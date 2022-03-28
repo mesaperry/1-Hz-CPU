@@ -40,7 +40,8 @@ module decode_unit (
     // critical path #2
     assign cw.is_jal = ctrl.uopcode == uopc::jal;
     assign cw.is_jalr = ctrl.uopcode == uopc::jalr;
-    assign cw.shadowable = ctrl.shadowable;
+    // TODO: if under shadow and come across non shadowable instruction, cancel SFO
+    assign cw.shadowed = ctrl.shadowable & cw.under_shadow;
 
     logic [4:0] packed_imm_mid;
     // critical path #1
