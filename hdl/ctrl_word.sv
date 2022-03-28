@@ -2,6 +2,7 @@ import rv32i_types::*;
 
 interface CTRLWord;
     rv32i_word instr;
+    logic under_shadow;
 
     // for further decoding in rrd
     uopc::micro_opcode_t uopcode;
@@ -29,7 +30,7 @@ interface CTRLWord;
     logic is_jalr;
     // for short forward branch optimization
     // (if we implement it)
-    logic shadowable;
+    logic shadowed;
     // somewhat compressed imm
     logic [19:0] packed_imm;
 
