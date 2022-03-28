@@ -3,6 +3,7 @@ import rv32i_types::*;
 module top (
     input   clk,
     input   rv32i_word instr,
+    input   logic under_shadow,
 
     output  uopc::micro_opcode_t uopcode,
     output  iqt::queue_type_t iq_type,
@@ -24,6 +25,7 @@ module top (
     always_ff @(posedge clk)
     begin
         cw.instr <= instr;
+        cw.under_shadow <= under_shadow;
     end
     assign uopcode = cw.uopcode;
     assign iq_type = cw.iq_type;
