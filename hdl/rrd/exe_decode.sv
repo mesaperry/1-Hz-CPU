@@ -1,48 +1,71 @@
 import rv32i_types::*;
 
 module exe_decode (
-    CTRLWord cw
+    ExecuteControl ec
 );
 
     always_comb begin
-        unique case (cw.uopc)
-            uopc::lui    :
-            uopc::auipc  :
+        unique case (ec.uopc)
+            uopc::lui    : ec.ctrl = '{alufnt::add,  opr1t::zero, opr2t::imm, cmpfnt::none};
+            uopc::auipc  : ec.ctrl = '{alufnt::add,  opr1t::pc,   opr2t::imm, cmpfnt::none};
 
-            uopc::jal    :
-            uopc::jalr   :
+            uopc::jalr   : ec.ctrl = '{alufnt::add,  opr1t::rs1,  opr2t::imm, cmpfnt::jalr};
 
-            uopc::beq    :
-            uopc::bne    :
-            uopc::blt    : 
-            uopc::bge    :
-            uopc::bltu   :
-            uopc::bgeu   :
+            uopc::beq    : ec.ctrl = '{alufnt::add,  opr1t::pc,   opr2t::imm, cmpfnt::beq };
+            uopc::bne    : ec.ctrl = '{alufnt::add,  opr1t::pc,   opr2t::imm, cmpfnt::bne };
+            uopc::blt    : ec.ctrl = '{alufnt::add,  opr1t::pc,   opr2t::imm, cmpfnt::blt };
+            uopc::bge    : ec.ctrl = '{alufnt::add,  opr1t::pc,   opr2t::imm, cmpfnt::bge };
+            uopc::bltu   : ec.ctrl = '{alufnt::add,  opr1t::pc,   opr2t::imm, cmpfnt::bltu};
+            uopc::bgeu   : ec.ctrl = '{alufnt::add,  opr1t::pc,   opr2t::imm, cmpfnt::bgeu};
 
-            uopc::addi   :
-            uopc::slti   :
-            uopc::sltiu  :
-            uopc::xori   :
-            uopc::ori    :
-            uopc::andi   :
-            uopc::slli   : 
-            uopc::srli   :
-            uopc::srai   :
+            uopc::addi   : ec.ctrl = '{alufnt::add,  opr1t::rs1,  opr2t::imm, cmpfnt::none};
+            uopc::slti   : ec.ctrl = '{alufnt::slt,  opr1t::rs1,  opr2t::imm, cmpfnt::none};
+            uopc::sltiu  : ec.ctrl = '{alufnt::sltu, opr1t::rs1,  opr2t::imm, cmpfnt::none};
+            uopc::xori   : ec.ctrl = '{alufnt::xoro, opr1t::rs1,  opr2t::imm, cmpfnt::none};
+            uopc::ori    : ec.ctrl = '{alufnt::oro,  opr1t::rs1,  opr2t::imm, cmpfnt::none};
+            uopc::andi   : ec.ctrl = '{alufnt::ando, opr1t::rs1,  opr2t::imm, cmpfnt::none};
+            uopc::slli   : ec.ctrl = '{alufnt::sl,   opr1t::rs1,  opr2t::imm, cmpfnt::none};
+            uopc::srli   : ec.ctrl = '{alufnt::sr,   opr1t::rs1,  opr2t::imm, cmpfnt::none};
+            uopc::srai   : ec.ctrl = '{alufnt::sra,  opr1t::rs1,  opr2t::imm, cmpfnt::none};
 
-            uopc::add    :
-            uopc::sub    :
-            uopc::sll    :
-            uopc::slt    :
-            uopc::sltu   :
-            uopc::xoro   :
-            uopc::srl    :
-            uopc::sra    :
-            uopc::oro    :
-            uopc::ando   :
-            default      :
+            uopc::add    : ec.ctrl = '{alufnt::add,  opr1t::rs1,   opr2t::rs2, cmpfnt::none};
+            uopc::sub    : ec.ctrl = '{alufnt::sub,  opr1t::rs1,   opr2t::rs2, cmpfnt::none};
+            uopc::sll    : ec.ctrl = '{alufnt::sl,   opr1t::rs1,   opr2t::rs2, cmpfnt::none};
+            uopc::slt    : ec.ctrl = '{alufnt::slt,  opr1t::rs1,   opr2t::rs2, cmpfnt::none};
+            uopc::sltu   : ec.ctrl = '{alufnt::sltu, opr1t::rs1,   opr2t::rs2, cmpfnt::none};
+            uopc::xoro   : ec.ctrl = '{alufnt::xoro, opr1t::rs1,   opr2t::rs2, cmpfnt::none};
+            uopc::srl    : ec.ctrl = '{alufnt::sr,   opr1t::rs1,   opr2t::rs2, cmpfnt::none};
+            uopc::sra    : ec.ctrl = '{alufnt::sra,  opr1t::rs1,   opr2t::rs2, cmpfnt::none};
+            uopc::oro    : ec.ctrl = '{alufnt::oro,  opr1t::rs1,   opr2t::rs2, cmpfnt::none};
+            uopc::ando   : ec.ctrl = '{alufnt::ando, opr1t::rs1,   opr2t::rs2, cmpfnt::none};
+
+            default      : ec.ctrl = '{alufnt::add,  opr1t::zero, opr2t::imm, cmpfnt::none};
         endcase
     end
 
     
 
 endmodule : exe_decode
+
+module alu_imm_dec (
+    input   logic [19:0]       packed_imm,
+    input   immt::imm_type_t   imm_type,
+    output  rv32i_word         imm
+);
+
+    logic sign;
+    assign sign = imm_packed[19];
+
+    assign imm[31]    = sign;
+    assign imm[30:20] = imm_sel == immt::u ? imm_packed[18:8] : {11{sign}};
+    assign imm[19:12] = imm_sel == immt::u || imm_sel == immt::j ? imm_packed[7:0] : {8{sign}};
+    assign imm[11]    = imm_sel == immt::u
+                      ? '0
+                      : imm_sel == immt::j || imm_sel == immt::b 
+                        ? imm_packed[8] 
+                        : sign;
+    assign imm[10:5]  = imm_sel == immt::u ? '0 : imm_packed[18:13];
+    assign imm[4:1]   = imm_sel == immt::u ? '0 : imm_packed[12:9];
+    assign imm[0]     = imm_sel == immt::i ? imm_packed[8] : 1'b0;
+
+endmodule : alu_imm_dec
