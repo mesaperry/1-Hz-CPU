@@ -215,8 +215,6 @@ typedef struct {
 
 // backend
 interface ExecuteControl;
-    logic under_shadow;
-
     // for further decoding in rrd
     uopc::micro_opcode_t uopcode;
     // for checking if we can issue (scoreboard)
@@ -237,6 +235,7 @@ interface ExecuteControl;
     // for short forward branch optimization
     // (if we implement it)
     logic shadowed;
+    rv32i_word pc;
     backend_ctrl_sigs_t ctrl;
     // somewhat compressed imm
     // decompressed imm
@@ -265,6 +264,7 @@ typedef struct {
     logic [19:0] packed_imm;
     logic taken;
     logic shadowed;
+    rv32i_word pc;
 } queue_item_t;
     
 

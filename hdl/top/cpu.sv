@@ -140,7 +140,8 @@ module one_hz_cpu (
         dc0.ctrl.imm_type,
         dc0.packed_imm,
         dc0.taken,
-        dc0.shadowed
+        dc0.shadowed,
+        dec_pc
     };
 
     assign aluqdin = dec_out;
@@ -184,34 +185,74 @@ module one_hz_cpu (
     
     always_comb begin
         if (aluqempty) begin
-            ec.uopcode <= uopc::add;
-            ec.exu_type <= exut::alu;
-            ec.rd <= '0;
-            ec.rs1 <= '0;
-            ec.rs2 <= '0;
-            ec.imm_type <= immt::r;
-            ec.taken <= '0;
-            ec.shadowed <= '0;
+            ec0.uopcode <= uopc::add;
+            ec0.exu_type <= exut::alu;
+            ec0.rd <= '0;
+            ec0.rs1 <= '0;
+            ec0.rs2 <= '0;
+            ec0.imm_type <= immt::r;
+            ec0.taken <= '0;
+            ec0.shadowed <= '0;
+            ec0.pc <= '0;
         end
         else if (ready) begin
-            ec.uopcode <= aluqdout.uopcode;
-            ec.exu_type <= exut::alu;
-            ec.rd <= '0;
-            ec.rs1 <= '0;
-            ec.rs2 <= '0;
-            ec.imm_type <= immt::r;
-            ec.taken <= '0;
-            ec.shadowed <= '0;
+            ec0.uopcode <= aluqdout.uopcode;
+            ec0.exu_type <= aluqdout.exu_type;
+            ec0.rd <= aluqdout.rd;
+            ec0.rs1 <= aluqdout.rs1;
+            ec0.rs2 <= aluqdout.rs2;
+            ec0.imm_type <= aluqdout.imm_type;
+            ec0.taken <= aluqdout.taken;
+            ec0.shadowed <= aluqdout.shadowed;
+            ec0.pc <= aluqdout.pc;
         end
     end
 
-
-
+    exe_decode(.ec(ec0));
+    alu_imm_dec imm_dec (
 
     
+    rv32i_word reg_a, reg_b;
+
+    regfile rf (
+        .clk,
+        .prefer_a(1'b1),
+        .ld_a(0),
+        .ld_b(0),
+        .dest_a(/*TODO*/),
+        .dest_b('0),
+        .in_a(0),
+        .in_b(0),
+        .src_a(ec.rs1),
+        .src_b(ec.rs2),
+        .reg_a,
+        .reg_b
+    );
+
+    rv32i_word operand1;
+    rv32i_word operand2;
+    
+    always_comb begin
+        unique case (ec.ctrl.opr1)
+            opr1t::rs1  : operand1 = reg_a;
+            opr1t::pc   : operand1 = ec0.pc;
+            opr1t::zero : operand1 = '0;
+        endcase
+    end
+    always_comb begin
+        unique case (ec.ctrl.opr2)
+            opr1t::rs2  : operand1 = reg_b;
+            opr1t::imm  : operand1 = ec0.imm;
+        endcase
+    end
 
 
     // exec
+    //
+    alu alu_inst (
+        .fn(ec.ctrl.alufn),
+        .in1(
+
 
 
 
