@@ -34,17 +34,17 @@ typedef enum logic {
 } operand2_t;
 endpackage
 
-package cmpfnt;
+package brfnt;
 typedef enum logic [2:0] {
-    beq,
-    bne,
-    blt,
-    bge,
-    bltu,
-    bgeu,
-    jalr,
-    none
-} cmp_func_t;
+    beq  = 3'b000,
+    bne  = 3'b001,
+    blt  = 3'b010,
+    bge  = 3'b011,
+    bltu = 3'b100,
+    bgeu = 3'b101,
+    jalr = 3'b110,
+    none = 3'b111
+} br_func_t;
 endpackage
 
 package exut;
@@ -248,7 +248,7 @@ typedef struct {
     alufnt::alu_func_t alufn;
     opr1t::operand1_t opr1;
     opr2t::operand2_t opr2;
-    cmpfnt::cmp_func_t cmpfn;
+    brfnt::br_func_t brfn;
 } backend_ctrl_sigs_t;
 
 typedef struct {

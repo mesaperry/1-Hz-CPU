@@ -6,40 +6,40 @@ module exe_decode (
 
     always_comb begin
         unique case (ec.uopc)
-            uopc::lui    : ec.ctrl = '{alufnt::add,  opr1t::zero, opr2t::imm, cmpfnt::none};
-            uopc::auipc  : ec.ctrl = '{alufnt::add,  opr1t::pc,   opr2t::imm, cmpfnt::none};
+            uopc::lui    : ec.ctrl = '{alufnt::add,  opr1t::zero, opr2t::imm, brfnt::none};
+            uopc::auipc  : ec.ctrl = '{alufnt::add,  opr1t::pc,   opr2t::imm, brfnt::none};
 
-            uopc::jalr   : ec.ctrl = '{alufnt::add,  opr1t::rs1,  opr2t::imm, cmpfnt::jalr};
+            uopc::jalr   : ec.ctrl = '{alufnt::add,  opr1t::rs1,  opr2t::imm, brfnt::jalr};
 
-            uopc::beq    : ec.ctrl = '{alufnt::add,  opr1t::pc,   opr2t::imm, cmpfnt::beq };
-            uopc::bne    : ec.ctrl = '{alufnt::add,  opr1t::pc,   opr2t::imm, cmpfnt::bne };
-            uopc::blt    : ec.ctrl = '{alufnt::add,  opr1t::pc,   opr2t::imm, cmpfnt::blt };
-            uopc::bge    : ec.ctrl = '{alufnt::add,  opr1t::pc,   opr2t::imm, cmpfnt::bge };
-            uopc::bltu   : ec.ctrl = '{alufnt::add,  opr1t::pc,   opr2t::imm, cmpfnt::bltu};
-            uopc::bgeu   : ec.ctrl = '{alufnt::add,  opr1t::pc,   opr2t::imm, cmpfnt::bgeu};
+            uopc::beq    : ec.ctrl = '{alufnt::add,  opr1t::pc,   opr2t::imm, brfnt::beq };
+            uopc::bne    : ec.ctrl = '{alufnt::add,  opr1t::pc,   opr2t::imm, brfnt::bne };
+            uopc::blt    : ec.ctrl = '{alufnt::add,  opr1t::pc,   opr2t::imm, brfnt::blt };
+            uopc::bge    : ec.ctrl = '{alufnt::add,  opr1t::pc,   opr2t::imm, brfnt::bge };
+            uopc::bltu   : ec.ctrl = '{alufnt::add,  opr1t::pc,   opr2t::imm, brfnt::bltu};
+            uopc::bgeu   : ec.ctrl = '{alufnt::add,  opr1t::pc,   opr2t::imm, brfnt::bgeu};
 
-            uopc::addi   : ec.ctrl = '{alufnt::add,  opr1t::rs1,  opr2t::imm, cmpfnt::none};
-            uopc::slti   : ec.ctrl = '{alufnt::slt,  opr1t::rs1,  opr2t::imm, cmpfnt::none};
-            uopc::sltiu  : ec.ctrl = '{alufnt::sltu, opr1t::rs1,  opr2t::imm, cmpfnt::none};
-            uopc::xori   : ec.ctrl = '{alufnt::xoro, opr1t::rs1,  opr2t::imm, cmpfnt::none};
-            uopc::ori    : ec.ctrl = '{alufnt::oro,  opr1t::rs1,  opr2t::imm, cmpfnt::none};
-            uopc::andi   : ec.ctrl = '{alufnt::ando, opr1t::rs1,  opr2t::imm, cmpfnt::none};
-            uopc::slli   : ec.ctrl = '{alufnt::sl,   opr1t::rs1,  opr2t::imm, cmpfnt::none};
-            uopc::srli   : ec.ctrl = '{alufnt::sr,   opr1t::rs1,  opr2t::imm, cmpfnt::none};
-            uopc::srai   : ec.ctrl = '{alufnt::sra,  opr1t::rs1,  opr2t::imm, cmpfnt::none};
+            uopc::addi   : ec.ctrl = '{alufnt::add,  opr1t::rs1,  opr2t::imm, brfnt::none};
+            uopc::slti   : ec.ctrl = '{alufnt::slt,  opr1t::rs1,  opr2t::imm, brfnt::none};
+            uopc::sltiu  : ec.ctrl = '{alufnt::sltu, opr1t::rs1,  opr2t::imm, brfnt::none};
+            uopc::xori   : ec.ctrl = '{alufnt::xoro, opr1t::rs1,  opr2t::imm, brfnt::none};
+            uopc::ori    : ec.ctrl = '{alufnt::oro,  opr1t::rs1,  opr2t::imm, brfnt::none};
+            uopc::andi   : ec.ctrl = '{alufnt::ando, opr1t::rs1,  opr2t::imm, brfnt::none};
+            uopc::slli   : ec.ctrl = '{alufnt::sl,   opr1t::rs1,  opr2t::imm, brfnt::none};
+            uopc::srli   : ec.ctrl = '{alufnt::sr,   opr1t::rs1,  opr2t::imm, brfnt::none};
+            uopc::srai   : ec.ctrl = '{alufnt::sra,  opr1t::rs1,  opr2t::imm, brfnt::none};
 
-            uopc::add    : ec.ctrl = '{alufnt::add,  opr1t::rs1,   opr2t::rs2, cmpfnt::none};
-            uopc::sub    : ec.ctrl = '{alufnt::sub,  opr1t::rs1,   opr2t::rs2, cmpfnt::none};
-            uopc::sll    : ec.ctrl = '{alufnt::sl,   opr1t::rs1,   opr2t::rs2, cmpfnt::none};
-            uopc::slt    : ec.ctrl = '{alufnt::slt,  opr1t::rs1,   opr2t::rs2, cmpfnt::none};
-            uopc::sltu   : ec.ctrl = '{alufnt::sltu, opr1t::rs1,   opr2t::rs2, cmpfnt::none};
-            uopc::xoro   : ec.ctrl = '{alufnt::xoro, opr1t::rs1,   opr2t::rs2, cmpfnt::none};
-            uopc::srl    : ec.ctrl = '{alufnt::sr,   opr1t::rs1,   opr2t::rs2, cmpfnt::none};
-            uopc::sra    : ec.ctrl = '{alufnt::sra,  opr1t::rs1,   opr2t::rs2, cmpfnt::none};
-            uopc::oro    : ec.ctrl = '{alufnt::oro,  opr1t::rs1,   opr2t::rs2, cmpfnt::none};
-            uopc::ando   : ec.ctrl = '{alufnt::ando, opr1t::rs1,   opr2t::rs2, cmpfnt::none};
+            uopc::add    : ec.ctrl = '{alufnt::add,  opr1t::rs1,   opr2t::rs2, brfnt::none};
+            uopc::sub    : ec.ctrl = '{alufnt::sub,  opr1t::rs1,   opr2t::rs2, brfnt::none};
+            uopc::sll    : ec.ctrl = '{alufnt::sl,   opr1t::rs1,   opr2t::rs2, brfnt::none};
+            uopc::slt    : ec.ctrl = '{alufnt::slt,  opr1t::rs1,   opr2t::rs2, brfnt::none};
+            uopc::sltu   : ec.ctrl = '{alufnt::sltu, opr1t::rs1,   opr2t::rs2, brfnt::none};
+            uopc::xoro   : ec.ctrl = '{alufnt::xoro, opr1t::rs1,   opr2t::rs2, brfnt::none};
+            uopc::srl    : ec.ctrl = '{alufnt::sr,   opr1t::rs1,   opr2t::rs2, brfnt::none};
+            uopc::sra    : ec.ctrl = '{alufnt::sra,  opr1t::rs1,   opr2t::rs2, brfnt::none};
+            uopc::oro    : ec.ctrl = '{alufnt::oro,  opr1t::rs1,   opr2t::rs2, brfnt::none};
+            uopc::ando   : ec.ctrl = '{alufnt::ando, opr1t::rs1,   opr2t::rs2, brfnt::none};
 
-            default      : ec.ctrl = '{alufnt::add,  opr1t::zero, opr2t::imm, cmpfnt::none};
+            default      : ec.ctrl = '{alufnt::add,  opr1t::zero, opr2t::imm, brfnt::none};
         endcase
     end
 
