@@ -40,11 +40,10 @@ module one_hz_cpu (
     assign exe_redir = ((ec0.taken != exe_says_take) & ec0.ctrl.brfn[2:1] != 2'b11) | 
                        (ec0.ctrl.brfn == brfnt::jalr & !ec0.taken);
     logic [1:0] exe_btype;
-    rv32i_word exe_pc;
     rv32i_word exe_target_pc;
     rv32i_word exe_redir_pc;
     assign exe_target_pc = alu_out;
-    assign exe_redir_pc = exe_says_take ? exe_target_pc : exe_pc + 4;
+    assign exe_redir_pc = exe_says_take ? exe_target_pc : ec0.pc + 4;
     
     // fetch
     logic fetch_pc;
@@ -69,10 +68,10 @@ module one_hz_cpu (
     dummyBTB BTB (
         .clk,
         .rst,
-        .new_PC(exe_redir ? exe_pc : dec_pc),
+        .new_PC(exe_redir ? ec0.pc : dec_pc),
         .new_target(exe_redir ? exe_redir_pc : dec_redir_pc),
         // TODO: fix, definitely not right
-        .new_btype(exe_redir ? exe_btype : {cw.bctrl.is_br, cw.bctrl.is_jal}),
+        .new_btype(exe_redir ? exe_btype : {dc0.bctrl.is_br, dc0.bctrl.is_jal}),
         .load(exe_redir | dec_redir),
 
         .fetch_PC(fetch_pc),
@@ -114,7 +113,7 @@ module one_hz_cpu (
 
     // 2 stage. starts in fetch. uses bram
     // result arrives in decode.
-    dummyBHT (
+    dummyBHT bht (
         .clk,
         .rst,
         .pc(fetch_pc),
@@ -139,6 +138,9 @@ module one_hz_cpu (
         dc0.ctrl.has_rd, 
         dc0.ctrl.has_rs1, 
         dc0.ctrl.has_rs2,
+		  dc0.rd,
+		  dc0.rs1,
+		  dc0.rs2,
         dc0.ctrl.imm_type,
         dc0.packed_imm,
         dc0.taken,
@@ -167,6 +169,19 @@ module one_hz_cpu (
         .din(aluqdin),
         .dout(aluqdout)
     );
+
+    logic aluqready;
+
+    dummy_issue_check aluq_issue_check (
+        .exu_type(aluqdout.exu_type),
+        .has_rd(aluqdout.has_rd),
+        .has_rs1(aluqdout.has_rs1),
+        .has_rs2(aluqdout.has_rs2),
+        .rd(aluqdout.rd),
+        .rs1(aluqdout.rs1),
+        .rs2(aluqdout.rs2),
+        .ready(aluqready)
+    );
     
     dummy_queue #(
         $bits(queue_item_t)
@@ -183,9 +198,11 @@ module one_hz_cpu (
     );
 
     // rrd
+	 
+	 assign aluqpop = !aluqempty & aluqready;
     
     always_comb begin
-        if (aluqempty) begin
+        if (aluqempty || !aluqready) begin
             rc0.uopcode <= uopc::add;
             rc0.exu_type <= exut::alu;
             rc0.rd <= '0;
@@ -197,7 +214,7 @@ module one_hz_cpu (
             rc0.shadowed <= '0;
             rc0.pc <= '0;
         end
-        else if (ready) begin
+        else begin
             rc0.uopcode <= aluqdout.uopcode;
             rc0.exu_type <= aluqdout.exu_type;
             rc0.rd <= aluqdout.rd;
@@ -211,7 +228,8 @@ module one_hz_cpu (
         end
     end
 
-    exe_decode(.ec(rc0));
+    exe_decode exe_dec (.ec(rc0));
+
     alu_imm_dec imm_dec (
         .packed_imm(rc0.packed_imm),
         .imm_type(rc0.imm_type),
@@ -335,6 +353,24 @@ module one_hz_cpu (
 
 endmodule : one_hz_cpu
 
+
+
+module dummy_issue_check (
+    input exut::exe_unit_type_t exu_type,
+    input logic has_rd,
+    input logic has_rs1,
+    input logic has_rs2,
+    input logic [4:0] rd,
+    input logic [4:0] rs1,
+    input logic [4:0] rs2,
+    output logic ready
+);
+
+    assign ready = 1'b1;
+
+endmodule : dummy_issue_check
+
+
 module dummy_queue #(
     parameter size = 32
 )
@@ -345,18 +381,16 @@ module dummy_queue #(
     input   logic            pop_back,
     output  logic            empty,
     output  logic            full,
-    output  logic            ready,
     input   logic [size-1:0] din,
     output  logic [size-1:0] dout
 );
     
-    assign ready = ~empty;
     always_ff @(posedge clk) begin
-        if (rst | pop) begin
+        if (rst | pop_back) begin
             empty <= 1'b1;
             full <= 1'b0;
         end
-        else if (push) begin
+        else if (push_front) begin
             empty <= 1'b0;
             full <= 1'b1;
         end
@@ -367,8 +401,8 @@ module dummy_queue #(
     ) 
     q (
         .clk,
-        .rst(rst | pop),
-        .ld(push),
+        .rst(rst | pop_back),
+        .ld(push_front),
         .din,
         .dout
     );

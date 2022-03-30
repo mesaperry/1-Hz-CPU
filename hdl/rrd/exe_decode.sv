@@ -5,7 +5,7 @@ module exe_decode (
 );
 
     always_comb begin
-        unique case (ec.uopc)
+        unique case (ec.uopcode)
             uopc::lui    : ec.ctrl = '{alufnt::add,  opr1t::zero, opr2t::imm, brfnt::none};
             uopc::auipc  : ec.ctrl = '{alufnt::add,  opr1t::pc,   opr2t::imm, brfnt::none};
 
@@ -54,18 +54,18 @@ module alu_imm_dec (
 );
 
     logic sign;
-    assign sign = imm_packed[19];
+    assign sign = packed_imm[19];
 
     assign imm[31]    = sign;
-    assign imm[30:20] = imm_sel == immt::u ? imm_packed[18:8] : {11{sign}};
-    assign imm[19:12] = imm_sel == immt::u || imm_sel == immt::j ? imm_packed[7:0] : {8{sign}};
-    assign imm[11]    = imm_sel == immt::u
+    assign imm[30:20] = imm_type == immt::u ? packed_imm[18:8] : {11{sign}};
+    assign imm[19:12] = imm_type == immt::u || imm_type == immt::j ? packed_imm[7:0] : {8{sign}};
+    assign imm[11]    = imm_type == immt::u
                       ? '0
-                      : imm_sel == immt::j || imm_sel == immt::b 
-                        ? imm_packed[8] 
+                      : imm_type == immt::j || imm_type == immt::b 
+                        ? packed_imm[8] 
                         : sign;
-    assign imm[10:5]  = imm_sel == immt::u ? '0 : imm_packed[18:13];
-    assign imm[4:1]   = imm_sel == immt::u ? '0 : imm_packed[12:9];
-    assign imm[0]     = imm_sel == immt::i ? imm_packed[8] : 1'b0;
+    assign imm[10:5]  = imm_type == immt::u ? '0 : packed_imm[18:13];
+    assign imm[4:1]   = imm_type == immt::u ? '0 : packed_imm[12:9];
+    assign imm[0]     = imm_type == immt::i ? packed_imm[8] : 1'b0;
 
 endmodule : alu_imm_dec

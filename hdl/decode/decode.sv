@@ -13,7 +13,7 @@ module decode_unit (
     //if (!ctrl.legal) // do something
 
     // TODO: if under shadow and come across non shadowable instruction, cancel SFO
-    assign dc.shadowed = dc.ctrl.shadowable & dc.under_shadow;
+    assign dc.shadowed = dc.bctrl.shadowable & dc.under_shadow;
 
     logic [4:0] packed_imm_mid;
     // critical path #1
@@ -46,85 +46,85 @@ module decode_mux (
 
     always_comb begin
         unique casez ({dc.funct7, dc.funct3, dc.opcode})
-            dec_op::LUI    : dc.ctrl = '{1'b1, uopc::lui,    iqt::alu, exut::alu, 1'b1, 1'b0, 1'b0, immt::u, 1'b0, 1'b1};
-            dec_op::AUIPC  : dc.ctrl = '{1'b1, uopc::auipc,  iqt::alu, exut::alu, 1'b1, 1'b0, 1'b0, immt::u, 1'b0, 1'b0};
+            dec_op::LUI    : dc.ctrl = '{1'b1, uopc::lui,    iqt::alu, exut::alu, 1'b1, 1'b0, 1'b0, immt::u};
+            dec_op::AUIPC  : dc.ctrl = '{1'b1, uopc::auipc,  iqt::alu, exut::alu, 1'b1, 1'b0, 1'b0, immt::u};
             // TODO: make sure AUIPC should use alu (maybe jump unit or smth?)
 
-            dec_op::JAL    : dc.ctrl = '{1'b1, uopc::jal,    iqt::alu, exut::alu, 1'b1, 1'b0, 1'b0, immt::j, 1'b0, 1'b0};
-            dec_op::JALR   : dc.ctrl = '{1'b1, uopc::jalr,   iqt::alu, exut::alu, 1'b1, 1'b1, 1'b0, immt::i, 1'b0, 1'b0};
+            dec_op::JAL    : dc.ctrl = '{1'b1, uopc::jal,    iqt::alu, exut::alu, 1'b1, 1'b0, 1'b0, immt::j};
+            dec_op::JALR   : dc.ctrl = '{1'b1, uopc::jalr,   iqt::alu, exut::alu, 1'b1, 1'b1, 1'b0, immt::i};
 
-            dec_op::BEQ    : dc.ctrl = '{1'b1, uopc::beq,    iqt::alu, exut::alu, 1'b0, 1'b1, 1'b1, immt::b, 1'b1, 1'b0};
-            dec_op::BNE    : dc.ctrl = '{1'b1, uopc::bne,    iqt::alu, exut::alu, 1'b0, 1'b1, 1'b1, immt::b, 1'b1, 1'b0}; 
-            dec_op::BLT    : dc.ctrl = '{1'b1, uopc::blt,    iqt::alu, exut::alu, 1'b0, 1'b1, 1'b1, immt::b, 1'b1, 1'b0};
-            dec_op::BGE    : dc.ctrl = '{1'b1, uopc::bge,    iqt::alu, exut::alu, 1'b0, 1'b1, 1'b1, immt::b, 1'b1, 1'b0};
-            dec_op::BLTU   : dc.ctrl = '{1'b1, uopc::bltu,   iqt::alu, exut::alu, 1'b0, 1'b1, 1'b1, immt::b, 1'b1, 1'b0};
-            dec_op::BGEU   : dc.ctrl = '{1'b1, uopc::bgeu,   iqt::alu, exut::alu, 1'b0, 1'b1, 1'b1, immt::b, 1'b1, 1'b0};
+            dec_op::BEQ    : dc.ctrl = '{1'b1, uopc::beq,    iqt::alu, exut::alu, 1'b0, 1'b1, 1'b1, immt::b};
+            dec_op::BNE    : dc.ctrl = '{1'b1, uopc::bne,    iqt::alu, exut::alu, 1'b0, 1'b1, 1'b1, immt::b}; 
+            dec_op::BLT    : dc.ctrl = '{1'b1, uopc::blt,    iqt::alu, exut::alu, 1'b0, 1'b1, 1'b1, immt::b};
+            dec_op::BGE    : dc.ctrl = '{1'b1, uopc::bge,    iqt::alu, exut::alu, 1'b0, 1'b1, 1'b1, immt::b};
+            dec_op::BLTU   : dc.ctrl = '{1'b1, uopc::bltu,   iqt::alu, exut::alu, 1'b0, 1'b1, 1'b1, immt::b};
+            dec_op::BGEU   : dc.ctrl = '{1'b1, uopc::bgeu,   iqt::alu, exut::alu, 1'b0, 1'b1, 1'b1, immt::b};
 
-            dec_op::LB     : dc.ctrl = '{1'b1, uopc::lb,     iqt::mem, exut::mem, 1'b1, 1'b1, 1'b0, immt::i, 1'b0, 1'b0};
-            dec_op::LH     : dc.ctrl = '{1'b1, uopc::lh,     iqt::mem, exut::mem, 1'b1, 1'b1, 1'b0, immt::i, 1'b0, 1'b0};
-            dec_op::LW     : dc.ctrl = '{1'b1, uopc::lw,     iqt::mem, exut::mem, 1'b1, 1'b1, 1'b0, immt::i, 1'b0, 1'b0};
-            dec_op::LBU    : dc.ctrl = '{1'b1, uopc::lbu,    iqt::mem, exut::mem, 1'b1, 1'b1, 1'b0, immt::i, 1'b0, 1'b0};
-            dec_op::LHU    : dc.ctrl = '{1'b1, uopc::lhu,    iqt::mem, exut::mem, 1'b1, 1'b1, 1'b0, immt::i, 1'b0, 1'b0};
+            dec_op::LB     : dc.ctrl = '{1'b1, uopc::lb,     iqt::mem, exut::mem, 1'b1, 1'b1, 1'b0, immt::i};
+            dec_op::LH     : dc.ctrl = '{1'b1, uopc::lh,     iqt::mem, exut::mem, 1'b1, 1'b1, 1'b0, immt::i};
+            dec_op::LW     : dc.ctrl = '{1'b1, uopc::lw,     iqt::mem, exut::mem, 1'b1, 1'b1, 1'b0, immt::i};
+            dec_op::LBU    : dc.ctrl = '{1'b1, uopc::lbu,    iqt::mem, exut::mem, 1'b1, 1'b1, 1'b0, immt::i};
+            dec_op::LHU    : dc.ctrl = '{1'b1, uopc::lhu,    iqt::mem, exut::mem, 1'b1, 1'b1, 1'b0, immt::i};
 
-            dec_op::SB     : dc.ctrl = '{1'b1, uopc::sb,     iqt::mem, exut::mem, 1'b0, 1'b1, 1'b1, immt::s, 1'b0, 1'b0};
-            dec_op::SH     : dc.ctrl = '{1'b1, uopc::sh,     iqt::mem, exut::mem, 1'b0, 1'b1, 1'b1, immt::s, 1'b0, 1'b0};
-            dec_op::SW     : dc.ctrl = '{1'b1, uopc::sw,     iqt::mem, exut::mem, 1'b0, 1'b1, 1'b1, immt::s, 1'b0, 1'b0};
+            dec_op::SB     : dc.ctrl = '{1'b1, uopc::sb,     iqt::mem, exut::mem, 1'b0, 1'b1, 1'b1, immt::s};
+            dec_op::SH     : dc.ctrl = '{1'b1, uopc::sh,     iqt::mem, exut::mem, 1'b0, 1'b1, 1'b1, immt::s};
+            dec_op::SW     : dc.ctrl = '{1'b1, uopc::sw,     iqt::mem, exut::mem, 1'b0, 1'b1, 1'b1, immt::s};
 
-            dec_op::ADDI   : dc.ctrl = '{1'b1, uopc::addi,   iqt::alu, exut::alu, 1'b1, 1'b1, 1'b0, immt::i, 1'b0, 1'b1};
-            dec_op::SLTI   : dc.ctrl = '{1'b1, uopc::slti,   iqt::alu, exut::alu, 1'b1, 1'b1, 1'b0, immt::i, 1'b0, 1'b1};
-            dec_op::SLTIU  : dc.ctrl = '{1'b1, uopc::sltiu,  iqt::alu, exut::alu, 1'b1, 1'b1, 1'b0, immt::i, 1'b0, 1'b1};
-            dec_op::XORI   : dc.ctrl = '{1'b1, uopc::xori,   iqt::alu, exut::alu, 1'b1, 1'b1, 1'b0, immt::i, 1'b0, 1'b1};
-            dec_op::ORI    : dc.ctrl = '{1'b1, uopc::ori,    iqt::alu, exut::alu, 1'b1, 1'b1, 1'b0, immt::i, 1'b0, 1'b1};
-            dec_op::ANDI   : dc.ctrl = '{1'b1, uopc::andi,   iqt::alu, exut::alu, 1'b1, 1'b1, 1'b0, immt::i, 1'b0, 1'b1};
-            dec_op::SLLI   : dc.ctrl = '{1'b1, uopc::slli,   iqt::alu, exut::alu, 1'b1, 1'b1, 1'b0, immt::i, 1'b0, 1'b1};
-            dec_op::SRLI   : dc.ctrl = '{1'b1, uopc::srli,   iqt::alu, exut::alu, 1'b1, 1'b1, 1'b0, immt::i, 1'b0, 1'b1};
-            dec_op::SRAI   : dc.ctrl = '{1'b1, uopc::srai,   iqt::alu, exut::alu, 1'b1, 1'b1, 1'b0, immt::i, 1'b0, 1'b1};
+            dec_op::ADDI   : dc.ctrl = '{1'b1, uopc::addi,   iqt::alu, exut::alu, 1'b1, 1'b1, 1'b0, immt::i};
+            dec_op::SLTI   : dc.ctrl = '{1'b1, uopc::slti,   iqt::alu, exut::alu, 1'b1, 1'b1, 1'b0, immt::i};
+            dec_op::SLTIU  : dc.ctrl = '{1'b1, uopc::sltiu,  iqt::alu, exut::alu, 1'b1, 1'b1, 1'b0, immt::i};
+            dec_op::XORI   : dc.ctrl = '{1'b1, uopc::xori,   iqt::alu, exut::alu, 1'b1, 1'b1, 1'b0, immt::i};
+            dec_op::ORI    : dc.ctrl = '{1'b1, uopc::ori,    iqt::alu, exut::alu, 1'b1, 1'b1, 1'b0, immt::i};
+            dec_op::ANDI   : dc.ctrl = '{1'b1, uopc::andi,   iqt::alu, exut::alu, 1'b1, 1'b1, 1'b0, immt::i};
+            dec_op::SLLI   : dc.ctrl = '{1'b1, uopc::slli,   iqt::alu, exut::alu, 1'b1, 1'b1, 1'b0, immt::i};
+            dec_op::SRLI   : dc.ctrl = '{1'b1, uopc::srli,   iqt::alu, exut::alu, 1'b1, 1'b1, 1'b0, immt::i};
+            dec_op::SRAI   : dc.ctrl = '{1'b1, uopc::srai,   iqt::alu, exut::alu, 1'b1, 1'b1, 1'b0, immt::i};
 
-            dec_op::ADD    : dc.ctrl = '{1'b1, uopc::add,    iqt::alu, exut::alu, 1'b1, 1'b1, 1'b1, immt::r, 1'b0, 1'b1};
-            dec_op::SUB    : dc.ctrl = '{1'b1, uopc::sub,    iqt::alu, exut::alu, 1'b1, 1'b1, 1'b1, immt::r, 1'b0, 1'b1};
-            dec_op::SLL    : dc.ctrl = '{1'b1, uopc::sll,    iqt::alu, exut::alu, 1'b1, 1'b1, 1'b1, immt::r, 1'b0, 1'b1};
-            dec_op::SLT    : dc.ctrl = '{1'b1, uopc::slt,    iqt::alu, exut::alu, 1'b1, 1'b1, 1'b1, immt::r, 1'b0, 1'b1};
-            dec_op::SLTU   : dc.ctrl = '{1'b1, uopc::sltu,   iqt::alu, exut::alu, 1'b1, 1'b1, 1'b1, immt::r, 1'b0, 1'b1};
-            dec_op::XOR    : dc.ctrl = '{1'b1, uopc::xoro,   iqt::alu, exut::alu, 1'b1, 1'b1, 1'b1, immt::r, 1'b0, 1'b1};
-            dec_op::SRL    : dc.ctrl = '{1'b1, uopc::srl,    iqt::alu, exut::alu, 1'b1, 1'b1, 1'b1, immt::r, 1'b0, 1'b1}; 
-            dec_op::SRA    : dc.ctrl = '{1'b1, uopc::sra,    iqt::alu, exut::alu, 1'b1, 1'b1, 1'b1, immt::r, 1'b0, 1'b1}; 
-            dec_op::OR     : dc.ctrl = '{1'b1, uopc::oro,    iqt::alu, exut::alu, 1'b1, 1'b1, 1'b1, immt::r, 1'b0, 1'b1}; 
-            dec_op::AND    : dc.ctrl = '{1'b1, uopc::ando,   iqt::alu, exut::alu, 1'b1, 1'b1, 1'b1, immt::r, 1'b0, 1'b1}; 
+            dec_op::ADD    : dc.ctrl = '{1'b1, uopc::add,    iqt::alu, exut::alu, 1'b1, 1'b1, 1'b1, immt::r};
+            dec_op::SUB    : dc.ctrl = '{1'b1, uopc::sub,    iqt::alu, exut::alu, 1'b1, 1'b1, 1'b1, immt::r};
+            dec_op::SLL    : dc.ctrl = '{1'b1, uopc::sll,    iqt::alu, exut::alu, 1'b1, 1'b1, 1'b1, immt::r};
+            dec_op::SLT    : dc.ctrl = '{1'b1, uopc::slt,    iqt::alu, exut::alu, 1'b1, 1'b1, 1'b1, immt::r};
+            dec_op::SLTU   : dc.ctrl = '{1'b1, uopc::sltu,   iqt::alu, exut::alu, 1'b1, 1'b1, 1'b1, immt::r};
+            dec_op::XOR    : dc.ctrl = '{1'b1, uopc::xoro,   iqt::alu, exut::alu, 1'b1, 1'b1, 1'b1, immt::r};
+            dec_op::SRL    : dc.ctrl = '{1'b1, uopc::srl,    iqt::alu, exut::alu, 1'b1, 1'b1, 1'b1, immt::r}; 
+            dec_op::SRA    : dc.ctrl = '{1'b1, uopc::sra,    iqt::alu, exut::alu, 1'b1, 1'b1, 1'b1, immt::r}; 
+            dec_op::OR     : dc.ctrl = '{1'b1, uopc::oro,    iqt::alu, exut::alu, 1'b1, 1'b1, 1'b1, immt::r}; 
+            dec_op::AND    : dc.ctrl = '{1'b1, uopc::ando,   iqt::alu, exut::alu, 1'b1, 1'b1, 1'b1, immt::r}; 
 
             // all following instructions currently marked illegal
             // FIXME: implement and mark legal
-            dec_op::MUL    : dc.ctrl = '{1'b0, uopc::mul,    iqt::alu, exut::mul, 1'b1, 1'b1, 1'b1, immt::r, 1'b0, 1'b0};
-            dec_op::MULH   : dc.ctrl = '{1'b0, uopc::mulh,   iqt::alu, exut::mul, 1'b1, 1'b1, 1'b1, immt::r, 1'b0, 1'b0};
-            dec_op::MULHSU : dc.ctrl = '{1'b0, uopc::mulhsu, iqt::alu, exut::mul, 1'b1, 1'b1, 1'b1, immt::r, 1'b0, 1'b0};
-            dec_op::MULHU  : dc.ctrl = '{1'b0, uopc::mulhu,  iqt::alu, exut::mul, 1'b1, 1'b1, 1'b1, immt::r, 1'b0, 1'b0};
-            dec_op::DIV    : dc.ctrl = '{1'b0, uopc::div,    iqt::alu, exut::div, 1'b1, 1'b1, 1'b1, immt::r, 1'b0, 1'b0};
-            dec_op::DIVU   : dc.ctrl = '{1'b0, uopc::divu,   iqt::alu, exut::div, 1'b1, 1'b1, 1'b1, immt::r, 1'b0, 1'b0};
-            dec_op::REM    : dc.ctrl = '{1'b0, uopc::rem,    iqt::alu, exut::div, 1'b1, 1'b1, 1'b1, immt::r, 1'b0, 1'b0};
-            dec_op::REMU   : dc.ctrl = '{1'b0, uopc::remu,   iqt::alu, exut::div, 1'b1, 1'b1, 1'b1, immt::r, 1'b0, 1'b0};
+            dec_op::MUL    : dc.ctrl = '{1'b0, uopc::mul,    iqt::alu, exut::mul, 1'b1, 1'b1, 1'b1, immt::r};
+            dec_op::MULH   : dc.ctrl = '{1'b0, uopc::mulh,   iqt::alu, exut::mul, 1'b1, 1'b1, 1'b1, immt::r};
+            dec_op::MULHSU : dc.ctrl = '{1'b0, uopc::mulhsu, iqt::alu, exut::mul, 1'b1, 1'b1, 1'b1, immt::r};
+            dec_op::MULHU  : dc.ctrl = '{1'b0, uopc::mulhu,  iqt::alu, exut::mul, 1'b1, 1'b1, 1'b1, immt::r};
+            dec_op::DIV    : dc.ctrl = '{1'b0, uopc::div,    iqt::alu, exut::div, 1'b1, 1'b1, 1'b1, immt::r};
+            dec_op::DIVU   : dc.ctrl = '{1'b0, uopc::divu,   iqt::alu, exut::div, 1'b1, 1'b1, 1'b1, immt::r};
+            dec_op::REM    : dc.ctrl = '{1'b0, uopc::rem,    iqt::alu, exut::div, 1'b1, 1'b1, 1'b1, immt::r};
+            dec_op::REMU   : dc.ctrl = '{1'b0, uopc::remu,   iqt::alu, exut::div, 1'b1, 1'b1, 1'b1, immt::r};
 
-            dec_op::ANDN   : dc.ctrl = '{1'b0, uopc::andn,   iqt::alu, exut::alu, 1'b1, 1'b1, 1'b1, immt::r, 1'b0, 1'b1};
-            dec_op::ORN    : dc.ctrl = '{1'b0, uopc::orn,    iqt::alu, exut::alu, 1'b1, 1'b1, 1'b1, immt::r, 1'b0, 1'b1};
-            dec_op::XNOR   : dc.ctrl = '{1'b0, uopc::xnoro,  iqt::alu, exut::alu, 1'b1, 1'b1, 1'b1, immt::r, 1'b0, 1'b1};
+            dec_op::ANDN   : dc.ctrl = '{1'b0, uopc::andn,   iqt::alu, exut::alu, 1'b1, 1'b1, 1'b1, immt::r};
+            dec_op::ORN    : dc.ctrl = '{1'b0, uopc::orn,    iqt::alu, exut::alu, 1'b1, 1'b1, 1'b1, immt::r};
+            dec_op::XNOR   : dc.ctrl = '{1'b0, uopc::xnoro,  iqt::alu, exut::alu, 1'b1, 1'b1, 1'b1, immt::r};
 
-            dec_op::ROL    : dc.ctrl = '{1'b0, uopc::rol,    iqt::alu, exut::alu, 1'b1, 1'b1, 1'b1, immt::r, 1'b0, 1'b1};
-            dec_op::ROR    : dc.ctrl = '{1'b0, uopc::ror,    iqt::alu, exut::alu, 1'b1, 1'b1, 1'b1, immt::r, 1'b0, 1'b1};
-            dec_op::RORI   : dc.ctrl = '{1'b0, uopc::rori,   iqt::alu, exut::alu, 1'b1, 1'b1, 1'b0, immt::i, 1'b0, 1'b1};
+            dec_op::ROL    : dc.ctrl = '{1'b0, uopc::rol,    iqt::alu, exut::alu, 1'b1, 1'b1, 1'b1, immt::r};
+            dec_op::ROR    : dc.ctrl = '{1'b0, uopc::ror,    iqt::alu, exut::alu, 1'b1, 1'b1, 1'b1, immt::r};
+            dec_op::RORI   : dc.ctrl = '{1'b0, uopc::rori,   iqt::alu, exut::alu, 1'b1, 1'b1, 1'b0, immt::i};
 
-            dec_op::MIN    : dc.ctrl = '{1'b0, uopc::min,    iqt::alu, exut::alu, 1'b1, 1'b1, 1'b1, immt::r, 1'b0, 1'b1};
-            dec_op::MINU   : dc.ctrl = '{1'b0, uopc::minu,   iqt::alu, exut::alu, 1'b1, 1'b1, 1'b1, immt::r, 1'b0, 1'b1};
-            dec_op::MAX    : dc.ctrl = '{1'b0, uopc::max,    iqt::alu, exut::alu, 1'b1, 1'b1, 1'b1, immt::r, 1'b0, 1'b1};
-            dec_op::MAXU   : dc.ctrl = '{1'b0, uopc::maxu,   iqt::alu, exut::alu, 1'b1, 1'b1, 1'b1, immt::r, 1'b0, 1'b1};
+            dec_op::MIN    : dc.ctrl = '{1'b0, uopc::min,    iqt::alu, exut::alu, 1'b1, 1'b1, 1'b1, immt::r};
+            dec_op::MINU   : dc.ctrl = '{1'b0, uopc::minu,   iqt::alu, exut::alu, 1'b1, 1'b1, 1'b1, immt::r};
+            dec_op::MAX    : dc.ctrl = '{1'b0, uopc::max,    iqt::alu, exut::alu, 1'b1, 1'b1, 1'b1, immt::r};
+            dec_op::MAXU   : dc.ctrl = '{1'b0, uopc::maxu,   iqt::alu, exut::alu, 1'b1, 1'b1, 1'b1, immt::r};
 
-            dec_op::GREVI  : dc.ctrl = '{1'b0, uopc::grevi,  iqt::alu, exut::alu, 1'b1, 1'b1, 1'b0, immt::i, 1'b0, 1'b1};
-            dec_op::GORCI  : dc.ctrl = '{1'b0, uopc::gorci,  iqt::alu, exut::alu, 1'b1, 1'b1, 1'b0, immt::i, 1'b0, 1'b1};
+            dec_op::GREVI  : dc.ctrl = '{1'b0, uopc::grevi,  iqt::alu, exut::alu, 1'b1, 1'b1, 1'b0, immt::i};
+            dec_op::GORCI  : dc.ctrl = '{1'b0, uopc::gorci,  iqt::alu, exut::alu, 1'b1, 1'b1, 1'b0, immt::i};
 
             // TODO: this may need to be broken into sub instructions in
             // decode by using shamt
-            dec_op::CBSEXT : dc.ctrl = '{1'b0, uopc::cbsext, iqt::alu, exut::alu, 1'b1, 1'b1, 1'b0, immt::i, 1'b0, 1'b1};
+            dec_op::CBSEXT : dc.ctrl = '{1'b0, uopc::cbsext, iqt::alu, exut::alu, 1'b1, 1'b1, 1'b0, immt::i};
             // we will only implement Zbb so PACK is only used for zext.h and rs2 can only take zero.
-            dec_op::PACK   : dc.ctrl = '{1'b0, uopc::pack,   iqt::alu, exut::alu, 1'b1, 1'b1, 1'b1, immt::r, 1'b0, 1'b1};
+            dec_op::PACK   : dc.ctrl = '{1'b0, uopc::pack,   iqt::alu, exut::alu, 1'b1, 1'b1, 1'b1, immt::r};
 
-            default : dc.ctrl = '{1'b0, uopc::micro_opcode_t'('X), iqt::queue_type_t'('X), exut::exe_unit_type_t'('X), 1'bX, 1'bX, 1'bX, immt::imm_type_t'('X), 1'bX, 1'bX};
+            default : dc.ctrl = '{1'b0, uopc::micro_opcode_t'('X), iqt::queue_type_t'('X), exut::exe_unit_type_t'('X), 1'bX, 1'bX, 1'bX, immt::imm_type_t'('X)};
         endcase
     end
 
@@ -188,7 +188,7 @@ module branch_decode_mux (
 endmodule : branch_decode_mux
 
 module branch_target_calc (
-    rv32i_word pc,
+    input rv32i_word pc,
     DecodeControl dc
 );
     rv32i_word b_imm;

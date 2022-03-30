@@ -42,6 +42,6 @@ module top (
     assign shadowed = cw.shadowed;
     assign packed_imm = cw.packed_imm;
 
-    decode_unit dec_inst (.*);
+    decode_unit dec_inst ( .dc(dc0) );
 
 endmodule : top

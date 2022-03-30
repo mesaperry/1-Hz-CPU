@@ -20,7 +20,7 @@ typedef enum logic [3:0] {
 endpackage
 
 package opr1t;
-typedef enum logic {
+typedef enum logic [1:0] {
     rs1,
     pc,
     zero
@@ -251,7 +251,7 @@ typedef struct {
     brfnt::br_func_t brfn;
 } backend_ctrl_sigs_t;
 
-typedef struct {
+typedef struct packed {
     uopc::micro_opcode_t uopcode;
     exut::exe_unit_type_t exu_type;
     logic has_rd;
