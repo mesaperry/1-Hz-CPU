@@ -18,8 +18,8 @@ localparam num_regs = 2**s_index;
 
 logic [s_width-1:0] data [num_regs];
 
-assign reg_a = data[src_a];
-assign reg_b = data[src_b];
+assign reg_a = src_a != 0 ? data[src_a] : '0;
+assign reg_b = src_b != 0 ? data[src_b] : '0;
 
 always_ff @(posedge clk)
 begin

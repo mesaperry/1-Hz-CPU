@@ -1,3 +1,5 @@
+`include "../ctrl_word.sv"
+`include "../../hvl/tb_itf.sv"
 import rv32i_types::*;
 
 module one_hz_cpu (
@@ -40,13 +42,15 @@ module one_hz_cpu (
     assign exe_redir = ((ec0.taken != exe_says_take) & ec0.ctrl.brfn[2:1] != 2'b11) | 
                        (ec0.ctrl.brfn == brfnt::jalr & !ec0.taken);
     logic [1:0] exe_btype;
+    rv32i_word exe_pc;
+    rv32i_word alu_out;
     rv32i_word exe_target_pc;
     rv32i_word exe_redir_pc;
     assign exe_target_pc = alu_out;
-    assign exe_redir_pc = exe_says_take ? exe_target_pc : ec0.pc + 4;
+    assign exe_redir_pc = exe_says_take ? exe_target_pc : exe_pc + 4;
     
     // fetch
-    logic fetch_pc;
+    rv32i_word fetch_pc;
     assign pc = fetch_pc;
     rv32i_word npc;
     rv32i_word btb_target_pc;
@@ -68,7 +72,7 @@ module one_hz_cpu (
     dummyBTB BTB (
         .clk,
         .rst,
-        .new_PC(exe_redir ? ec0.pc : dec_pc),
+        .new_PC(exe_redir ? exe_pc : dec_pc),
         .new_target(exe_redir ? exe_redir_pc : dec_redir_pc),
         // TODO: fix, definitely not right
         .new_btype(exe_redir ? exe_btype : {dc0.bctrl.is_br, dc0.bctrl.is_jal}),
@@ -76,6 +80,7 @@ module one_hz_cpu (
 
         .fetch_PC(fetch_pc),
         .target(btb_target_pc),
+        .btype(),
         .hit(btb_hit)
     );
     
@@ -134,13 +139,13 @@ module one_hz_cpu (
 
     assign dec_out = '{
         dc0.ctrl.uopcode, 
-        dc0.ctrl.exu_type, 
+        dc0.ctrl.exu_type,
         dc0.ctrl.has_rd, 
         dc0.ctrl.has_rs1, 
         dc0.ctrl.has_rs2,
-		  dc0.rd,
-		  dc0.rs1,
-		  dc0.rs2,
+        dc0.rd,
+        dc0.rs1,
+        dc0.rs2,
         dc0.ctrl.imm_type,
         dc0.packed_imm,
         dc0.taken,
@@ -152,8 +157,8 @@ module one_hz_cpu (
     assign memqdin = dec_out;
 
     assign imem_read = !(aluqfull | memqfull);
-
-    assign aluqpush = !aluqfull & dc0.ctrl.iq_type == iqt::alu;
+    // not checking if full, since it we need more slots so it doesn't stall
+    assign aluqpush = /*!aluqfull & */dc0.ctrl.iq_type == iqt::alu;
     assign memqpush = !memqfull & dc0.ctrl.iq_type == iqt::mem;
 
     dummy_queue #(
@@ -199,10 +204,10 @@ module one_hz_cpu (
 
     // rrd
 	 
-	 assign aluqpop = !aluqempty & aluqready;
+	 assign aluqpop = 1'b0;//!aluqempty & aluqready;
     
     always_comb begin
-        if (aluqempty || !aluqready) begin
+        if (/*aluqempty ||*/ !aluqready) begin
             rc0.uopcode <= uopc::add;
             rc0.exu_type <= exut::alu;
             rc0.rd <= '0;
@@ -217,6 +222,9 @@ module one_hz_cpu (
         else begin
             rc0.uopcode <= aluqdout.uopcode;
             rc0.exu_type <= aluqdout.exu_type;
+            rc0.has_rd <= aluqdout.has_rd;
+            rc0.has_rs1 <= aluqdout.has_rs1;
+            rc0.has_rs2 <= aluqdout.has_rs2;
             rc0.rd <= aluqdout.rd;
             rc0.rs1 <= aluqdout.rs1;
             rc0.rs2 <= aluqdout.rs2;
@@ -238,6 +246,7 @@ module one_hz_cpu (
 
     
     rv32i_word reg_a, reg_b;
+    rv32i_word alu_out_wb;
 
     regfile rf (
         .clk,
@@ -295,7 +304,6 @@ module one_hz_cpu (
         endcase
     end
 
-    rv32i_word alu_out;
 
     //
     alu alu_inst (
@@ -327,7 +335,6 @@ module one_hz_cpu (
 
 
     // exec -> wb
-    rv32i_word alu_out_wb;
     always_ff @(posedge clk) begin
         alu_out_wb <= alu_out;
         wc0.has_rd <= ec0.has_rd;
