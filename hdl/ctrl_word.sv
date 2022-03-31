@@ -47,6 +47,30 @@ typedef enum logic [2:0] {
 } br_func_t;
 endpackage
 
+package memfnt;
+typedef enum logic [1:0] {
+    st = 2'b01,
+    ld = 2'b10,
+    nm = 2'b00
+} mem_func_t;
+endpackage
+
+package memszt;
+typedef enum logic [1:0] {
+    b,
+    h,
+    w
+} mem_size_t;
+endpackage
+
+
+package ldextt;
+typedef enum logic {
+    z,
+    s
+} load_ext_t;
+endpackage
+
 package exut;
 typedef enum logic [1:0] {
     alu,
@@ -230,6 +254,7 @@ interface ExecuteControl;
 
     // for decoding imm in parallel with rrd
     immt::imm_type_t imm_type;
+    // somewhat compressed imm
     logic [19:0] packed_imm;
     logic taken;
     // for short forward branch optimization
@@ -237,9 +262,11 @@ interface ExecuteControl;
     logic shadowed;
     rv32i_word pc;
     backend_ctrl_sigs_t ctrl;
-    // somewhat compressed imm
     // decompressed imm
+    rv32i_word reg_a, reg_b;
     rv32i_word imm;
+
+    rv32i_word alu_out;
     
     // TODO: maybe define some modports so everything's not inout
 endinterface
@@ -266,7 +293,39 @@ typedef struct packed {
     logic shadowed;
     rv32i_word pc;
 } queue_item_t;
+
+interface MemoryControl;
+    // for further decoding in rrd
+    uopc::micro_opcode_t uopcode;
+    // for checking if we can issue (scoreboard)
+    // and for rrd
+    exut::exe_unit_type_t exu_type;
+    logic has_rd;
+    logic has_rs1;
+    logic has_rs2;
+    // for rrd
+    logic [4:0] rd;
+    logic [4:0] rs1;
+    logic [4:0] rs2;
+
+    // somewhat compressed imm
+    logic [19:0] packed_imm;
+    memory_ctrl_sigs_t ctrl;
+    rv32i_word reg_a, reg_b;
+    // decompressed imm
+    rv32i_word imm;
+    rv32i_word addr;
+    logic [3:0] mbe;
+    rv32i_word mem_out;
     
+    // TODO: maybe define some modports so everything's not inout
+endinterface
+
+typedef struct {
+    memfnt::mem_func_t memfn;
+    memszt::mem_size_t memsz;
+    ldextt::load_ext_t ldext;
+} memory_ctrl_sigs_t;
 
 
 // first 2 bits of opcode are don't cares

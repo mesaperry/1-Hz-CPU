@@ -1,7 +1,24 @@
-`include "../ctrl_word.sv"
-`include "../../hvl/tb_itf.sv"
+//`include "../ctrl_word.sv"
+//`include "../../hvl/tb_itf.sv"
+//
 import rv32i_types::*;
-
+/*
+typedef struct packed {
+    uopc::micro_opcode_t uopcode;
+    exut::exe_unit_type_t exu_type;
+    logic has_rd;
+    logic has_rs1;
+    logic has_rs2;
+    logic [4:0] rd;
+    logic [4:0] rs1;
+    logic [4:0] rs2;
+    immt::imm_type_t imm_type;
+    logic [19:0] packed_imm;
+    logic taken;
+    logic shadowed;
+    rv32i_word pc;
+} queue_item_t;
+*/
 module one_hz_cpu (
     input clk,
     input rst,
@@ -10,8 +27,8 @@ module one_hz_cpu (
     output  logic        imem_read,
     input   logic        imem_resp,
     output  rv32i_word   mem_address,
-    output  rv32i_word   mem_rdata,
-    input   rv32i_word   mem_wdata,
+    input   rv32i_word   mem_rdata,
+    output  rv32i_word   mem_wdata,
     output  logic        mem_read,
     output  logic        mem_write,
     output  logic [3:0]  mem_byte_enable,
@@ -19,9 +36,21 @@ module one_hz_cpu (
 );
 
     DecodeControl dc0();
-    ExecuteControl rc0();
-    ExecuteControl ec0();
-    ExecuteControl wc0();
+    ExecuteControl arc0();
+    ExecuteControl aec0();
+    ExecuteControl awc0();
+    MemoryControl mrc0();
+    MemoryControl mmc0();
+    MemoryControl mwc0();
+
+    regfile rf (
+        .clk,
+        .ld({awc0.has_rd, mwc0.has_rd}),
+        .dest('{awc0.rd, mwc0.rd}),
+        .in('{awc0.alu_out, mwc0.mem_out}),
+        .src('{arc0.rs1, arc0.rs2, mrc0.rs1, mrc0.rs2}),
+        .out('{arc0.reg_a, arc0.reg_b, mrc0.reg_a, mrc0.reg_b})
+    );
 
     // decode redirect
     logic dec_says_take;
@@ -39,14 +68,14 @@ module one_hz_cpu (
     // exe redirect
     logic exe_says_take;
     logic exe_redir;
-    assign exe_redir = ((ec0.taken != exe_says_take) & ec0.ctrl.brfn[2:1] != 2'b11) | 
-                       (ec0.ctrl.brfn == brfnt::jalr & !ec0.taken);
+    assign exe_redir = ((aec0.taken != exe_says_take) & aec0.ctrl.brfn[2:1] != 2'b11) | 
+                       (aec0.ctrl.brfn == brfnt::jalr & !aec0.taken);
     logic [1:0] exe_btype;
     rv32i_word exe_pc;
-    rv32i_word alu_out;
+    assign exe_pc = aec0.pc;
     rv32i_word exe_target_pc;
     rv32i_word exe_redir_pc;
-    assign exe_target_pc = alu_out;
+    assign exe_target_pc = aec0.alu_out;
     assign exe_redir_pc = exe_says_take ? exe_target_pc : exe_pc + 4;
     
     // fetch
@@ -111,14 +140,14 @@ module one_hz_cpu (
         .dc(dc0)
     );
 
-    branch_target_calc btc (
+    branch_target_calc btc0 (
         .pc(dec_pc),
         .dc(dc0)
     );
 
     // 2 stage. starts in fetch. uses bram
     // result arrives in decode.
-    dummyBHT bht (
+    dummyBHT bht0 (
         .clk,
         .rst,
         .pc(fetch_pc),
@@ -164,7 +193,7 @@ module one_hz_cpu (
     dummy_queue #(
         $bits(queue_item_t)
     )
-    aluq (
+    aluq0 (
         .clk,
         .rst,
         .push_front(aluqpush),
@@ -177,7 +206,7 @@ module one_hz_cpu (
 
     logic aluqready;
 
-    dummy_issue_check aluq_issue_check (
+    dummy_issue_check aluq_issue_check0 (
         .exu_type(aluqdout.exu_type),
         .has_rd(aluqdout.has_rd),
         .has_rs1(aluqdout.has_rs1),
@@ -191,7 +220,7 @@ module one_hz_cpu (
     dummy_queue #(
         $bits(queue_item_t)
     )
-    memq (
+    memq0 (
         .clk,
         .rst,
         .push_front(memqpush),
@@ -202,87 +231,83 @@ module one_hz_cpu (
         .dout(memqdout)
     );
 
+    logic memqready;
+
+    dummy_issue_check memq_issue_check0 (
+        .exu_type(memqdout.exu_type),
+        .has_rd(memqdout.has_rd),
+        .has_rs1(memqdout.has_rs1),
+        .has_rs2(memqdout.has_rs2),
+        .rd(memqdout.rd),
+        .rs1(memqdout.rs1),
+        .rs2(memqdout.rs2),
+        .ready(memqready)
+    );
+
     // rrd
 	 
-	 assign aluqpop = 1'b0;//!aluqempty & aluqready;
+    assign aluqpop = 1'b0;//!aluqempty & aluqready;
     
     always_comb begin
         if (/*aluqempty ||*/ !aluqready) begin
-            rc0.uopcode <= uopc::add;
-            rc0.exu_type <= exut::alu;
-            rc0.rd <= '0;
-            rc0.rs1 <= '0;
-            rc0.rs2 <= '0;
-            rc0.imm_type <= immt::r;
-            rc0.packed_imm <= '0;
-            rc0.taken <= '0;
-            rc0.shadowed <= '0;
-            rc0.pc <= '0;
+            arc0.uopcode <= uopc::add;
+            arc0.exu_type <= exut::alu;
+            arc0.has_rd <= '0;
+            arc0.has_rs1 <= '0;
+            arc0.has_rs2 <= '0;
+            arc0.rd <= '0;
+            arc0.rs1 <= '0;
+            arc0.rs2 <= '0;
+            arc0.imm_type <= immt::r;
+            arc0.packed_imm <= '0;
+            arc0.taken <= '0;
+            arc0.shadowed <= '0;
+            arc0.pc <= '0;
         end
         else begin
-            rc0.uopcode <= aluqdout.uopcode;
-            rc0.exu_type <= aluqdout.exu_type;
-            rc0.has_rd <= aluqdout.has_rd;
-            rc0.has_rs1 <= aluqdout.has_rs1;
-            rc0.has_rs2 <= aluqdout.has_rs2;
-            rc0.rd <= aluqdout.rd;
-            rc0.rs1 <= aluqdout.rs1;
-            rc0.rs2 <= aluqdout.rs2;
-            rc0.imm_type <= aluqdout.imm_type;
-            rc0.packed_imm <= aluqdout.packed_imm;
-            rc0.taken <= aluqdout.taken;
-            rc0.shadowed <= aluqdout.shadowed;
-            rc0.pc <= aluqdout.pc;
+            arc0.uopcode <= aluqdout.uopcode;
+            arc0.exu_type <= aluqdout.exu_type;
+            arc0.has_rd <= aluqdout.has_rd;
+            arc0.has_rs1 <= aluqdout.has_rs1;
+            arc0.has_rs2 <= aluqdout.has_rs2;
+            arc0.rd <= aluqdout.rd;
+            arc0.rs1 <= aluqdout.rs1;
+            arc0.rs2 <= aluqdout.rs2;
+            arc0.imm_type <= aluqdout.imm_type;
+            arc0.packed_imm <= aluqdout.packed_imm;
+            arc0.taken <= aluqdout.taken;
+            arc0.shadowed <= aluqdout.shadowed;
+            arc0.pc <= aluqdout.pc;
         end
     end
 
-    exe_decode exe_dec (.ec(rc0));
+    exe_decode exe_dec0 (.ec(arc0));
 
-    alu_imm_dec imm_dec (
-        .packed_imm(rc0.packed_imm),
-        .imm_type(rc0.imm_type),
-        .imm(rc0.imm)
+    alu_imm_dec alu_imm_dec0 (
+        .packed_imm(arc0.packed_imm),
+        .imm_type(arc0.imm_type),
+        .imm(arc0.imm)
     );
 
     
-    rv32i_word reg_a, reg_b;
-    rv32i_word alu_out_wb;
-
-    regfile rf (
-        .clk,
-        .prefer_a(1'b1),
-        .ld_a(wc0.has_rd),
-        .ld_b(0),
-        .dest_a(wc0.rd),
-        .dest_b('0),
-        .in_a(alu_out_wb),
-        .in_b(0),
-        .src_a(rc0.rs1),
-        .src_b(rc0.rs2),
-        .reg_a,
-        .reg_b
-    );
-
-    rv32i_word reg_a_exe;
-    rv32i_word reg_b_exe;
 
     // rrd -> exec
     always_ff @(posedge clk) begin
-        ec0.uopcode <= rc0.uopcode;
-        ec0.exu_type <= rc0.exu_type;
-        ec0.has_rd <= rc0.has_rd;
-        ec0.has_rs1 <= rc0.has_rs1;
-        ec0.has_rs2 <= rc0.has_rs2;
-        ec0.rd <= rc0.rd;
-        ec0.rs1 <= rc0.rs1;
-        ec0.rs2 <= rc0.rs2;
-        ec0.taken <= rc0.taken;
-        ec0.shadowed <= rc0.shadowed;
-        ec0.pc <= rc0.pc;
-        ec0.ctrl <= rc0.ctrl;
-        ec0.imm <= rc0.imm;
-        reg_a_exe <= reg_a;
-        reg_b_exe <= reg_b;
+        aec0.uopcode <= arc0.uopcode;
+        aec0.exu_type <= arc0.exu_type;
+        aec0.has_rd <= arc0.has_rd;
+        aec0.has_rs1 <= arc0.has_rs1;
+        aec0.has_rs2 <= arc0.has_rs2;
+        aec0.rd <= arc0.rd;
+        aec0.rs1 <= arc0.rs1;
+        aec0.rs2 <= arc0.rs2;
+        aec0.taken <= arc0.taken;
+        aec0.shadowed <= arc0.shadowed;
+        aec0.pc <= arc0.pc;
+        aec0.ctrl <= arc0.ctrl;
+        aec0.imm <= arc0.imm;
+        aec0.reg_a <= arc0.reg_a;
+        aec0.reg_b <= arc0.reg_b;
     end
 
     // exec
@@ -290,38 +315,38 @@ module one_hz_cpu (
     rv32i_word operand2;
     
     always_comb begin
-        unique case (ec0.ctrl.opr1)
-            opr1t::rs1  : operand1 = reg_a_exe;
-            opr1t::pc   : operand1 = ec0.pc;
+        unique case (aec0.ctrl.opr1)
+            opr1t::rs1  : operand1 = aec0.reg_a;
+            opr1t::pc   : operand1 = aec0.pc;
             opr1t::zero : operand1 = '0;
         endcase
     end
 
     always_comb begin
-        unique case (ec0.ctrl.opr2)
-            opr2t::rs2  : operand2 = reg_b_exe;
-            opr2t::imm  : operand2 = ec0.imm;
+        unique case (aec0.ctrl.opr2)
+            opr2t::rs2  : operand2 = aec0.reg_b;
+            opr2t::imm  : operand2 = aec0.imm;
         endcase
     end
 
 
     //
-    alu alu_inst (
-        .fn(ec0.ctrl.alufn),
+    alu alu0 (
+        .fn(aec0.ctrl.alufn),
         .in1(operand1),
         .in2(operand2),
-        .out(alu_out)
+        .out(aec0.alu_out)
     );
 
     logic eq;
     logic lt;
     logic ltu;
-    assign eq  = reg_a_exe == reg_b_exe;
-    assign lt  = reg_a_exe <  reg_b_exe;
-    assign ltu = $signed(reg_a_exe) <  $signed(reg_b_exe);
+    assign eq  = aec0.reg_a == aec0.reg_b;
+    assign lt  = aec0.reg_a <  aec0.reg_b;
+    assign ltu = $signed(aec0.reg_a) <  $signed(aec0.reg_b);
 
     always_comb begin
-        unique case (ec0.ctrl.brfn)
+        unique case (aec0.ctrl.brfn)
             brfnt::beq  : exe_says_take = eq;
             brfnt::bne  : exe_says_take = !eq;
             brfnt::blt  : exe_says_take = lt;
@@ -336,23 +361,114 @@ module one_hz_cpu (
 
     // exec -> wb
     always_ff @(posedge clk) begin
-        alu_out_wb <= alu_out;
-        wc0.has_rd <= ec0.has_rd;
-        wc0.has_rs1 <= ec0.has_rs1;
-        wc0.has_rs2 <= ec0.has_rs2;
-        wc0.rd <= ec0.rd;
-        wc0.rs1 <= ec0.rs1;
-        wc0.rs2 <= ec0.rs2;
-        wc0.shadowed <= ec0.shadowed;
+        awc0.alu_out <= aec0.alu_out;
+        awc0.has_rd <= aec0.has_rd;
+        awc0.has_rs1 <= aec0.has_rs1;
+        awc0.has_rs2 <= aec0.has_rs2;
+        awc0.rd <= aec0.rd;
+        awc0.rs1 <= aec0.rs1;
+        awc0.rs2 <= aec0.rs2;
+        awc0.shadowed <= aec0.shadowed;
     end
 
     // wb
     // TODO: set registers to unused
     
 
- 
 
 
+
+    // -- mem stuff oh god why -- //
+
+
+    // rrd
+	 
+	 assign memqpop = 1'b0;//!memqempty & memqready;
+    
+    always_comb begin
+        if (/*memqempty ||*/ !memqready) begin
+            mrc0.uopcode <= uopc::add;
+            mrc0.exu_type <= exut::mem;
+            mrc0.has_rd <= '0;
+            mrc0.has_rs1 <= '0;
+            mrc0.has_rs2 <= '0;
+            mrc0.rd <= '0;
+            mrc0.rs1 <= '0;
+            mrc0.rs2 <= '0;
+            mrc0.packed_imm <= '0;
+        end
+        else begin
+            mrc0.uopcode <= memqdout.uopcode;
+            mrc0.exu_type <= memqdout.exu_type;
+            mrc0.has_rd <= memqdout.has_rd;
+            mrc0.has_rs1 <= memqdout.has_rs1;
+            mrc0.has_rs2 <= memqdout.has_rs2;
+            mrc0.rd <= memqdout.rd;
+            mrc0.rs1 <= memqdout.rs1;
+            mrc0.rs2 <= memqdout.rs2;
+            mrc0.packed_imm <= memqdout.packed_imm;
+        end
+    end
+
+    mem_decode mem_dec (.mc(mrc0));
+
+    mem_imm_dec mem_imm_dec0 (
+        .packed_imm(mrc0.packed_imm),
+        .imm(mrc0.imm)
+    );
+
+
+
+    // rrd -> agu
+    always_ff @(posedge clk) begin
+        mmc0.uopcode  <= mrc0.uopcode;
+        mmc0.exu_type <= mrc0.exu_type;
+        mmc0.has_rd   <= mrc0.has_rd;
+        mmc0.has_rs1  <= mrc0.has_rs1;
+        mmc0.has_rs2  <= mrc0.has_rs2;
+        mmc0.rd       <= mrc0.rd;
+        mmc0.rs1      <= mrc0.rs1;
+        mmc0.rs2      <= mrc0.rs2;
+        mmc0.ctrl     <= mrc0.ctrl;
+        mmc0.imm      <= mrc0.imm;
+        mmc0.reg_a    <= mrc0.reg_a;
+        mmc0.reg_b    <= mrc0.reg_b;
+    end
+
+    // agu + mem
+    // TODO: timing: agu and mem should be split into 2 stages
+
+    assign mmc0.addr = mmc0.reg_a + mmc0.imm;
+
+    mbe_gen mbe_gen0 ( .mc(mmc0) );
+
+    assign mem_byte_enable = mmc0.mbe;
+    assign mem_address = mmc0.addr;
+    assign mem_wdata = mmc0.reg_b;
+    assign mmc0.mem_out = mem_rdata;
+
+    assign mem_read  = mmc0.ctrl.memfn[1];
+    assign mem_write = mmc0.ctrl.memfn[0];
+
+    // TODO: if no resp, unit busy
+
+
+    //
+
+
+    // exec -> wb
+    always_ff @(posedge clk) begin
+        mwc0.mem_out <= mmc0.mem_out;
+        mwc0.has_rd <= mmc0.has_rd;
+        mwc0.has_rs1 <= mmc0.has_rs1;
+        mwc0.has_rs2 <= mmc0.has_rs2;
+        mwc0.rd <= mmc0.rd;
+        mwc0.rs1 <= mmc0.rs1;
+        mwc0.rs2 <= mmc0.rs2;
+    end
+
+    // wb
+    // TODO: set registers to unused
 
 
 

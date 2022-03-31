@@ -28,16 +28,16 @@ module exe_decode (
             uopc::srli   : ec.ctrl = '{alufnt::sr,   opr1t::rs1,  opr2t::imm, brfnt::none};
             uopc::srai   : ec.ctrl = '{alufnt::sra,  opr1t::rs1,  opr2t::imm, brfnt::none};
 
-            uopc::add    : ec.ctrl = '{alufnt::add,  opr1t::rs1,   opr2t::rs2, brfnt::none};
-            uopc::sub    : ec.ctrl = '{alufnt::sub,  opr1t::rs1,   opr2t::rs2, brfnt::none};
-            uopc::sll    : ec.ctrl = '{alufnt::sl,   opr1t::rs1,   opr2t::rs2, brfnt::none};
-            uopc::slt    : ec.ctrl = '{alufnt::slt,  opr1t::rs1,   opr2t::rs2, brfnt::none};
-            uopc::sltu   : ec.ctrl = '{alufnt::sltu, opr1t::rs1,   opr2t::rs2, brfnt::none};
-            uopc::xoro   : ec.ctrl = '{alufnt::xoro, opr1t::rs1,   opr2t::rs2, brfnt::none};
-            uopc::srl    : ec.ctrl = '{alufnt::sr,   opr1t::rs1,   opr2t::rs2, brfnt::none};
-            uopc::sra    : ec.ctrl = '{alufnt::sra,  opr1t::rs1,   opr2t::rs2, brfnt::none};
-            uopc::oro    : ec.ctrl = '{alufnt::oro,  opr1t::rs1,   opr2t::rs2, brfnt::none};
-            uopc::ando   : ec.ctrl = '{alufnt::ando, opr1t::rs1,   opr2t::rs2, brfnt::none};
+            uopc::add    : ec.ctrl = '{alufnt::add,  opr1t::rs1,  opr2t::rs2, brfnt::none};
+            uopc::sub    : ec.ctrl = '{alufnt::sub,  opr1t::rs1,  opr2t::rs2, brfnt::none};
+            uopc::sll    : ec.ctrl = '{alufnt::sl,   opr1t::rs1,  opr2t::rs2, brfnt::none};
+            uopc::slt    : ec.ctrl = '{alufnt::slt,  opr1t::rs1,  opr2t::rs2, brfnt::none};
+            uopc::sltu   : ec.ctrl = '{alufnt::sltu, opr1t::rs1,  opr2t::rs2, brfnt::none};
+            uopc::xoro   : ec.ctrl = '{alufnt::xoro, opr1t::rs1,  opr2t::rs2, brfnt::none};
+            uopc::srl    : ec.ctrl = '{alufnt::sr,   opr1t::rs1,  opr2t::rs2, brfnt::none};
+            uopc::sra    : ec.ctrl = '{alufnt::sra,  opr1t::rs1,  opr2t::rs2, brfnt::none};
+            uopc::oro    : ec.ctrl = '{alufnt::oro,  opr1t::rs1,  opr2t::rs2, brfnt::none};
+            uopc::ando   : ec.ctrl = '{alufnt::ando, opr1t::rs1,  opr2t::rs2, brfnt::none};
 
             default      : ec.ctrl = '{alufnt::add,  opr1t::zero, opr2t::imm, brfnt::none};
         endcase

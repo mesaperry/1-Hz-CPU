@@ -124,7 +124,7 @@ module decode_mux (
             // we will only implement Zbb so PACK is only used for zext.h and rs2 can only take zero.
             dec_op::PACK   : dc.ctrl = '{1'b0, uopc::pack,   iqt::alu, exut::alu, 1'b1, 1'b1, 1'b1, immt::r};
 
-            default : dc.ctrl = '{1'b0, uopc::micro_opcode_t'('X), iqt::queue_type_t'('X), exut::exe_unit_type_t'('X), 1'bX, 1'bX, 1'bX, immt::imm_type_t'('X)};
+            default        : dc.ctrl = '{1'b0, uopc::add,    iqt::alu, exut::alu, 1'b0, 1'b0, 1'b0, immt::r};
         endcase
     end
 

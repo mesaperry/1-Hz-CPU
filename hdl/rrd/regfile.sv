@@ -1,39 +1,43 @@
 module regfile #(
-	parameter s_width = 32,
-	parameter s_index = 5
+    parameter s_index = 5,
+    parameter s_width = 32,
+    parameter num_read_ports = 4,
+    parameter num_write_ports = 2,
+    parameter nrp = num_read_ports,
+    parameter nwp = num_write_ports
 )
 (
-	input clk,
+    input clk,
 
-	input prefer_a,
-	input ld_a, ld_b,
-	input [s_index-1:0] dest_a, dest_b,
-	input [s_width-1:0] in_a, in_b,
+    // TODO: figure out priority stuff again
+    //input logic [swl-1:0] prefer_a,
+    input logic [nwp-1:0] ld,
+    input logic [s_index-1:0] dest [nwp-1:0],
+    input logic [s_width-1:0] in [nwp-1:0],
 
-	input [s_index-1:0] src_a, src_b,
-	output logic [s_width-1:0] reg_a, reg_b
+    input logic [s_index-1:0] src [nrp-1:0],
+    output logic [s_width-1:0] out [nrp-1:0]
 );
 
-localparam num_regs = 2**s_index;
+    localparam num_regs = 2**s_index;
+    localparam s_write_sel = $clog2(nwp);
+    localparam swl = s_write_sel;
 
-logic [s_width-1:0] data [num_regs];
+    logic [s_width-1:0] data [num_regs];
 
-assign reg_a = src_a != 0 ? data[src_a] : '0;
-assign reg_b = src_b != 0 ? data[src_b] : '0;
+    genvar rp;
+    generate
+        for (rp = 0; rp < nrp; rp++) begin : reads
+            assign out[rp] = src[rp] != 0 ? data[src[rp]] : '0;
+        end
+    endgenerate
 
-always_ff @(posedge clk)
-begin
-	if (ld_a && ld_b && dest_a == dest_b) begin
-		// loads to same reg is requested, look towards priority bit
-		data[dest_a] <= prefer_a ? in_a : in_b;
-	end else begin
-		if (ld_a) begin
-			data[dest_a] <= in_a;
-		end
-		if (ld_b) begin
-			data[dest_b] <= in_b;
-		end
-	end
-end
+    always_ff @(posedge clk) begin
+        for (int i = 0; i < nwp; i++) begin
+            if (ld[i]) begin
+                data[dest[i]] <= in[i];
+            end
+        end
+    end
 
 endmodule : regfile

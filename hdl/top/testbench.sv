@@ -1,3 +1,4 @@
+`include "../../hvl/tb_itf.sv"
 import rv32i_types::*;
 
 module testbench ();
