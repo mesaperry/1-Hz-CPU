@@ -105,7 +105,7 @@ Burst Memory Ports:
 Please refer to tb_itf.sv for more information.
 */
 
-one_hz_cpu dut(
+mp4 dut(
     .clk(itf.clk),
     .rst(itf.rst),
     .pc(itf.mmcb.address_a),

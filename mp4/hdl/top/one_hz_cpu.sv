@@ -2,7 +2,6 @@
 //`include "../../hvl/tb_itf.sv"
 //
 import rv32i_types::*;
-/*
 typedef struct packed {
     uopc::micro_opcode_t uopcode;
     exut::exe_unit_type_t exu_type;
@@ -18,7 +17,6 @@ typedef struct packed {
     logic shadowed;
     rv32i_word pc;
 } queue_item_t;
-*/
 module one_hz_cpu (
     input clk,
     input rst,

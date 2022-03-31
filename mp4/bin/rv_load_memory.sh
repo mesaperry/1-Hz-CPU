@@ -2,7 +2,7 @@
 
 # Settings
 ECE411DIR=$HOME/1-Hz-CPU
-DEFAULT_TARGET=$ECE411DIR/simulation/modelsim/memory.lst
+DEFAULT_TARGET=$ECE411DIR/mp4/simulation/modelsim/memory.lst
 ASSEMBLER=/class/ece411/software/riscv-tools/bin/riscv32-unknown-elf-gcc
 OBJCOPY=/class/ece411/software/riscv-tools/bin/riscv32-unknown-elf-objcopy
 OBJDUMP=/class/ece411/software/riscv-tools/bin/riscv32-unknown-elf-objdump

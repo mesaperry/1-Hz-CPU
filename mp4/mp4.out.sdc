@@ -1,4 +1,4 @@
-## Generated SDC file "1-Hz-CPU.out.sdc"
+## Generated SDC file "mp4.out.sdc"
 
 ## Copyright (C) 2018  Intel Corporation. All rights reserved.
 ## Your use of Intel Corporation's design tools, logic functions 
@@ -19,7 +19,7 @@
 ## PROGRAM "Quartus Prime"
 ## VERSION "Version 18.1.0 Build 625 09/12/2018 SJ Standard Edition"
 
-## DATE    "Wed Mar 30 17:55:43 2022"
+## DATE    "Wed Mar 30 20:16:37 2022"
 
 ##
 ## DEVICE  "EP2AGX45DF25I3"
