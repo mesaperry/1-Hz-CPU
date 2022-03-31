@@ -1,6 +1,5 @@
 //`include "../ctrl_word.sv"
 //`include "../../hvl/tb_itf.sv"
-//
 import rv32i_types::*;
 typedef struct packed {
     uopc::micro_opcode_t uopcode;
@@ -17,6 +16,7 @@ typedef struct packed {
     logic shadowed;
     rv32i_word pc;
 } queue_item_t;
+
 module one_hz_cpu (
     input clk,
     input rst,
@@ -84,7 +84,7 @@ module one_hz_cpu (
     rv32i_word nextline_pc;
     logic btb_hit;
 
-    assign nextline_pc = fetch_pc + 4;
+    assign nextline_pc = imem_read ? fetch_pc + 4 : fetch_pc;
 
     always_comb begin
         unique casez ({btb_hit, dec_redir, exe_redir})
@@ -111,10 +111,13 @@ module one_hz_cpu (
         .hit(btb_hit)
     );
     
-    rg fetch_pc_reg (
+    rg #(
+        .rst_val(32'h00000060)
+    )
+    fetch_pc_reg (
         .clk,
         .rst,
-        .ld(1'b1),
+        .ld(1'b1), // TODO: maybe should be imem_resp
         .din(npc),
         .dout(fetch_pc)
     );
@@ -128,8 +131,22 @@ module one_hz_cpu (
         .din(fetch_pc),
         .dout(dec_pc)
     );
+    rg dec_instr_reg0 (
+        .clk,
+        .rst,
+        .ld(1'b1),
+        .din(instr),
+        .dout(dc0.instr)
+    );
+    rg dec_taken_reg0 (
+        .clk,
+        .rst,
+        .ld(1'b1),
+        .din(btb_hit),
+        .dout(dc0.taken)
+    );
     assign dc0.under_shadow = 1'b0; // TODO: SFO
-    assign dc0.instr = instr;
+    
 
 
     // decode
@@ -183,10 +200,10 @@ module one_hz_cpu (
     assign aluqdin = dec_out;
     assign memqdin = dec_out;
 
-    assign imem_read = !(aluqfull | memqfull);
+    assign imem_read = 1'b1;//!(aluqfull | memqfull);
     // not checking if full, since it we need more slots so it doesn't stall
     assign aluqpush = /*!aluqfull & */dc0.ctrl.iq_type == iqt::alu;
-    assign memqpush = !memqfull & dc0.ctrl.iq_type == iqt::mem;
+    assign memqpush = /*!memqfull & */dc0.ctrl.iq_type == iqt::mem;
 
     dummy_queue #(
         $bits(queue_item_t)
@@ -244,10 +261,10 @@ module one_hz_cpu (
 
     // rrd
 	 
-    assign aluqpop = 1'b0;//!aluqempty & aluqready;
+    assign aluqpop = !aluqempty & aluqready;
     
     always_comb begin
-        if (/*aluqempty ||*/ !aluqready) begin
+        if (aluqempty || !aluqready) begin
             arc0.uopcode <= uopc::add;
             arc0.exu_type <= exut::alu;
             arc0.has_rd <= '0;
@@ -340,8 +357,8 @@ module one_hz_cpu (
     logic lt;
     logic ltu;
     assign eq  = aec0.reg_a == aec0.reg_b;
-    assign lt  = aec0.reg_a <  aec0.reg_b;
-    assign ltu = $signed(aec0.reg_a) <  $signed(aec0.reg_b);
+    assign lt  = $signed(aec0.reg_a) <  $signed(aec0.reg_b);
+    assign ltu = aec0.reg_a <  aec0.reg_b;
 
     always_comb begin
         unique case (aec0.ctrl.brfn)
@@ -381,10 +398,10 @@ module one_hz_cpu (
 
     // rrd
 	 
-	 assign memqpop = 1'b0;//!memqempty & memqready;
+	 assign memqpop = !memqempty & memqready;
     
     always_comb begin
-        if (/*memqempty ||*/ !memqready) begin
+        if (memqempty || !memqready) begin
             mrc0.uopcode <= uopc::add;
             mrc0.exu_type <= exut::mem;
             mrc0.has_rd <= '0;
@@ -443,7 +460,18 @@ module one_hz_cpu (
     assign mem_byte_enable = mmc0.mbe;
     assign mem_address = mmc0.addr;
     assign mem_wdata = mmc0.reg_b;
-    assign mmc0.mem_out = mem_rdata;
+
+    logic sign_byte;
+    logic zero_byte;
+    always_comb begin
+        unique case ({mmc0.ctrl.memsz, mmc0.ctrl.ldext})
+            {memszt::b, ldextt::s} : mmc0.mem_out = {{24{mem_rdata[07]}}, mem_rdata[07:0]};
+            {memszt::b, ldextt::z} : mmc0.mem_out = { 24'b0,              mem_rdata[07:0]};
+            {memszt::h, ldextt::s} : mmc0.mem_out = {{16{mem_rdata[15]}}, mem_rdata[15:0]};
+            {memszt::h, ldextt::z} : mmc0.mem_out = { 16'b0,              mem_rdata[15:0]};
+            default                : mmc0.mem_out =                       mem_rdata;
+        endcase
+    end
 
     assign mem_read  = mmc0.ctrl.memfn[1];
     assign mem_write = mmc0.ctrl.memfn[0];
@@ -454,7 +482,7 @@ module one_hz_cpu (
     //
 
 
-    // exec -> wb
+    // mem -> wb
     always_ff @(posedge clk) begin
         mwc0.mem_out <= mmc0.mem_out;
         mwc0.has_rd <= mmc0.has_rd;
@@ -507,13 +535,17 @@ module dummy_queue #(
 );
     
     always_ff @(posedge clk) begin
-        if (rst | pop_back) begin
+        if (rst) begin
             empty <= 1'b1;
             full <= 1'b0;
         end
         else if (push_front) begin
             empty <= 1'b0;
             full <= 1'b1;
+        end
+        else if (pop_back) begin // and not push_front
+            empty <= 1'b1;
+            full <= 1'b0;
         end
     end
 
@@ -522,7 +554,7 @@ module dummy_queue #(
     ) 
     q (
         .clk,
-        .rst(rst | pop_back),
+        .rst(rst | (pop_back & ~push_front)),
         .ld(push_front),
         .din,
         .dout
@@ -531,7 +563,8 @@ module dummy_queue #(
 endmodule : dummy_queue
 
 module rg #(
-    parameter size = 32
+    parameter size = 32,
+    parameter rst_val = '0
 )
 (
     input clk,
@@ -542,7 +575,7 @@ module rg #(
 );
 
     always_ff @(posedge clk) begin
-        if (rst) dout <= '0;
+        if (rst) dout <= rst_val;
         else if (ld) dout <= din;
     end
 
