@@ -75,16 +75,9 @@ package exut;
 typedef enum logic [1:0] {
     alu,
     mul,
-    div,
+    jmp,
     mem
 } exe_unit_type_t;
-endpackage
-
-package iqt;
-typedef enum logic {
-    alu,
-    mem
-} queue_type_t;
 endpackage
 
 package immt;
@@ -96,6 +89,15 @@ typedef enum logic [2:0] {
     s,
     r
 } imm_type_t;
+endpackage
+
+package pred;
+typedef enum logic [1:0] {
+    strongly_taken     = 2'b11,
+    weakly_taken       = 2'b10,
+    weakly_not_taken   = 2'b01,
+    strongly_not_taken = 2'b00
+} br_pred_t;
 endpackage
 
 package uopc;
@@ -214,8 +216,6 @@ typedef struct {
     logic legal;
     // for further decoding in rrd
     uopc::micro_opcode_t uopcode;
-    // for pushing to appropriate queue
-    iqt::queue_type_t iq_type;
     // for checking if we can issue (scoreboard)
     // and for rrd
     exut::exe_unit_type_t exu_type;
@@ -279,19 +279,18 @@ typedef struct {
 } backend_ctrl_sigs_t;
 
 typedef struct packed {
-    uopc::micro_opcode_t uopcode;
-    exut::exe_unit_type_t exu_type;
-    logic has_rd;
-    logic has_rs1;
-    logic has_rs2;
-    logic [4:0] rd;
-    logic [4:0] rs1;
-    logic [4:0] rs2;
-    immt::imm_type_t imm_type;
-    logic [19:0] packed_imm;
-    logic taken;
-    logic shadowed;
-    rv32i_word pc;
+    uopc::micro_opcode_t uopcode;   //6
+    exut::exe_unit_type_t exu_type; //2
+    logic has_rd; // 1
+    logic has_rs1; // 1
+    logic has_rs2; // 1
+    logic [4:0] rd; //5
+    logic [4:0] rs1;//5
+    logic [4:0] rs2;//5
+    immt::imm_type_t imm_type; //3
+    logic [19:0] packed_imm;//20
+    logic taken;//1
+    logic shadowed;//1
 } queue_item_t;
 
 interface MemoryControl;

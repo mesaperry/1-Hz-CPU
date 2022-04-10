@@ -1,7 +1,7 @@
 //`include "../ctrl_word.sv"
 //`include "../../hvl/tb_itf.sv"
 import rv32i_types::*;
-typedef struct packed {
+typedef struct packed {//51
     uopc::micro_opcode_t uopcode;
     exut::exe_unit_type_t exu_type;
     logic has_rd;
@@ -14,8 +14,14 @@ typedef struct packed {
     logic [19:0] packed_imm;
     logic taken;
     logic shadowed;
-    rv32i_word pc;
 } queue_item_t;
+
+
+// TODO: actually important! jal and jalr
+// need to store pc+4. jalr implementation may work
+// already, but not tested. would prefer to fix it
+// so it doesn't need another adder
+// TODO: detect ret and call
 
 module one_hz_cpu (
     input clk,
@@ -33,155 +39,256 @@ module one_hz_cpu (
     input   logic        mem_resp
 );
 
-    DecodeControl dc0();
-    ExecuteControl arc0();
-    ExecuteControl aec0();
-    ExecuteControl awc0();
-    MemoryControl mrc0();
-    MemoryControl mmc0();
-    MemoryControl mwc0();
+    //------------//
+    //--- decl ---//
+    //------------//
 
-    regfile rf (
-        .clk,
-        .ld({awc0.has_rd, mwc0.has_rd}),
-        .dest('{awc0.rd, mwc0.rd}),
-        .in('{awc0.alu_out, mwc0.mem_out}),
-        .src('{arc0.rs1, arc0.rs2, mrc0.rs1, mrc0.rs2}),
-        .out('{arc0.reg_a, arc0.reg_b, mrc0.reg_a, mrc0.reg_b})
-    );
+    //-- fetch0 --//
+    rv32i_word pc_f0;
 
-    // decode redirect
-    logic dec_says_take;
-    logic dec_confident;
-    logic dec_redir;
-    assign dec_redir = ((dc0.taken != dec_says_take) & dc0.bctrl.is_br & dec_confident) | 
-                       (dc0.bctrl.is_jal & !dc0.taken);
-    rv32i_word dec_pc;
-    rv32i_word dec_target_pc;
-    rv32i_word dec_redir_pc;
-    assign dec_target_pc = dc0.bctrl.is_jal ? dc0.jtarget : dc0.btarget;
-    assign dec_redir_pc = dec_says_take | dc0.bctrl.is_jal ? dec_target_pc : dec_pc + 4;
+    logic taken_f0;
 
 
-    // exe redirect
-    logic exe_says_take;
-    logic exe_redir;
-    assign exe_redir = ((aec0.taken != exe_says_take) & aec0.ctrl.brfn[2:1] != 2'b11) | 
-                       (aec0.ctrl.brfn == brfnt::jalr & !aec0.taken);
-    logic [1:0] exe_btype;
-    rv32i_word exe_pc;
-    assign exe_pc = aec0.pc;
-    rv32i_word exe_target_pc;
-    rv32i_word exe_redir_pc;
-    assign exe_target_pc = aec0.alu_out;
-    assign exe_redir_pc = exe_says_take ? exe_target_pc : exe_pc + 4;
+    //-- fetch1 --//
+    rv32i_word pc_f1;
+
+    logic taken_f1;
+
+    logic [1:0] bht_resp_f1;
+    rv32i_word nxl_target; // (next line or pc+4)
+    rv32i_word btb_target
+    rv32i_word ras_target; // technically available in f0
+
+    rv32i_word instr_f1;
+
+
+    //-- decode --//
+    rv32i_word pc_dc;
+
+    logic taken_dc;
+
+    logic [1:0] bht_resp_dc;
+
+    rv32i_word instr_dc;
+
+    rv32i_word dec_target;
+
+    queue_item_t ctrl_sigs_dc;
+
+
+    //-- rrd/issue --//
+    rv32i_word pc_is;
+
+    queue_item_t ctrl_sigs_is;
+
+    alufnt::alu_func_t alufn_is;
+    rv32i_word alu_opr1_is;
+    rv32i_word alu_opr2_is;
+
+    memfnt::mem_func_t memfn_is;
+    rv32i_word lsu_opr1_is;
+    rv32i_word lsu_opr2_is;
+
+    brfnt::br_func_t brfn_is;
+    rv32i_word jmp_opr1_is;
+    rv32i_word jmp_opr2_is;
+    rv32i_word jmp_pc_ofst_is;
+
+
+    //-- execute --//
+    rv32i_word pc_ex;
+
+    logic alu_has_rd_ex;
+    logic [4:0] alu_rd_ex;
     
-    // fetch
-    rv32i_word fetch_pc;
-    assign pc = fetch_pc;
-    rv32i_word npc;
-    rv32i_word btb_target_pc;
-    rv32i_word nextline_pc;
-    logic btb_hit;
+    logic mem_has_rd_ex;
+    logic [4:0] mem_rd_ex;
+    
+    logic jmp_has_rd_ex;
+    logic [4:0] jmp_rd_ex;
+    
+    alufnt::alu_func_t alufn_ex;
+    rv32i_word alu_opr1_ex;
+    rv32i_word alu_opr2_ex;
 
-    assign nextline_pc = imem_read ? fetch_pc + 4 : fetch_pc;
+    memfnt::mem_func_t memfn_ex;
+    rv32i_word lsu_opr1_ex;
+    rv32i_word lsu_opr2_ex;
 
+    brfnt::br_func_t brfn_ex;
+    rv32i_word jmp_opr1_ex;
+    rv32i_word jmp_opr2_ex;
+    rv32i_word jmp_pc_ofst_ex;
+
+    rv32i_word alu_res_ex;
+
+    rv32i_word mem_res_ex;
+
+    rv32i_word jmp_res_ex;
+
+
+    //-- writeback --//
+    logic alu_has_rd_wb;
+    logic [4:0] alu_rd_wb;
+    
+    logic mem_has_rd_wb;
+    logic [4:0] mem_rd_wb;
+    
+    logic jmp_has_rd_wb;
+    logic [4:0] jmp_rd_wb;
+    
+    rv32i_word alu_res_wb;
+
+    rv32i_word mem_res_wb;
+
+    rv32i_word jmp_res_wb;
+
+
+
+
+    //------------//
+    //--- impl ---//
+    //------------//
+
+    logic stall;
+
+    //-- fetch0 --//
+    assign imem_read = ~stall;
+
+    // TODO: decide based on:
+    // BHT entry (4 state)
+    // BTB valid? ret? jmp?
+    // decoded jal
+    // branch unit resolution
     always_comb begin
-        unique casez ({btb_hit, dec_redir, exe_redir})
-            3'b??1  : npc = exe_target_pc;
-            3'b?10  : npc = dec_redir_pc; 
-            3'b100  : npc = btb_target_pc;
-            default : npc = nextline_pc;
+        unique case (0)
+            1       : {pc_f0, taken_f0} = {btb_target, 1'b1};
+            2       : {pc_f0, taken_f0} = {ras_target, 1'b1};
+            // TODO: for decode redirect 
+            // need to kill anything in fetch1
+            3       : {pc_f0, taken_f0} = {dec_target, 1'b1};
+            // TODO: for branch resolution redirect, 
+            // kill everything not in a functional unit
+            4       : {pc_f0, taken_f0} = {bru_target, 1'b1};
+            default : {pc_f0, taken_f0} = {nxl_target, 1'b0};
         endcase
     end
 
-    // TODO: only load for jal, jalr, and confident br
-    dummyBTB BTB (
+    
+
+    //-- fetch0 -> fetch1 --//
+
+    rg #(
+        .rst_val('X)
+    )
+    fetch1_pc_reg (
         .clk,
         .rst,
-        .new_PC(exe_redir ? exe_pc : dec_pc),
-        .new_target(exe_redir ? exe_redir_pc : dec_redir_pc),
-        // TODO: fix, definitely not right
-        .new_btype(exe_redir ? exe_btype : {dc0.bctrl.is_br, dc0.bctrl.is_jal}),
-        .load(exe_redir | dec_redir),
-
-        .fetch_PC(fetch_pc),
-        .target(btb_target_pc),
-        .btype(),
-        .hit(btb_hit)
+        .ld(~stall), // TODO: maybe should be imem_resp
+        .din(pc_f0),
+        .dout(pc_f1)
     );
-    
+
+    rg #(
+        .size(1)
+    )
+    fetch1_taken_reg (
+        .clk,
+        .rst,
+        .ld(~stall),
+        .din(taken_f0),
+        .dout(taken_f1)
+    );
+
+    //-- fetch1 --//
+
     rg #(
         .rst_val(32'h00000060)
     )
-    fetch_pc_reg (
+    next_line_reg (
         .clk,
         .rst,
-        .ld(1'b1), // TODO: maybe should be imem_resp
-        .din(npc),
-        .dout(fetch_pc)
+        .ld(~stall), // TODO: maybe should be imem_resp or stall
+        .din(pc_f0 + 4),
+        .dout(nxl_target)
     );
-    
 
-    // fetch -> decode
-    rg dec_pc_reg (
-        .clk,
-        .rst,
-        .ld(1'b1),
-        .din(fetch_pc),
-        .dout(dec_pc)
-    );
-    rg dec_instr_reg0 (
-        .clk,
-        .rst,
-        .ld(1'b1),
-        .din(instr),
-        .dout(dc0.instr)
-    );
-    rg dec_taken_reg0 (
-        .clk,
-        .rst,
-        .ld(1'b1),
-        .din(btb_hit),
-        .dout(dc0.taken)
-    );
-    assign dc0.under_shadow = 1'b0; // TODO: SFO
-    
+    always_ff @(posedge clk) begin
+        bht_resp_f1 <= 2'b01;
+        btb_target <= '0; // TODO: output from BTB
+        ras_target <= '0; // TODO: output from RAS
+    end
+
+    // dummy 2 cycle pipelined icache
+    assign pc = pc_f1;
+    assign instr_f1 = instr;
 
 
-    // decode
+    //-- fetch1 -> decode --//
+
+    rg #(
+        .rst_val('X)
+    )
+    decode_pc_reg (
+        .clk,
+        .rst,
+        .ld(~stall),
+        .din(pc_f1),
+        .dout(pc_dc)
+    );
+
+    rg #(
+        .size(1)
+    )
+    decode_taken_reg (
+        .clk,
+        .rst,
+        .ld(~stall),
+        .din(taken_f1),
+        .dout(taken_dc)
+    );
+
+    rg #(
+        .size(2)
+    )
+    decode_bht_resp_reg (
+        .clk,
+        .rst,
+        .ld(~stall),
+        .din(bht_resp_f1),
+        .dout(bht_resp_dc)
+    );
+
+    rg #(
+        .rst_val('X) // TODO: make a nop
+    )
+    decode_pc_reg (
+        .clk,
+        .rst,
+        .ld(~stall),
+        .din(instr_f1),
+        .dout(instr_dc)
+    );
+
+    //-- decode --//
+
+    DecodeControl dc0();
+
+    assign dc0.instr = instr_dc;
+    assign dc0.taken = taken_dc;
+    // TODO: implement SFO
+    assign dc0.under_shadow = 1'b0;
 
     decode_unit dec0 (
         .dc(dc0)
     );
 
     branch_target_calc btc0 (
-        .pc(dec_pc),
+        .pc(pc_dc),
         .dc(dc0)
     );
 
-    // 2 stage. starts in fetch. uses bram
-    // result arrives in decode.
-    dummyBHT bht0 (
-        .clk,
-        .rst,
-        .pc(fetch_pc),
-        .should_take(dec_says_take),
-        .confidence(dec_confident)
-    );
-
-    // dispatch 
-    // trying to shove in same cycle as decode
-    logic aluqpush,  memqpush;
-    logic aluqpop,   memqpop;
-    logic aluqempty, memqempty;
-    logic aluqfull,  memqfull;
-    queue_item_t aluqdin,  memqdin;
-    queue_item_t aluqdout, memqdout;
-
-    queue_item_t dec_out;
-
-    assign dec_out = '{
+    assign ctrl_sigs_dc = '{
         dc0.ctrl.uopcode, 
         dc0.ctrl.exu_type,
         dc0.ctrl.has_rd, 
@@ -193,308 +300,69 @@ module one_hz_cpu (
         dc0.ctrl.imm_type,
         dc0.packed_imm,
         dc0.taken,
-        dc0.shadowed,
-        dec_pc
+        dc0.shadowed
     };
 
-    assign aluqdin = dec_out;
-    assign memqdin = dec_out;
+    logic is_nop_dc;
+    assign is_nop_dc = dc0.ctrl.exu_type == exut::alu && dc0.rd = 5'b0;
 
-    assign imem_read = 1'b1;//!(aluqfull | memqfull);
-    // not checking if full, since it we need more slots so it doesn't stall
-    assign aluqpush = /*!aluqfull & */dc0.ctrl.iq_type == iqt::alu;
-    assign memqpush = /*!memqfull & */dc0.ctrl.iq_type == iqt::mem;
+    logic needs_pc_dc;
+    assign needs_pc_dc = dc0.ctrl.exu_type == exut::jmp;
 
-    dummy_queue #(
-        $bits(queue_item_t)
-    )
-    aluq0 (
+    //-- decode --(queue)-> rrd/issue --//
+
+    logic push_iq0, pop_iq0, empty_iq0, full_iq0;
+    logic push_pq0, pop_pq0, empty_pq0, full_pq0;
+
+    assign stall = full_iq0 | full_pq0;
+
+    assign push_iq0 = ~stall & ~is_nop_dc;
+    assign push_pq0 = ~stall & needs_pc_dc;
+
+    instr_queue iq0 (
         .clk,
         .rst,
-        .push_front(aluqpush),
-        .pop_back(aluqpop),
-        .empty(aluqempty),
-        .full(aluqfull),
-        .din(aluqdin),
-        .dout(aluqdout)
+        .push(push_iq0),
+        .pop(pop_iq0),
+        .empty(empty_iq0),
+        .full(full_iq0),
+        .din(ctrl_sigs_dc),
+        .dout(ctrl_sigs_is)
     );
 
-    logic aluqready;
-
-    dummy_issue_check aluq_issue_check0 (
-        .exu_type(aluqdout.exu_type),
-        .has_rd(aluqdout.has_rd),
-        .has_rs1(aluqdout.has_rs1),
-        .has_rs2(aluqdout.has_rs2),
-        .rd(aluqdout.rd),
-        .rs1(aluqdout.rs1),
-        .rs2(aluqdout.rs2),
-        .ready(aluqready)
-    );
-    
-    dummy_queue #(
-        $bits(queue_item_t)
-    )
-    memq0 (
+    pc_queue pc0 (
         .clk,
         .rst,
-        .push_front(memqpush),
-        .pop_back(memqpop),
-        .empty(memqempty),
-        .full(memqfull),
-        .din(memqdin),
-        .dout(memqdout)
-    );
-
-    logic memqready;
-
-    dummy_issue_check memq_issue_check0 (
-        .exu_type(memqdout.exu_type),
-        .has_rd(memqdout.has_rd),
-        .has_rs1(memqdout.has_rs1),
-        .has_rs2(memqdout.has_rs2),
-        .rd(memqdout.rd),
-        .rs1(memqdout.rs1),
-        .rs2(memqdout.rs2),
-        .ready(memqready)
-    );
-
-    // rrd
-	 
-    assign aluqpop = !aluqempty & aluqready;
-    
-    always_comb begin
-        if (aluqempty || !aluqready) begin
-            arc0.uopcode <= uopc::add;
-            arc0.exu_type <= exut::alu;
-            arc0.has_rd <= '0;
-            arc0.has_rs1 <= '0;
-            arc0.has_rs2 <= '0;
-            arc0.rd <= '0;
-            arc0.rs1 <= '0;
-            arc0.rs2 <= '0;
-            arc0.imm_type <= immt::r;
-            arc0.packed_imm <= '0;
-            arc0.taken <= '0;
-            arc0.shadowed <= '0;
-            arc0.pc <= '0;
-        end
-        else begin
-            arc0.uopcode <= aluqdout.uopcode;
-            arc0.exu_type <= aluqdout.exu_type;
-            arc0.has_rd <= aluqdout.has_rd;
-            arc0.has_rs1 <= aluqdout.has_rs1;
-            arc0.has_rs2 <= aluqdout.has_rs2;
-            arc0.rd <= aluqdout.rd;
-            arc0.rs1 <= aluqdout.rs1;
-            arc0.rs2 <= aluqdout.rs2;
-            arc0.imm_type <= aluqdout.imm_type;
-            arc0.packed_imm <= aluqdout.packed_imm;
-            arc0.taken <= aluqdout.taken;
-            arc0.shadowed <= aluqdout.shadowed;
-            arc0.pc <= aluqdout.pc;
-        end
-    end
-
-    exe_decode exe_dec0 (.ec(arc0));
-
-    alu_imm_dec alu_imm_dec0 (
-        .packed_imm(arc0.packed_imm),
-        .imm_type(arc0.imm_type),
-        .imm(arc0.imm)
-    );
-
-    
-
-    // rrd -> exec
-    always_ff @(posedge clk) begin
-        aec0.uopcode <= arc0.uopcode;
-        aec0.exu_type <= arc0.exu_type;
-        aec0.has_rd <= arc0.has_rd;
-        aec0.has_rs1 <= arc0.has_rs1;
-        aec0.has_rs2 <= arc0.has_rs2;
-        aec0.rd <= arc0.rd;
-        aec0.rs1 <= arc0.rs1;
-        aec0.rs2 <= arc0.rs2;
-        aec0.taken <= arc0.taken;
-        aec0.shadowed <= arc0.shadowed;
-        aec0.pc <= arc0.pc;
-        aec0.ctrl <= arc0.ctrl;
-        aec0.imm <= arc0.imm;
-        aec0.reg_a <= arc0.reg_a;
-        aec0.reg_b <= arc0.reg_b;
-    end
-
-    // exec
-    rv32i_word operand1;
-    rv32i_word operand2;
-    
-    always_comb begin
-        unique case (aec0.ctrl.opr1)
-            opr1t::rs1  : operand1 = aec0.reg_a;
-            opr1t::pc   : operand1 = aec0.pc;
-            opr1t::zero : operand1 = '0;
-        endcase
-    end
-
-    always_comb begin
-        unique case (aec0.ctrl.opr2)
-            opr2t::rs2  : operand2 = aec0.reg_b;
-            opr2t::imm  : operand2 = aec0.imm;
-        endcase
-    end
-
-
-    //
-    alu alu0 (
-        .fn(aec0.ctrl.alufn),
-        .in1(operand1),
-        .in2(operand2),
-        .out(aec0.alu_out)
-    );
-
-    logic eq;
-    logic lt;
-    logic ltu;
-    assign eq  = aec0.reg_a == aec0.reg_b;
-    assign lt  = $signed(aec0.reg_a) <  $signed(aec0.reg_b);
-    assign ltu = aec0.reg_a <  aec0.reg_b;
-
-    always_comb begin
-        unique case (aec0.ctrl.brfn)
-            brfnt::beq  : exe_says_take = eq;
-            brfnt::bne  : exe_says_take = !eq;
-            brfnt::blt  : exe_says_take = lt;
-            brfnt::bge  : exe_says_take = !lt;
-            brfnt::bltu : exe_says_take = ltu;
-            brfnt::bgeu : exe_says_take = !ltu;
-            brfnt::jalr : exe_says_take = 1'b1;
-            default     : exe_says_take = 1'bX;
-        endcase
-    end
-
-
-    // exec -> wb
-    always_ff @(posedge clk) begin
-        awc0.alu_out <= aec0.alu_out;
-        awc0.has_rd <= aec0.has_rd;
-        awc0.has_rs1 <= aec0.has_rs1;
-        awc0.has_rs2 <= aec0.has_rs2;
-        awc0.rd <= aec0.rd;
-        awc0.rs1 <= aec0.rs1;
-        awc0.rs2 <= aec0.rs2;
-        awc0.shadowed <= aec0.shadowed;
-    end
-
-    // wb
-    // TODO: set registers to unused
-    
-
-
-
-
-    // -- mem stuff oh god why -- //
-
-
-    // rrd
-	 
-	 assign memqpop = !memqempty & memqready;
-    
-    always_comb begin
-        if (memqempty || !memqready) begin
-            mrc0.uopcode <= uopc::add;
-            mrc0.exu_type <= exut::mem;
-            mrc0.has_rd <= '0;
-            mrc0.has_rs1 <= '0;
-            mrc0.has_rs2 <= '0;
-            mrc0.rd <= '0;
-            mrc0.rs1 <= '0;
-            mrc0.rs2 <= '0;
-            mrc0.packed_imm <= '0;
-        end
-        else begin
-            mrc0.uopcode <= memqdout.uopcode;
-            mrc0.exu_type <= memqdout.exu_type;
-            mrc0.has_rd <= memqdout.has_rd;
-            mrc0.has_rs1 <= memqdout.has_rs1;
-            mrc0.has_rs2 <= memqdout.has_rs2;
-            mrc0.rd <= memqdout.rd;
-            mrc0.rs1 <= memqdout.rs1;
-            mrc0.rs2 <= memqdout.rs2;
-            mrc0.packed_imm <= memqdout.packed_imm;
-        end
-    end
-
-    mem_decode mem_dec (.mc(mrc0));
-
-    mem_imm_dec mem_imm_dec0 (
-        .packed_imm(mrc0.packed_imm),
-        .imm(mrc0.imm)
+        .push(push_pq0),
+        .pop(pop_pq0),
+        .empty(empty_pq0),
+        .full(full_pq0),
+        .din(pc_dc),
+        .dout(pc_is)
     );
 
 
+    //-- rrd/issue --//
 
-    // rrd -> agu
-    always_ff @(posedge clk) begin
-        mmc0.uopcode  <= mrc0.uopcode;
-        mmc0.exu_type <= mrc0.exu_type;
-        mmc0.has_rd   <= mrc0.has_rd;
-        mmc0.has_rs1  <= mrc0.has_rs1;
-        mmc0.has_rs2  <= mrc0.has_rs2;
-        mmc0.rd       <= mrc0.rd;
-        mmc0.rs1      <= mrc0.rs1;
-        mmc0.rs2      <= mrc0.rs2;
-        mmc0.ctrl     <= mrc0.ctrl;
-        mmc0.imm      <= mrc0.imm;
-        mmc0.reg_a    <= mrc0.reg_a;
-        mmc0.reg_b    <= mrc0.reg_b;
-    end
+    logic can_issue;
 
-    // agu + mem
-    // TODO: timing: agu and mem should be split into 2 stages
+    scoreboard sb0 (
+        .exu_type(ctrl_sigs_is.exu_type),
+        .has_rd(ctrl_sigs_is.has_rd),
+        .has_rs1(ctrl_sigs_is.has_rs1),
+        .has_rs2(ctrl_sigs_is.has_rs2),
+        .rd(ctrl_sigs_is.rd),
+        .rs1(ctrl_sigs_is.rs1),
+        .rs2(ctrl_sigs_is.rs2),
+        .ready(can_issue)
+    );
 
-    assign mmc0.addr = mmc0.reg_a + mmc0.imm;
+    logic needs_pc_is;
+    assign needs_pc_is = ctrl_sigs_is.exu_type == exut::jmp;
 
-    mbe_gen mbe_gen0 ( .mc(mmc0) );
-
-    assign mem_byte_enable = mmc0.mbe;
-    assign mem_address = mmc0.addr;
-    assign mem_wdata = mmc0.reg_b;
-
-    logic sign_byte;
-    logic zero_byte;
-    always_comb begin
-        unique case ({mmc0.ctrl.memsz, mmc0.ctrl.ldext})
-            {memszt::b, ldextt::s} : mmc0.mem_out = {{24{mem_rdata[07]}}, mem_rdata[07:0]};
-            {memszt::b, ldextt::z} : mmc0.mem_out = { 24'b0,              mem_rdata[07:0]};
-            {memszt::h, ldextt::s} : mmc0.mem_out = {{16{mem_rdata[15]}}, mem_rdata[15:0]};
-            {memszt::h, ldextt::z} : mmc0.mem_out = { 16'b0,              mem_rdata[15:0]};
-            default                : mmc0.mem_out =                       mem_rdata;
-        endcase
-    end
-
-    assign mem_read  = mmc0.ctrl.memfn[1];
-    assign mem_write = mmc0.ctrl.memfn[0];
-
-    // TODO: if no resp, unit busy
-
-
-    //
-
-
-    // mem -> wb
-    always_ff @(posedge clk) begin
-        mwc0.mem_out <= mmc0.mem_out;
-        mwc0.has_rd <= mmc0.has_rd;
-        mwc0.has_rs1 <= mmc0.has_rs1;
-        mwc0.has_rs2 <= mmc0.has_rs2;
-        mwc0.rd <= mmc0.rd;
-        mwc0.rs1 <= mmc0.rs1;
-        mwc0.rs2 <= mmc0.rs2;
-    end
-
-    // wb
-    // TODO: set registers to unused
+    assign pop_iq0 = ~empty_iq0 & can_issue;
+    // assuming will not be empty if needs pc
+    assign pop_pq0 = pop_iq0 & needs_pc_is;
 
 
 
@@ -503,8 +371,35 @@ module one_hz_cpu (
 endmodule : one_hz_cpu
 
 
+module instr_queue (
+    input logic clk,
+    input logic rst,
+    input logic push,
+    input logic pop,
+    output logic empty,
+    output logic full,
+    input queue_item_t din,
+    output queue_item_t dout
+);
 
-module dummy_issue_check (
+    // TODO: create one in quartus
+    fifo51x8 (
+        .clock(clk),
+        .data(din),
+        .rdreq(pop),
+        .sclr(rst),
+        .wrreq(push),
+        .empty(empty),
+        .full(full),
+        .q(dout)
+    );
+
+endmodule : instr_queue
+
+
+
+
+module scoreboard (
     input exut::exe_unit_type_t exu_type,
     input logic has_rd,
     input logic has_rs1,
@@ -517,7 +412,7 @@ module dummy_issue_check (
 
     assign ready = 1'b1;
 
-endmodule : dummy_issue_check
+endmodule : scoreboard
 
 
 module dummy_queue #(
