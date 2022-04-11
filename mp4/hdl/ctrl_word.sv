@@ -55,6 +55,14 @@ typedef enum logic [1:0] {
 } mem_func_t;
 endpackage
 
+package jmpt;
+typedef enum logic [1:0] {
+    nope = 2'b00,
+    cond = 2'b01,
+    jump = 2'b10
+} jump_type_t;
+endpackage
+
 package memszt;
 typedef enum logic [1:0] {
     b,
@@ -81,13 +89,11 @@ typedef enum logic [1:0] {
 endpackage
 
 package immt;
-typedef enum logic [2:0] {
-    i,
+typedef enum logic [1:0] {
+    i, // includes s
     b,
     u,
-    j,
-    s,
-    r
+    j
 } imm_type_t;
 endpackage
 
@@ -222,6 +228,7 @@ typedef struct {
     logic has_rd;
     logic has_rs1;
     logic has_rs2;
+    logic is_simm;
     // for decoding imm in parallel with rrd
     immt::imm_type_t imm_type;
 } ctrl_sigs_t;
@@ -261,7 +268,7 @@ interface ExecuteControl;
     // (if we implement it)
     logic shadowed;
     rv32i_word pc;
-    backend_ctrl_sigs_t ctrl;
+    alu_ctrl_sigs_t ctrl;
     // decompressed imm
     rv32i_word reg_a, reg_b;
     rv32i_word imm;
@@ -273,10 +280,12 @@ endinterface
 
 typedef struct {
     alufnt::alu_func_t alufn;
-    opr1t::operand1_t opr1;
     opr2t::operand2_t opr2;
+} alu_ctrl_sigs_t;
+
+typedef struct {
     brfnt::br_func_t brfn;
-} backend_ctrl_sigs_t;
+} bru_ctrl_sigs_t;
 
 typedef struct packed {
     uopc::micro_opcode_t uopcode;   //6
@@ -287,7 +296,7 @@ typedef struct packed {
     logic [4:0] rd; //5
     logic [4:0] rs1;//5
     logic [4:0] rs2;//5
-    immt::imm_type_t imm_type; //3
+    immt::imm_type_t imm_type; //2
     logic [19:0] packed_imm;//20
     logic taken;//1
     logic shadowed;//1
@@ -309,7 +318,7 @@ interface MemoryControl;
 
     // somewhat compressed imm
     logic [19:0] packed_imm;
-    memory_ctrl_sigs_t ctrl;
+    mem_ctrl_sigs_t ctrl;
     rv32i_word reg_a, reg_b;
     // decompressed imm
     rv32i_word imm;
@@ -320,11 +329,11 @@ interface MemoryControl;
     // TODO: maybe define some modports so everything's not inout
 endinterface
 
-typedef struct {
+typedef struct packed {
     memfnt::mem_func_t memfn;
     memszt::mem_size_t memsz;
     ldextt::load_ext_t ldext;
-} memory_ctrl_sigs_t;
+} mem_ctrl_sigs_t;
 
 
 // first 2 bits of opcode are don't cares
