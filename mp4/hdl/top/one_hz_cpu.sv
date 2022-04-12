@@ -65,6 +65,7 @@ module one_hz_cpu (
     logic taken_f1;
 
     logic [1:0] bht_resp_f1;
+    btb_resp_t btb_resp_f1;
     rv32i_word nxl_target; // (next line or pc+4)
     rv32i_word btb_target;
     rv32i_word ras_target; // technically available in f0
@@ -81,6 +82,7 @@ module one_hz_cpu (
 
     rv32i_word instr_dc;
 
+    logic dec_redir;
     rv32i_word dec_target;
 
     queue_item_t ctrl_sigs_dc;
@@ -140,8 +142,8 @@ module one_hz_cpu (
     rv32i_word bru_add1_ex;
     rv32i_word bru_add2_ex;
     logic bru_taken_ex;
-    logic bru_redir;
 
+    logic bru_redir;
     rv32i_word bru_res_ex;
     rv32i_word bru_target;
 
@@ -177,16 +179,19 @@ module one_hz_cpu (
     // decoded jal
     // branch unit resolution
     always_comb begin
-        unique case (0)
-            1       : {pc_f0, taken_f0} = {btb_target, 1'b1};
-            2       : {pc_f0, taken_f0} = {ras_target, 1'b1};
-            // TODO: for decode redirect 
-            // need to kill anything in fetch1
-            3       : {pc_f0, taken_f0} = {dec_target, 1'b1};
+        unique casez ({bru_redir, dec_redir, &bht_resp_dc, btb_resp_f1.valid, btb_resp_f1.is_ret, btb_resp_f1.is_jmp, &bht_resp_f1})
             // TODO: for branch resolution redirect, 
             // kill everything not in a functional unit
-            4       : {pc_f0, taken_f0} = {bru_target, 1'b1};
-            default : {pc_f0, taken_f0} = {nxl_target, 1'b0};
+            7'b1?????? : {pc_f0, taken_f0} = {bru_target, 1'b0};
+            // TODO: for decode redirect 
+            // need to kill anything in fetch1
+            // need to put taken tag in correct uopc
+            7'b01????? : {pc_f0, taken_f0} = {dec_target, 1'b1};
+            7'b001???? : {pc_f0, taken_f0} = {dec_target, 1'b1};
+            7'b00011?? : {pc_f0, taken_f0} = {ras_target, 1'b1};
+            7'b000101? : {pc_f0, taken_f0} = {btb_target, 1'b1};
+            7'b0001001 : {pc_f0, taken_f0} = {btb_target, 1'b1};
+            default    : {pc_f0, taken_f0} = {nxl_target, 1'b0};
         endcase
     end
 
@@ -234,6 +239,7 @@ module one_hz_cpu (
 
     always_ff @(posedge clk) begin
         bht_resp_f1 <= 2'b01;
+        btb_resp_f1 <= '{1'b0, 1'b0, 1'b0, 1'b0};
         btb_target <= '0; // TODO: output from BTB
         ras_target <= '0; // TODO: output from RAS
     end
@@ -307,6 +313,12 @@ module one_hz_cpu (
         .dc(dc0)
     );
 
+    assign dec_target = dc0.bctrl.is_jal ? dc0.jtarget : dc0.btarget;
+    logic dec_says_take;
+    assign dec_says_take = dc0.bctrl.is_jal;
+    assign dec_redir = dec_says_take & ~taken_dc;
+
+
     assign ctrl_sigs_dc = '{
         dc0.ctrl.uopcode, 
         dc0.ctrl.exu_type,
@@ -337,6 +349,9 @@ module one_hz_cpu (
 
     assign push_iq0 = ~stall & ~is_nop_dc;
     assign push_pq0 = push_iq0 & needs_pc_dc;
+    
+    queue_item_t ctrl_sigs_iq;
+    rv32i_word   pc_pq;
 
     instr_queue iq0 (
         .clk,
@@ -346,7 +361,7 @@ module one_hz_cpu (
         .empty(empty_iq0),
         .full(full_iq0),
         .din(ctrl_sigs_dc),
-        .dout(ctrl_sigs_is)
+        .dout(ctrl_sigs_iq)
     );
 
     pc_queue pc0 (
@@ -362,6 +377,9 @@ module one_hz_cpu (
 
 
     //-- rrd/issue --//
+    queue_item_t nop_sigs;
+    assign nop_sigs = '{uopc::addi, exut::alu, 1'b0, 1'b0, 1'b0, 5'b0, 5'b0, 5'b0, immt::i, 20'b0, 1'b0, 1'b0};
+    assign ctrl_sigs_is = empty_iq0 ? nop_sigs : ctrl_sigs_iq;
 
     logic can_issue;
 
@@ -440,6 +458,9 @@ module one_hz_cpu (
     // bru setup
     logic is_auipc;
     assign is_auipc = ctrl_sigs_is.uopcode == uopc::auipc;
+    logic is_br;
+    // Assuming only branches will have b type imm
+    assign is_br = ctrl_sigs_is.imm_type == immt::b;
 
     bru_decode bru_dec0 (
         .uopcode(ctrl_sigs_is.uopcode),
@@ -447,7 +468,7 @@ module one_hz_cpu (
     );
     assign bru_cmp1_is = rs1_out;
     assign bru_cmp2_is = rs2_out;
-    assign bru_ofst_is = is_auipc ? imm_out : 4;
+    assign bru_ofst_is = is_auipc | is_br ? imm_out : 4;
     assign bru_add1_is = rs1_out;
     assign bru_add2_is = imm_out;
 
@@ -731,7 +752,7 @@ module one_hz_cpu (
         .clk,
         .rst,
         .ld(1'b1),
-        .din(lsu_has_rd_ex),
+        .din(mem_has_rd_ex),
         .dout(lsu_has_rd_wb)
     );
     rg #(

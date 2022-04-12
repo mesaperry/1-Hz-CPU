@@ -233,6 +233,14 @@ typedef struct packed {
     ldextt::load_ext_t ldext;
 } mem_ctrl_sigs_t;
 
+typedef struct packed {
+    logic valid;
+    logic is_ret;
+    logic is_jmp;
+    logic bidx;
+} btb_resp_t;
+
+
 endpackage : ctrl_sigs
 
 interface DecodeControl;
