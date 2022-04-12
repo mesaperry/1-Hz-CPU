@@ -1,37 +1,7 @@
 //`include "../../hvl/tb_itf.sv"
 import rv32i_types::*;
 import ctrl_sigs::*;
-/*
-typedef struct packed {//50
-    uopc::micro_opcode_t uopcode;
-    exut::exe_unit_type_t exu_type;
-    logic has_rd;
-    logic has_rs1;
-    logic has_rs2;
-    logic [4:0] rd;
-    logic [4:0] rs1;
-    logic [4:0] rs2;
-    immt::imm_type_t imm_type;
-    logic [19:0] packed_imm;
-    logic taken;
-    logic shadowed;
-} queue_item_t;
-typedef struct packed {
-    memfnt::mem_func_t memfn;
-    memszt::mem_size_t memsz;
-    ldextt::load_ext_t ldext;
-} mem_ctrl_sigs_t;
-typedef struct {
-    alufnt::alu_func_t alufn;
-    opr2t::operand2_t opr2;
-} alu_ctrl_sigs_t;
-*/
 
-// TODO: actually important! jal and jalr
-// need to store pc+4. jalr implementation may work
-// already, but not tested. would prefer to fix it
-// so it doesn't need another adder
-// TODO: detect ret and call
 
 module one_hz_cpu (
     input clk,
@@ -297,6 +267,7 @@ module one_hz_cpu (
 
     //-- decode --//
 
+    // TODO: detect ret and call
     DecodeControl dc0();
 
     assign dc0.instr = instr_dc;
@@ -943,10 +914,6 @@ module one_hz_cpu (
 
 
 
-
-
-
-
 endmodule : one_hz_cpu
 
 module pc_queue (
@@ -1018,48 +985,6 @@ module scoreboard (
 
 endmodule : scoreboard
 
-
-module dummy_queue #(
-    parameter size = 32
-)
-(
-    input clk,
-    input rst,
-    input   logic            push_front,
-    input   logic            pop_back,
-    output  logic            empty,
-    output  logic            full,
-    input   logic [size-1:0] din,
-    output  logic [size-1:0] dout
-);
-    
-    always_ff @(posedge clk) begin
-        if (rst) begin
-            empty <= 1'b1;
-            full <= 1'b0;
-        end
-        else if (push_front) begin
-            empty <= 1'b0;
-            full <= 1'b1;
-        end
-        else if (pop_back) begin // and not push_front
-            empty <= 1'b1;
-            full <= 1'b0;
-        end
-    end
-
-    rg #(
-        size
-    ) 
-    q (
-        .clk,
-        .rst(rst | (pop_back & ~push_front)),
-        .ld(push_front),
-        .din,
-        .dout
-    );
-
-endmodule : dummy_queue
 
 module rg #(
     parameter size = 32,
