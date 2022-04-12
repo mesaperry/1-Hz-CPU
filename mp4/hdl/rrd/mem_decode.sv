@@ -1,10 +1,5 @@
 import rv32i_types::*;
-
-typedef struct packed {
-    memfnt::mem_func_t memfn;
-    memszt::mem_size_t memsz;
-    ldextt::load_ext_t ldext;
-} mem_ctrl_sigs_t;
+import ctrl_sigs::*;
 
 module mem_decode (
     input uopc::micro_opcode_t uopcode,

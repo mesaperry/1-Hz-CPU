@@ -54,24 +54,11 @@ set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_RO
 set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
 set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 200 LFPM AIRFLOW"
 set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
-set_global_assignment -name SDC_FILE mp4.out.sdc
-set_global_assignment -name SYSTEMVERILOG_FILE hdl/rv32i_mux_types.sv
-set_global_assignment -name SYSTEMVERILOG_FILE hdl/rv32i_types.sv
-set_global_assignment -name SYSTEMVERILOG_FILE hdl/mp4.sv
-set_global_assignment -name SYSTEMVERILOG_FILE hdl/ctrl_word.sv
-set_global_assignment -name SYSTEMVERILOG_FILE hdl/top/one_hz_cpu.sv
-set_global_assignment -name SYSTEMVERILOG_FILE hdl/rrd/regfile.sv
-set_global_assignment -name SYSTEMVERILOG_FILE hdl/rrd/mem_decode.sv
-set_global_assignment -name SYSTEMVERILOG_FILE hdl/rrd/exe_decode.sv
-set_global_assignment -name SYSTEMVERILOG_FILE hdl/exe/alu.sv
-set_global_assignment -name SYSTEMVERILOG_FILE hdl/decode/decode.sv
-set_global_assignment -name SYSTEMVERILOG_FILE hdl/branch_target_buffer/branch_target_buffer.sv
 set_global_assignment -name EDA_TEST_BENCH_ENABLE_STATUS TEST_BENCH_MODE -section_id eda_simulation
 set_global_assignment -name EDA_NATIVELINK_SIMULATION_TEST_BENCH mp4_tb -section_id eda_simulation
 set_global_assignment -name EDA_TEST_BENCH_NAME mp4_tb -section_id eda_simulation
 set_global_assignment -name EDA_DESIGN_INSTANCE_NAME NA -section_id mp4_tb
 set_global_assignment -name EDA_TEST_BENCH_MODULE_NAME mp4_tb -section_id mp4_tb
-set_global_assignment -name QIP_FILE queue.qip
 set_global_assignment -name EDA_NATIVELINK_SIMULATION_SETUP_SCRIPT simulation/modelsim/wave.do -section_id eda_simulation
 set_global_assignment -name EDA_TEST_BENCH_RUN_SIM_FOR "1500 ns" -section_id mp4_tb
 set_global_assignment -name EDA_TEST_BENCH_FILE hvl/top.sv -section_id mp4_tb
@@ -82,6 +69,19 @@ set_global_assignment -name EDA_TEST_BENCH_FILE hvl/rvfimon.v -section_id mp4_tb
 set_global_assignment -name EDA_TEST_BENCH_FILE hvl/shadow_memory.sv -section_id mp4_tb
 set_global_assignment -name EDA_TEST_BENCH_FILE hvl/source_tb.sv -section_id mp4_tb
 set_global_assignment -name EDA_TEST_BENCH_FILE hvl/tb_itf.sv -section_id mp4_tb
+set_global_assignment -name SYSTEMVERILOG_FILE hdl/ctrl_word.sv
+set_global_assignment -name SDC_FILE mp4.out.sdc
+set_global_assignment -name SYSTEMVERILOG_FILE hdl/rv32i_mux_types.sv
+set_global_assignment -name SYSTEMVERILOG_FILE hdl/rv32i_types.sv
+set_global_assignment -name SYSTEMVERILOG_FILE hdl/mp4.sv
+set_global_assignment -name SYSTEMVERILOG_FILE hdl/top/one_hz_cpu.sv
+set_global_assignment -name SYSTEMVERILOG_FILE hdl/rrd/regfile.sv
+set_global_assignment -name SYSTEMVERILOG_FILE hdl/rrd/mem_decode.sv
+set_global_assignment -name SYSTEMVERILOG_FILE hdl/rrd/exe_decode.sv
+set_global_assignment -name SYSTEMVERILOG_FILE hdl/exe/alu.sv
+set_global_assignment -name SYSTEMVERILOG_FILE hdl/decode/decode.sv
+set_global_assignment -name SYSTEMVERILOG_FILE hdl/branch_target_buffer/branch_target_buffer.sv
+set_global_assignment -name QIP_FILE queue.qip
 set_global_assignment -name QIP_FILE test_fifo.qip
 set_global_assignment -name QIP_FILE fifo50x8.qip
 set_global_assignment -name QIP_FILE fifo30x4.qip

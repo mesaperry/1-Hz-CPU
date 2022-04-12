@@ -1,4 +1,5 @@
 import rv32i_types::*;
+import ctrl_sigs::*;
 
 module decode_unit (
     DecodeControl dc

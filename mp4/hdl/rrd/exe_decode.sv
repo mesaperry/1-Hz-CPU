@@ -1,8 +1,5 @@
 import rv32i_types::*;
-typedef struct {
-    alufnt::alu_func_t alufn;
-    opr2t::operand2_t opr2;
-} alu_ctrl_sigs_t;
+import ctrl_sigs::*;
 
 module alu_decode (
     input uopc::micro_opcode_t uopcode,

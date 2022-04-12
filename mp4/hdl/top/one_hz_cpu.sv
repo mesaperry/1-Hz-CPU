@@ -1,6 +1,7 @@
-//`include "../ctrl_word.sv"
 //`include "../../hvl/tb_itf.sv"
 import rv32i_types::*;
+import ctrl_sigs::*;
+/*
 typedef struct packed {//50
     uopc::micro_opcode_t uopcode;
     exut::exe_unit_type_t exu_type;
@@ -24,7 +25,7 @@ typedef struct {
     alufnt::alu_func_t alufn;
     opr2t::operand2_t opr2;
 } alu_ctrl_sigs_t;
-
+*/
 
 // TODO: actually important! jal and jalr
 // need to store pc+4. jalr implementation may work
@@ -168,7 +169,7 @@ module one_hz_cpu (
     logic stall;
 
     //-- fetch0 --//
-    assign imem_read = ~stall;
+    assign imem_read = 1'b1;//~stall;
 
     // TODO: decide based on:
     // BHT entry (4 state)
@@ -463,7 +464,6 @@ module one_hz_cpu (
         .clk,
         .rst,
         .ld(1'b1),
-        // ASK: why are these enum variants turning into implicit nets?
         .din(alu_has_rd_is),
         .dout(alu_has_rd_ex)
     );
