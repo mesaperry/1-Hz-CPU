@@ -1,6 +1,13 @@
-db/
-incremental_db/
-output_files/
+mp4/db/
+mp4/incremental_db/
+mp4/output_files/
+.qsys_edit/
+mp4/.qsys_edit/
+mp4/greybox_tmp/
+mp4/mp4_nativelink_simulation.rpt
 
 *.bak
 
+mp4/simulation/*
+
+!mp4/simulation/modelsim/wave.do
