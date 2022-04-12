@@ -200,7 +200,7 @@ module one_hz_cpu (
     fetch1_pc_reg (
         .clk,
         .rst,
-        .ld(~stall), // TODO: maybe should be imem_resp
+        .ld(~stall),
         .din(pc_f0),
         .dout(pc_f1)
     );
@@ -227,7 +227,7 @@ module one_hz_cpu (
     next_line_reg (
         .clk,
         .rst,
-        .ld(~stall), // TODO: maybe should be imem_resp or stall
+        .ld(~stall),
         .din(pc_f0 + 4),
         .dout(nxl_target)
     );
@@ -336,7 +336,7 @@ module one_hz_cpu (
     assign stall = full_iq0 | full_pq0;
 
     assign push_iq0 = ~stall & ~is_nop_dc;
-    assign push_pq0 = ~stall & needs_pc_dc;
+    assign push_pq0 = push_iq0 & needs_pc_dc;
 
     instr_queue iq0 (
         .clk,
@@ -741,7 +741,7 @@ module one_hz_cpu (
         .clk,
         .rst,
         .ld(1'b1),
-        .din(lsu_rd_ex),
+        .din(mem_rd_ex),
         .dout(lsu_rd_wb)
     );
     rg wb_lsu_res_reg (
@@ -940,7 +940,6 @@ module pc_queue (
 );
 
     logic [31:02] pc3102;
-    // TODO: create one in quartus
     fifo30x4 fifo (
         .clock(clk),
         .data(din[31:02]),
@@ -967,7 +966,6 @@ module instr_queue (
     output queue_item_t dout
 );
 
-    // TODO: create one in quartus
     fifo50x8 fifo (
         .clock(clk),
         .data(din),
