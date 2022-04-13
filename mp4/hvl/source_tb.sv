@@ -67,7 +67,7 @@ generate
 
     if (`USE_RVFI_MONITOR) begin
         /* Instantiate RVFI Monitor */
-        riscv_formal_monitor_rv32imc monitor(
+        riscv_formal_monitor_rv32im monitor(
             .clock(rvfi.clk),
             .reset(rvfi.rst),
             .rvfi_valid(rvfi.commit),

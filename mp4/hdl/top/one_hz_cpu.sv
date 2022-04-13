@@ -368,23 +368,31 @@ module one_hz_cpu (
         1'b0
     };
     // TODO: determine if we need to check for mispred as well
-    assign ctrl_sigs_is = empty_iq0 ? nop_sigs : ctrl_sigs_iq;
+    queue_item_t ctrl_sigs_rd;
+    assign ctrl_sigs_rd = empty_iq0 ? nop_sigs : ctrl_sigs_iq;
 
     logic can_issue;
 
     scoreboard sb0 (
-        .exu_type(ctrl_sigs_is.exu_type),
-        .has_rd(ctrl_sigs_is.has_rd),
-        .has_rs1(ctrl_sigs_is.has_rs1),
-        .has_rs2(ctrl_sigs_is.has_rs2),
-        .rd(ctrl_sigs_is.rd),
-        .rs1(ctrl_sigs_is.rs1),
-        .rs2(ctrl_sigs_is.rs2),
-        .ready(can_issue)
+        .clk,
+        .rst,
+        .mispred,
+        .exu_type('{ctrl_sigs_rd.exu_type}),
+        .has_rd(ctrl_sigs_rd.has_rd),
+        .has_rs1(ctrl_sigs_rd.has_rs1),
+        .has_rs2(ctrl_sigs_rd.has_rs2),
+        .rd('{ctrl_sigs_rd.rd}),
+        .rs1('{ctrl_sigs_rd.rs1}),
+        .rs2('{ctrl_sigs_rd.rs2}),
+        .ready('{can_issue}),
+        .has_rd_wb({alu_has_rd_wb, lsu_has_rd_wb, bru_has_rd_wb}),
+        .rd_wb('{alu_rd_wb, lsu_rd_wb, bru_rd_wb})
     );
 
+    assign ctrl_sigs_is = can_issue ? ctrl_sigs_rd : nop_sigs;
+
     logic needs_pc_is;
-    assign needs_pc_is = ctrl_sigs_is.exu_type == exut::jmp;
+    assign needs_pc_is = ctrl_sigs_rd.exu_type == exut::jmp;
 
     assign pop_iq0 = ~empty_iq0 & can_issue;
     // assuming will not be empty if needs pc
@@ -397,7 +405,7 @@ module one_hz_cpu (
         .ld({alu_has_rd_wb, lsu_has_rd_wb, bru_has_rd_wb}),
         .dest('{alu_rd_wb, lsu_rd_wb, bru_rd_wb}),
         .in('{alu_res_wb, lsu_res_wb, bru_res_wb}),
-        .src('{ctrl_sigs_is.rs1, ctrl_sigs_is.rs2}),
+        .src('{ctrl_sigs_rd.rs1, ctrl_sigs_rd.rs2}),
         .out('{rs1_out, rs2_out})
     );
 
@@ -992,18 +1000,65 @@ module instr_queue (
 endmodule : instr_queue
 
 
-module scoreboard (
-    input exut::exe_unit_type_t exu_type,
-    input logic has_rd,
-    input logic has_rs1,
-    input logic has_rs2,
-    input logic [4:0] rd,
-    input logic [4:0] rs1,
-    input logic [4:0] rs2,
-    output logic ready
+module scoreboard #(
+    parameter s_index = 5,
+    parameter num_read_ports = 1,
+    parameter num_write_ports = 3,
+    parameter nrp = num_read_ports,
+    parameter nwp = num_write_ports
+)
+(
+    input   logic                  clk,
+    input   logic                  rst,
+    input   logic                  mispred,
+    input   exut::exe_unit_type_t  exu_type [nrp-1:0],
+    input   logic [nrp-1:0]        has_rd,
+    input   logic [nrp-1:0]        has_rs1,
+    input   logic [nrp-1:0]        has_rs2,
+    input   logic [s_index-1:0]    rd  [nrp-1:0],
+    input   logic [s_index-1:0]    rs1 [nrp-1:0],
+    input   logic [s_index-1:0]    rs2 [nrp-1:0],
+    output  logic                  ready [nrp-1:0],
+
+    input   logic [nwp-1:0]        has_rd_wb,
+    input   logic [s_index-1:0]    rd_wb [nwp-1:0]
+
 );
 
-    assign ready = 1'b1;
+    localparam num_regs = 2**s_index;
+    localparam s_write_sel = $clog2(nwp);
+    localparam swl = s_write_sel;
+
+    logic reg_states [num_regs];
+
+    genvar rp;
+    generate
+        for (rp = 0; rp < nrp; rp++) begin : reads
+            assign ready[rp] = ~((reg_states[ rd[rp]] & has_rd)
+                             | (reg_states[rs1[rp]] & has_rs1)
+                             | (reg_states[rs2[rp]] & has_rs2));
+
+        end
+    endgenerate
+
+    always_ff @(posedge clk) begin
+        if (rst) begin
+            for (int i = 0; i < num_regs; i++) begin
+                reg_states[i] <= 1'b0;
+            end
+        end else begin
+            for (int i = 0; i < nrp; i++) begin
+                if (ready[i] & ~mispred & rd[i] != '0) begin
+                    reg_states[rd[i]] <= has_rd[i];
+                end
+            end
+            for (int i = 0; i < nwp; i++) begin
+                if (has_rd_wb[i]) begin
+                    reg_states[rd_wb[i]] <= 1'b0;
+                end
+            end
+        end
+    end
 
 endmodule : scoreboard
 
@@ -1033,7 +1088,7 @@ module dummyBTB (
     );
     always_comb begin
         if (pc_out == 32'h140) begin
-            resp = '{1'b1, 1'b0, 1'b0, 1'b0};
+            resp = '{1'b0, 1'b0, 1'b0, 1'b0};
             target = 32'h218;
         end
         else begin
@@ -1065,7 +1120,7 @@ module dummyBHT (
     // wrong prediction test
     always_comb begin
         if (pc_out == 32'h140)
-            pred = 2'b11;
+            pred = 2'b01;
         else
             pred = 2'b01;
     end
