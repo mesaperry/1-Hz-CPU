@@ -137,6 +137,8 @@ module one_hz_cpu (
     //------------//
 
     logic stall;
+    logic mispred;
+    assign mispred = bru_redir;
 
     //-- fetch0 --//
     assign imem_read = 1'b1;//~stall;
@@ -151,8 +153,6 @@ module one_hz_cpu (
             // TODO: for branch resolution redirect, 
             // kill everything not in execute or writeback
             6'b1????? : {pc_f0, taken_f1} = {bru_target, 1'b0};
-            // TODO: for decode redirect 
-            // need to kill anything in fetch1
             6'b01???? : {pc_f0, taken_f1} = {dec_target, 1'b0};
             6'b0011?? : {pc_f0, taken_f1} = {ras_target, 1'b1};
             6'b00101? : {pc_f0, taken_f1} = {btb_target, 1'b1};
@@ -194,9 +194,6 @@ module one_hz_cpu (
         .dout(pc_f1)
     );
 
-
-    //-- fetch1 --//
-
     rg #(
         .rst_val(32'h00000060)
     )
@@ -208,13 +205,17 @@ module one_hz_cpu (
         .dout(nxl_target)
     );
 
+
+    //-- fetch1 --//
+
     always_ff @(posedge clk) begin
         ras_target <= '0; // TODO: output from RAS
     end
 
     // dummy 2 cycle pipelined icache
     assign pc = pc_f1;
-    assign instr_f1 = instr;
+    // fetch1 instruction becomes a nop if there was a decode redirect
+    assign instr_f1 = dec_redir ? 32'h00000013 : instr;
 
 
     //-- fetch1 -> decode --//
@@ -246,18 +247,18 @@ module one_hz_cpu (
     )
     decode_bht_resp_reg (
         .clk,
-        .rst,
+        .rst(rst | mispred),
         .ld(~stall),
         .din(bht_resp_f1),
         .dout(bht_resp_dc)
     );
 
     rg #(
-        .rst_val('X) // TODO: make a nop
+        .rst_val(32'h00000013)
     )
     decode_instr_reg (
         .clk,
-        .rst,
+        .rst(rst | mispred),
         .ld(~stall),
         .din(instr_f1),
         .dout(instr_dc)
@@ -289,6 +290,7 @@ module one_hz_cpu (
     // instruction is a branch, the bht doesn't say strongly not taken,
     // and the immediate sign is negative (loops)
     // that loop check isn't amazing for fmax
+    // assuming bht will never say strongly taken for a non jmp instruction
     assign dec_says_take = dc0.bctrl.is_jal
                          | &bht_resp_dc
                          | (dc0.bctrl.is_br & |bht_resp_dc & instr_dc[31]);
@@ -332,7 +334,7 @@ module one_hz_cpu (
 
     instr_queue iq0 (
         .clk,
-        .rst,
+        .rst(rst | mispred),
         .push(push_iq0),
         .pop(pop_iq0),
         .empty(empty_iq0),
@@ -343,7 +345,7 @@ module one_hz_cpu (
 
     pc_queue pc0 (
         .clk,
-        .rst,
+        .rst(rst | mispred),
         .push(push_pq0),
         .pop(pop_pq0),
         .empty(empty_pq0),
@@ -355,7 +357,17 @@ module one_hz_cpu (
 
     //-- rrd/issue --//
     queue_item_t nop_sigs;
-    assign nop_sigs = '{uopc::addi, exut::alu, 1'b0, 1'b0, 1'b0, 5'b0, 5'b0, 5'b0, immt::i, 20'b0, 1'b0, 1'b0};
+    assign nop_sigs = '{
+        uopc::addi, 
+        exut::alu, 
+        1'b0, 1'b0, 1'b0, 
+        5'b0, 5'b0, 5'b0, 
+        immt::i, 
+        20'b0, 
+        1'b0, 
+        1'b0
+    };
+    // TODO: determine if we need to check for mispred as well
     assign ctrl_sigs_is = empty_iq0 ? nop_sigs : ctrl_sigs_iq;
 
     logic can_issue;
@@ -454,13 +466,14 @@ module one_hz_cpu (
 
 
     //-- rrd/issue -> alu --//
+    // TODO: update scoreboard
 
     rg #(
         .size(1)
     )
     exec_alu_has_rd_reg (
         .clk,
-        .rst,
+        .rst(rst | mispred),
         .ld(1'b1),
         .din(alu_has_rd_is),
         .dout(alu_has_rd_ex)
@@ -470,7 +483,7 @@ module one_hz_cpu (
     )
     exec_alu_rd_reg (
         .clk,
-        .rst,
+        .rst(rst | mispred),
         .ld(1'b1),
         .din(ctrl_sigs_is.rd),
         .dout(alu_rd_ex)
@@ -481,7 +494,7 @@ module one_hz_cpu (
     )
     alu_fn_reg (
         .clk,
-        .rst,
+        .rst(rst | mispred),
         .ld(1'b1),
         .din(alufn_is),
         .dout(alufn_bits_ex)
@@ -548,13 +561,14 @@ module one_hz_cpu (
 
 
     //-- rrd/issue -> lsu --//
+    // TODO: update scoreboard
 
     rg #(
         .size(1)
     )
     agu_has_rd_reg (
         .clk,
-        .rst,
+        .rst(rst | mispred),
         .ld(1'b1),
         .din(lsu_has_rd_is),
         .dout(lsu_has_rd_ex)
@@ -564,7 +578,7 @@ module one_hz_cpu (
     )
     agu_rd_reg (
         .clk,
-        .rst,
+        .rst(rst | mispred),
         .ld(1'b1),
         .din(ctrl_sigs_is.rd),
         .dout(lsu_rd_ex)
@@ -576,7 +590,7 @@ module one_hz_cpu (
     )
     agu_mem_ctrl_reg (
         .clk,
-        .rst,
+        .rst(rst | mispred),
         .ld(1'b1),
         .din(lsu_ctrl_is),
         .dout(lsu_ctrl_bits_ex)
@@ -762,6 +776,7 @@ module one_hz_cpu (
 
 
     //-- rrd/issue -> bru --//
+    // TODO: update scoreboard
 
     rg bru_pc_reg (
         .clk,
@@ -775,7 +790,7 @@ module one_hz_cpu (
     )
     exec_bru_has_rd_reg (
         .clk,
-        .rst,
+        .rst(rst | mispred),
         .ld(1'b1),
         .din(bru_has_rd_is),
         .dout(bru_has_rd_ex)
@@ -785,7 +800,7 @@ module one_hz_cpu (
     )
     exec_bru_rd_reg (
         .clk,
-        .rst,
+        .rst(rst | mispred),
         .ld(1'b1),
         .din(ctrl_sigs_is.rd),
         .dout(bru_rd_ex)
@@ -798,7 +813,7 @@ module one_hz_cpu (
     )
     bru_fn_reg (
         .clk,
-        .rst,
+        .rst(rst | mispred),
         .ld(1'b1),
         .din(brfn_is),
         .dout(brfn_bits_ex)
@@ -1017,9 +1032,9 @@ module dummyBTB (
         .dout(pc_out)
     );
     always_comb begin
-        if (pc_out == 32'hb0) begin
+        if (pc_out == 32'h140) begin
             resp = '{1'b1, 1'b0, 1'b0, 1'b0};
-            target = 32'hd0;
+            target = 32'h218;
         end
         else begin
             resp = '{1'b0, 1'b0, 1'b0, 1'b0};
@@ -1047,8 +1062,9 @@ module dummyBHT (
         .din(pc),
         .dout(pc_out)
     );
+    // wrong prediction test
     always_comb begin
-        if (pc_out == 32'hb0)
+        if (pc_out == 32'h140)
             pred = 2'b11;
         else
             pred = 2'b01;
