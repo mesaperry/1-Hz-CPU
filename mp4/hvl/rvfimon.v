@@ -1,31 +1,31 @@
 // DO NOT EDIT -- auto-generated from riscv-formal/monitor/generate.py
 //
-// Command line options: -i rv32imc -a
+// Command line options: -i rv32im -a -c 4
 
-module riscv_formal_monitor_rv32imc (
+module riscv_formal_monitor_rv32im (
   input clock,
   input reset,
-  input [0:0] rvfi_valid,
-  input [63:0] rvfi_order,
-  input [31:0] rvfi_insn,
-  input [0:0] rvfi_trap,
-  input [0:0] rvfi_halt,
-  input [0:0] rvfi_intr,
-  input [1:0] rvfi_mode,
-  input [4:0] rvfi_rs1_addr,
-  input [4:0] rvfi_rs2_addr,
-  input [31:0] rvfi_rs1_rdata,
-  input [31:0] rvfi_rs2_rdata,
-  input [4:0] rvfi_rd_addr,
-  input [31:0] rvfi_rd_wdata,
-  input [31:0] rvfi_pc_rdata,
-  input [31:0] rvfi_pc_wdata,
-  input [31:0] rvfi_mem_addr,
-  input [3:0] rvfi_mem_rmask,
-  input [3:0] rvfi_mem_wmask,
-  input [31:0] rvfi_mem_rdata,
-  input [31:0] rvfi_mem_wdata,
-  input [0:0] rvfi_mem_extamo,
+  input [3:0] rvfi_valid,
+  input [255:0] rvfi_order,
+  input [127:0] rvfi_insn,
+  input [3:0] rvfi_trap,
+  input [3:0] rvfi_halt,
+  input [3:0] rvfi_intr,
+  input [7:0] rvfi_mode,
+  input [19:0] rvfi_rs1_addr,
+  input [19:0] rvfi_rs2_addr,
+  input [127:0] rvfi_rs1_rdata,
+  input [127:0] rvfi_rs2_rdata,
+  input [19:0] rvfi_rd_addr,
+  input [127:0] rvfi_rd_wdata,
+  input [127:0] rvfi_pc_rdata,
+  input [127:0] rvfi_pc_wdata,
+  input [127:0] rvfi_mem_addr,
+  input [15:0] rvfi_mem_rmask,
+  input [15:0] rvfi_mem_wmask,
+  input [127:0] rvfi_mem_rdata,
+  input [127:0] rvfi_mem_wdata,
+  input [3:0] rvfi_mem_extamo,
   output reg [15:0] errcode
 );
   wire ch0_rvfi_valid = rvfi_valid[0];
@@ -61,7 +61,7 @@ module riscv_formal_monitor_rv32imc (
   wire [3:0] ch0_spec_mem_wmask;
   wire [31:0] ch0_spec_mem_wdata;
 
-  riscv_formal_monitor_rv32imc_isa_spec ch0_isa_spec (
+  riscv_formal_monitor_rv32im_isa_spec ch0_isa_spec (
     .rvfi_valid(ch0_rvfi_valid),
     .rvfi_insn(ch0_rvfi_insn),
     .rvfi_pc_rdata(ch0_rvfi_pc_rdata),
@@ -179,6 +179,459 @@ module riscv_formal_monitor_rv32imc (
     end
   end
 
+  wire ch1_rvfi_valid = rvfi_valid[1];
+  wire [63:0] ch1_rvfi_order = rvfi_order[127:64];
+  wire [31:0] ch1_rvfi_insn = rvfi_insn[63:32];
+  wire ch1_rvfi_trap = rvfi_trap[1];
+  wire ch1_rvfi_halt = rvfi_halt[1];
+  wire ch1_rvfi_intr = rvfi_intr[1];
+  wire [4:0] ch1_rvfi_rs1_addr = rvfi_rs1_addr[9:5];
+  wire [4:0] ch1_rvfi_rs2_addr = rvfi_rs2_addr[9:5];
+  wire [31:0] ch1_rvfi_rs1_rdata = rvfi_rs1_rdata[63:32];
+  wire [31:0] ch1_rvfi_rs2_rdata = rvfi_rs2_rdata[63:32];
+  wire [4:0] ch1_rvfi_rd_addr = rvfi_rd_addr[9:5];
+  wire [31:0] ch1_rvfi_rd_wdata = rvfi_rd_wdata[63:32];
+  wire [31:0] ch1_rvfi_pc_rdata = rvfi_pc_rdata[63:32];
+  wire [31:0] ch1_rvfi_pc_wdata = rvfi_pc_wdata[63:32];
+  wire [31:0] ch1_rvfi_mem_addr = rvfi_mem_addr[63:32];
+  wire [3:0] ch1_rvfi_mem_rmask = rvfi_mem_rmask[7:4];
+  wire [3:0] ch1_rvfi_mem_wmask = rvfi_mem_wmask[7:4];
+  wire [31:0] ch1_rvfi_mem_rdata = rvfi_mem_rdata[63:32];
+  wire [31:0] ch1_rvfi_mem_wdata = rvfi_mem_wdata[63:32];
+  wire ch1_rvfi_mem_extamo = rvfi_mem_extamo[1];
+
+  wire ch1_spec_valid;
+  wire ch1_spec_trap;
+  wire [4:0] ch1_spec_rs1_addr;
+  wire [4:0] ch1_spec_rs2_addr;
+  wire [4:0] ch1_spec_rd_addr;
+  wire [31:0] ch1_spec_rd_wdata;
+  wire [31:0] ch1_spec_pc_wdata;
+  wire [31:0] ch1_spec_mem_addr;
+  wire [3:0] ch1_spec_mem_rmask;
+  wire [3:0] ch1_spec_mem_wmask;
+  wire [31:0] ch1_spec_mem_wdata;
+
+  riscv_formal_monitor_rv32im_isa_spec ch1_isa_spec (
+    .rvfi_valid(ch1_rvfi_valid),
+    .rvfi_insn(ch1_rvfi_insn),
+    .rvfi_pc_rdata(ch1_rvfi_pc_rdata),
+    .rvfi_rs1_rdata(ch1_rvfi_rs1_rdata),
+    .rvfi_rs2_rdata(ch1_rvfi_rs2_rdata),
+    .rvfi_mem_rdata(ch1_rvfi_mem_rdata),
+    .spec_valid(ch1_spec_valid),
+    .spec_trap(ch1_spec_trap),
+    .spec_rs1_addr(ch1_spec_rs1_addr),
+    .spec_rs2_addr(ch1_spec_rs2_addr),
+    .spec_rd_addr(ch1_spec_rd_addr),
+    .spec_rd_wdata(ch1_spec_rd_wdata),
+    .spec_pc_wdata(ch1_spec_pc_wdata),
+    .spec_mem_addr(ch1_spec_mem_addr),
+    .spec_mem_rmask(ch1_spec_mem_rmask),
+    .spec_mem_wmask(ch1_spec_mem_wmask),
+    .spec_mem_wdata(ch1_spec_mem_wdata)
+  );
+
+  reg [15:0] ch1_errcode;
+
+  task ch1_handle_error;
+    input [15:0] code;
+    input [511:0] msg;
+    begin
+      $display("-------- RVFI Monitor error %0d in channel 1: %m at time %0t --------", code, $time);
+      $display("Error message: %0s", msg);
+      $display("rvfi_valid = %x", ch1_rvfi_valid);
+      $display("rvfi_order = %x", ch1_rvfi_order);
+      $display("rvfi_insn = %x", ch1_rvfi_insn);
+      $display("rvfi_trap = %x", ch1_rvfi_trap);
+      $display("rvfi_halt = %x", ch1_rvfi_halt);
+      $display("rvfi_intr = %x", ch1_rvfi_intr);
+      $display("rvfi_rs1_addr = %x", ch1_rvfi_rs1_addr);
+      $display("rvfi_rs2_addr = %x", ch1_rvfi_rs2_addr);
+      $display("rvfi_rs1_rdata = %x", ch1_rvfi_rs1_rdata);
+      $display("rvfi_rs2_rdata = %x", ch1_rvfi_rs2_rdata);
+      $display("rvfi_rd_addr = %x", ch1_rvfi_rd_addr);
+      $display("rvfi_rd_wdata = %x", ch1_rvfi_rd_wdata);
+      $display("rvfi_pc_rdata = %x", ch1_rvfi_pc_rdata);
+      $display("rvfi_pc_wdata = %x", ch1_rvfi_pc_wdata);
+      $display("rvfi_mem_addr = %x", ch1_rvfi_mem_addr);
+      $display("rvfi_mem_rmask = %x", ch1_rvfi_mem_rmask);
+      $display("rvfi_mem_wmask = %x", ch1_rvfi_mem_wmask);
+      $display("rvfi_mem_rdata = %x", ch1_rvfi_mem_rdata);
+      $display("rvfi_mem_wdata = %x", ch1_rvfi_mem_wdata);
+      $display("spec_valid = %x", ch1_spec_valid);
+      $display("spec_trap = %x", ch1_spec_trap);
+      $display("spec_rs1_addr = %x", ch1_spec_rs1_addr);
+      $display("spec_rs2_addr = %x", ch1_spec_rs2_addr);
+      $display("spec_rd_addr = %x", ch1_spec_rd_addr);
+      $display("spec_rd_wdata = %x", ch1_spec_rd_wdata);
+      $display("spec_pc_wdata = %x", ch1_spec_pc_wdata);
+      $display("spec_mem_addr = %x", ch1_spec_mem_addr);
+      $display("spec_mem_rmask = %x", ch1_spec_mem_rmask);
+      $display("spec_mem_wmask = %x", ch1_spec_mem_wmask);
+      $display("spec_mem_wdata = %x", ch1_spec_mem_wdata);
+      ch1_errcode <= code;
+    end
+  endtask
+
+  always @(posedge clock) begin
+    ch1_errcode <= 0;
+    if (!reset && ch1_rvfi_valid) begin
+      if (ch1_spec_valid) begin
+        if (ch1_rvfi_trap != ch1_spec_trap) begin
+          ch1_handle_error(201, "mismatch in trap");
+        end
+        if (ch1_rvfi_rs1_addr != ch1_spec_rs1_addr && ch1_spec_rs1_addr != 0) begin
+          ch1_handle_error(202, "mismatch in rs1_addr");
+        end
+        if (ch1_rvfi_rs2_addr != ch1_spec_rs2_addr && ch1_spec_rs2_addr != 0) begin
+          ch1_handle_error(203, "mismatch in rs2_addr");
+        end
+        if (ch1_rvfi_rd_addr != ch1_spec_rd_addr) begin
+          ch1_handle_error(204, "mismatch in rd_addr");
+        end
+        if (ch1_rvfi_rd_wdata != ch1_spec_rd_wdata) begin
+          ch1_handle_error(205, "mismatch in rd_wdata");
+        end
+        if (ch1_rvfi_pc_wdata != ch1_spec_pc_wdata) begin
+          ch1_handle_error(206, "mismatch in pc_wdata");
+        end
+        if (ch1_rvfi_mem_wmask != ch1_spec_mem_wmask) begin
+          ch1_handle_error(208, "mismatch in mem_wmask");
+        end
+        if (!ch1_rvfi_mem_rmask[0] && ch1_spec_mem_rmask[0]) begin
+          ch1_handle_error(210, "mismatch in mem_rmask[0]");
+        end
+        if (ch1_rvfi_mem_wmask[0] && ch1_rvfi_mem_wdata[7:0] != ch1_spec_mem_wdata[7:0]) begin
+          ch1_handle_error(220, "mismatch in mem_wdata[7:0]");
+        end
+        if (!ch1_rvfi_mem_rmask[1] && ch1_spec_mem_rmask[1]) begin
+          ch1_handle_error(211, "mismatch in mem_rmask[1]");
+        end
+        if (ch1_rvfi_mem_wmask[1] && ch1_rvfi_mem_wdata[15:8] != ch1_spec_mem_wdata[15:8]) begin
+          ch1_handle_error(221, "mismatch in mem_wdata[15:8]");
+        end
+        if (!ch1_rvfi_mem_rmask[2] && ch1_spec_mem_rmask[2]) begin
+          ch1_handle_error(212, "mismatch in mem_rmask[2]");
+        end
+        if (ch1_rvfi_mem_wmask[2] && ch1_rvfi_mem_wdata[23:16] != ch1_spec_mem_wdata[23:16]) begin
+          ch1_handle_error(222, "mismatch in mem_wdata[23:16]");
+        end
+        if (!ch1_rvfi_mem_rmask[3] && ch1_spec_mem_rmask[3]) begin
+          ch1_handle_error(213, "mismatch in mem_rmask[3]");
+        end
+        if (ch1_rvfi_mem_wmask[3] && ch1_rvfi_mem_wdata[31:24] != ch1_spec_mem_wdata[31:24]) begin
+          ch1_handle_error(223, "mismatch in mem_wdata[31:24]");
+        end
+        if (ch1_rvfi_mem_addr != ch1_spec_mem_addr && (ch1_rvfi_mem_wmask || ch1_rvfi_mem_rmask)) begin
+          ch1_handle_error(207, "mismatch in mem_addr");
+        end
+      end
+    end
+  end
+
+  wire ch2_rvfi_valid = rvfi_valid[2];
+  wire [63:0] ch2_rvfi_order = rvfi_order[191:128];
+  wire [31:0] ch2_rvfi_insn = rvfi_insn[95:64];
+  wire ch2_rvfi_trap = rvfi_trap[2];
+  wire ch2_rvfi_halt = rvfi_halt[2];
+  wire ch2_rvfi_intr = rvfi_intr[2];
+  wire [4:0] ch2_rvfi_rs1_addr = rvfi_rs1_addr[14:10];
+  wire [4:0] ch2_rvfi_rs2_addr = rvfi_rs2_addr[14:10];
+  wire [31:0] ch2_rvfi_rs1_rdata = rvfi_rs1_rdata[95:64];
+  wire [31:0] ch2_rvfi_rs2_rdata = rvfi_rs2_rdata[95:64];
+  wire [4:0] ch2_rvfi_rd_addr = rvfi_rd_addr[14:10];
+  wire [31:0] ch2_rvfi_rd_wdata = rvfi_rd_wdata[95:64];
+  wire [31:0] ch2_rvfi_pc_rdata = rvfi_pc_rdata[95:64];
+  wire [31:0] ch2_rvfi_pc_wdata = rvfi_pc_wdata[95:64];
+  wire [31:0] ch2_rvfi_mem_addr = rvfi_mem_addr[95:64];
+  wire [3:0] ch2_rvfi_mem_rmask = rvfi_mem_rmask[11:8];
+  wire [3:0] ch2_rvfi_mem_wmask = rvfi_mem_wmask[11:8];
+  wire [31:0] ch2_rvfi_mem_rdata = rvfi_mem_rdata[95:64];
+  wire [31:0] ch2_rvfi_mem_wdata = rvfi_mem_wdata[95:64];
+  wire ch2_rvfi_mem_extamo = rvfi_mem_extamo[2];
+
+  wire ch2_spec_valid;
+  wire ch2_spec_trap;
+  wire [4:0] ch2_spec_rs1_addr;
+  wire [4:0] ch2_spec_rs2_addr;
+  wire [4:0] ch2_spec_rd_addr;
+  wire [31:0] ch2_spec_rd_wdata;
+  wire [31:0] ch2_spec_pc_wdata;
+  wire [31:0] ch2_spec_mem_addr;
+  wire [3:0] ch2_spec_mem_rmask;
+  wire [3:0] ch2_spec_mem_wmask;
+  wire [31:0] ch2_spec_mem_wdata;
+
+  riscv_formal_monitor_rv32im_isa_spec ch2_isa_spec (
+    .rvfi_valid(ch2_rvfi_valid),
+    .rvfi_insn(ch2_rvfi_insn),
+    .rvfi_pc_rdata(ch2_rvfi_pc_rdata),
+    .rvfi_rs1_rdata(ch2_rvfi_rs1_rdata),
+    .rvfi_rs2_rdata(ch2_rvfi_rs2_rdata),
+    .rvfi_mem_rdata(ch2_rvfi_mem_rdata),
+    .spec_valid(ch2_spec_valid),
+    .spec_trap(ch2_spec_trap),
+    .spec_rs1_addr(ch2_spec_rs1_addr),
+    .spec_rs2_addr(ch2_spec_rs2_addr),
+    .spec_rd_addr(ch2_spec_rd_addr),
+    .spec_rd_wdata(ch2_spec_rd_wdata),
+    .spec_pc_wdata(ch2_spec_pc_wdata),
+    .spec_mem_addr(ch2_spec_mem_addr),
+    .spec_mem_rmask(ch2_spec_mem_rmask),
+    .spec_mem_wmask(ch2_spec_mem_wmask),
+    .spec_mem_wdata(ch2_spec_mem_wdata)
+  );
+
+  reg [15:0] ch2_errcode;
+
+  task ch2_handle_error;
+    input [15:0] code;
+    input [511:0] msg;
+    begin
+      $display("-------- RVFI Monitor error %0d in channel 2: %m at time %0t --------", code, $time);
+      $display("Error message: %0s", msg);
+      $display("rvfi_valid = %x", ch2_rvfi_valid);
+      $display("rvfi_order = %x", ch2_rvfi_order);
+      $display("rvfi_insn = %x", ch2_rvfi_insn);
+      $display("rvfi_trap = %x", ch2_rvfi_trap);
+      $display("rvfi_halt = %x", ch2_rvfi_halt);
+      $display("rvfi_intr = %x", ch2_rvfi_intr);
+      $display("rvfi_rs1_addr = %x", ch2_rvfi_rs1_addr);
+      $display("rvfi_rs2_addr = %x", ch2_rvfi_rs2_addr);
+      $display("rvfi_rs1_rdata = %x", ch2_rvfi_rs1_rdata);
+      $display("rvfi_rs2_rdata = %x", ch2_rvfi_rs2_rdata);
+      $display("rvfi_rd_addr = %x", ch2_rvfi_rd_addr);
+      $display("rvfi_rd_wdata = %x", ch2_rvfi_rd_wdata);
+      $display("rvfi_pc_rdata = %x", ch2_rvfi_pc_rdata);
+      $display("rvfi_pc_wdata = %x", ch2_rvfi_pc_wdata);
+      $display("rvfi_mem_addr = %x", ch2_rvfi_mem_addr);
+      $display("rvfi_mem_rmask = %x", ch2_rvfi_mem_rmask);
+      $display("rvfi_mem_wmask = %x", ch2_rvfi_mem_wmask);
+      $display("rvfi_mem_rdata = %x", ch2_rvfi_mem_rdata);
+      $display("rvfi_mem_wdata = %x", ch2_rvfi_mem_wdata);
+      $display("spec_valid = %x", ch2_spec_valid);
+      $display("spec_trap = %x", ch2_spec_trap);
+      $display("spec_rs1_addr = %x", ch2_spec_rs1_addr);
+      $display("spec_rs2_addr = %x", ch2_spec_rs2_addr);
+      $display("spec_rd_addr = %x", ch2_spec_rd_addr);
+      $display("spec_rd_wdata = %x", ch2_spec_rd_wdata);
+      $display("spec_pc_wdata = %x", ch2_spec_pc_wdata);
+      $display("spec_mem_addr = %x", ch2_spec_mem_addr);
+      $display("spec_mem_rmask = %x", ch2_spec_mem_rmask);
+      $display("spec_mem_wmask = %x", ch2_spec_mem_wmask);
+      $display("spec_mem_wdata = %x", ch2_spec_mem_wdata);
+      ch2_errcode <= code;
+    end
+  endtask
+
+  always @(posedge clock) begin
+    ch2_errcode <= 0;
+    if (!reset && ch2_rvfi_valid) begin
+      if (ch2_spec_valid) begin
+        if (ch2_rvfi_trap != ch2_spec_trap) begin
+          ch2_handle_error(301, "mismatch in trap");
+        end
+        if (ch2_rvfi_rs1_addr != ch2_spec_rs1_addr && ch2_spec_rs1_addr != 0) begin
+          ch2_handle_error(302, "mismatch in rs1_addr");
+        end
+        if (ch2_rvfi_rs2_addr != ch2_spec_rs2_addr && ch2_spec_rs2_addr != 0) begin
+          ch2_handle_error(303, "mismatch in rs2_addr");
+        end
+        if (ch2_rvfi_rd_addr != ch2_spec_rd_addr) begin
+          ch2_handle_error(304, "mismatch in rd_addr");
+        end
+        if (ch2_rvfi_rd_wdata != ch2_spec_rd_wdata) begin
+          ch2_handle_error(305, "mismatch in rd_wdata");
+        end
+        if (ch2_rvfi_pc_wdata != ch2_spec_pc_wdata) begin
+          ch2_handle_error(306, "mismatch in pc_wdata");
+        end
+        if (ch2_rvfi_mem_wmask != ch2_spec_mem_wmask) begin
+          ch2_handle_error(308, "mismatch in mem_wmask");
+        end
+        if (!ch2_rvfi_mem_rmask[0] && ch2_spec_mem_rmask[0]) begin
+          ch2_handle_error(310, "mismatch in mem_rmask[0]");
+        end
+        if (ch2_rvfi_mem_wmask[0] && ch2_rvfi_mem_wdata[7:0] != ch2_spec_mem_wdata[7:0]) begin
+          ch2_handle_error(320, "mismatch in mem_wdata[7:0]");
+        end
+        if (!ch2_rvfi_mem_rmask[1] && ch2_spec_mem_rmask[1]) begin
+          ch2_handle_error(311, "mismatch in mem_rmask[1]");
+        end
+        if (ch2_rvfi_mem_wmask[1] && ch2_rvfi_mem_wdata[15:8] != ch2_spec_mem_wdata[15:8]) begin
+          ch2_handle_error(321, "mismatch in mem_wdata[15:8]");
+        end
+        if (!ch2_rvfi_mem_rmask[2] && ch2_spec_mem_rmask[2]) begin
+          ch2_handle_error(312, "mismatch in mem_rmask[2]");
+        end
+        if (ch2_rvfi_mem_wmask[2] && ch2_rvfi_mem_wdata[23:16] != ch2_spec_mem_wdata[23:16]) begin
+          ch2_handle_error(322, "mismatch in mem_wdata[23:16]");
+        end
+        if (!ch2_rvfi_mem_rmask[3] && ch2_spec_mem_rmask[3]) begin
+          ch2_handle_error(313, "mismatch in mem_rmask[3]");
+        end
+        if (ch2_rvfi_mem_wmask[3] && ch2_rvfi_mem_wdata[31:24] != ch2_spec_mem_wdata[31:24]) begin
+          ch2_handle_error(323, "mismatch in mem_wdata[31:24]");
+        end
+        if (ch2_rvfi_mem_addr != ch2_spec_mem_addr && (ch2_rvfi_mem_wmask || ch2_rvfi_mem_rmask)) begin
+          ch2_handle_error(307, "mismatch in mem_addr");
+        end
+      end
+    end
+  end
+
+  wire ch3_rvfi_valid = rvfi_valid[3];
+  wire [63:0] ch3_rvfi_order = rvfi_order[255:192];
+  wire [31:0] ch3_rvfi_insn = rvfi_insn[127:96];
+  wire ch3_rvfi_trap = rvfi_trap[3];
+  wire ch3_rvfi_halt = rvfi_halt[3];
+  wire ch3_rvfi_intr = rvfi_intr[3];
+  wire [4:0] ch3_rvfi_rs1_addr = rvfi_rs1_addr[19:15];
+  wire [4:0] ch3_rvfi_rs2_addr = rvfi_rs2_addr[19:15];
+  wire [31:0] ch3_rvfi_rs1_rdata = rvfi_rs1_rdata[127:96];
+  wire [31:0] ch3_rvfi_rs2_rdata = rvfi_rs2_rdata[127:96];
+  wire [4:0] ch3_rvfi_rd_addr = rvfi_rd_addr[19:15];
+  wire [31:0] ch3_rvfi_rd_wdata = rvfi_rd_wdata[127:96];
+  wire [31:0] ch3_rvfi_pc_rdata = rvfi_pc_rdata[127:96];
+  wire [31:0] ch3_rvfi_pc_wdata = rvfi_pc_wdata[127:96];
+  wire [31:0] ch3_rvfi_mem_addr = rvfi_mem_addr[127:96];
+  wire [3:0] ch3_rvfi_mem_rmask = rvfi_mem_rmask[15:12];
+  wire [3:0] ch3_rvfi_mem_wmask = rvfi_mem_wmask[15:12];
+  wire [31:0] ch3_rvfi_mem_rdata = rvfi_mem_rdata[127:96];
+  wire [31:0] ch3_rvfi_mem_wdata = rvfi_mem_wdata[127:96];
+  wire ch3_rvfi_mem_extamo = rvfi_mem_extamo[3];
+
+  wire ch3_spec_valid;
+  wire ch3_spec_trap;
+  wire [4:0] ch3_spec_rs1_addr;
+  wire [4:0] ch3_spec_rs2_addr;
+  wire [4:0] ch3_spec_rd_addr;
+  wire [31:0] ch3_spec_rd_wdata;
+  wire [31:0] ch3_spec_pc_wdata;
+  wire [31:0] ch3_spec_mem_addr;
+  wire [3:0] ch3_spec_mem_rmask;
+  wire [3:0] ch3_spec_mem_wmask;
+  wire [31:0] ch3_spec_mem_wdata;
+
+  riscv_formal_monitor_rv32im_isa_spec ch3_isa_spec (
+    .rvfi_valid(ch3_rvfi_valid),
+    .rvfi_insn(ch3_rvfi_insn),
+    .rvfi_pc_rdata(ch3_rvfi_pc_rdata),
+    .rvfi_rs1_rdata(ch3_rvfi_rs1_rdata),
+    .rvfi_rs2_rdata(ch3_rvfi_rs2_rdata),
+    .rvfi_mem_rdata(ch3_rvfi_mem_rdata),
+    .spec_valid(ch3_spec_valid),
+    .spec_trap(ch3_spec_trap),
+    .spec_rs1_addr(ch3_spec_rs1_addr),
+    .spec_rs2_addr(ch3_spec_rs2_addr),
+    .spec_rd_addr(ch3_spec_rd_addr),
+    .spec_rd_wdata(ch3_spec_rd_wdata),
+    .spec_pc_wdata(ch3_spec_pc_wdata),
+    .spec_mem_addr(ch3_spec_mem_addr),
+    .spec_mem_rmask(ch3_spec_mem_rmask),
+    .spec_mem_wmask(ch3_spec_mem_wmask),
+    .spec_mem_wdata(ch3_spec_mem_wdata)
+  );
+
+  reg [15:0] ch3_errcode;
+
+  task ch3_handle_error;
+    input [15:0] code;
+    input [511:0] msg;
+    begin
+      $display("-------- RVFI Monitor error %0d in channel 3: %m at time %0t --------", code, $time);
+      $display("Error message: %0s", msg);
+      $display("rvfi_valid = %x", ch3_rvfi_valid);
+      $display("rvfi_order = %x", ch3_rvfi_order);
+      $display("rvfi_insn = %x", ch3_rvfi_insn);
+      $display("rvfi_trap = %x", ch3_rvfi_trap);
+      $display("rvfi_halt = %x", ch3_rvfi_halt);
+      $display("rvfi_intr = %x", ch3_rvfi_intr);
+      $display("rvfi_rs1_addr = %x", ch3_rvfi_rs1_addr);
+      $display("rvfi_rs2_addr = %x", ch3_rvfi_rs2_addr);
+      $display("rvfi_rs1_rdata = %x", ch3_rvfi_rs1_rdata);
+      $display("rvfi_rs2_rdata = %x", ch3_rvfi_rs2_rdata);
+      $display("rvfi_rd_addr = %x", ch3_rvfi_rd_addr);
+      $display("rvfi_rd_wdata = %x", ch3_rvfi_rd_wdata);
+      $display("rvfi_pc_rdata = %x", ch3_rvfi_pc_rdata);
+      $display("rvfi_pc_wdata = %x", ch3_rvfi_pc_wdata);
+      $display("rvfi_mem_addr = %x", ch3_rvfi_mem_addr);
+      $display("rvfi_mem_rmask = %x", ch3_rvfi_mem_rmask);
+      $display("rvfi_mem_wmask = %x", ch3_rvfi_mem_wmask);
+      $display("rvfi_mem_rdata = %x", ch3_rvfi_mem_rdata);
+      $display("rvfi_mem_wdata = %x", ch3_rvfi_mem_wdata);
+      $display("spec_valid = %x", ch3_spec_valid);
+      $display("spec_trap = %x", ch3_spec_trap);
+      $display("spec_rs1_addr = %x", ch3_spec_rs1_addr);
+      $display("spec_rs2_addr = %x", ch3_spec_rs2_addr);
+      $display("spec_rd_addr = %x", ch3_spec_rd_addr);
+      $display("spec_rd_wdata = %x", ch3_spec_rd_wdata);
+      $display("spec_pc_wdata = %x", ch3_spec_pc_wdata);
+      $display("spec_mem_addr = %x", ch3_spec_mem_addr);
+      $display("spec_mem_rmask = %x", ch3_spec_mem_rmask);
+      $display("spec_mem_wmask = %x", ch3_spec_mem_wmask);
+      $display("spec_mem_wdata = %x", ch3_spec_mem_wdata);
+      ch3_errcode <= code;
+    end
+  endtask
+
+  always @(posedge clock) begin
+    ch3_errcode <= 0;
+    if (!reset && ch3_rvfi_valid) begin
+      if (ch3_spec_valid) begin
+        if (ch3_rvfi_trap != ch3_spec_trap) begin
+          ch3_handle_error(401, "mismatch in trap");
+        end
+        if (ch3_rvfi_rs1_addr != ch3_spec_rs1_addr && ch3_spec_rs1_addr != 0) begin
+          ch3_handle_error(402, "mismatch in rs1_addr");
+        end
+        if (ch3_rvfi_rs2_addr != ch3_spec_rs2_addr && ch3_spec_rs2_addr != 0) begin
+          ch3_handle_error(403, "mismatch in rs2_addr");
+        end
+        if (ch3_rvfi_rd_addr != ch3_spec_rd_addr) begin
+          ch3_handle_error(404, "mismatch in rd_addr");
+        end
+        if (ch3_rvfi_rd_wdata != ch3_spec_rd_wdata) begin
+          ch3_handle_error(405, "mismatch in rd_wdata");
+        end
+        if (ch3_rvfi_pc_wdata != ch3_spec_pc_wdata) begin
+          ch3_handle_error(406, "mismatch in pc_wdata");
+        end
+        if (ch3_rvfi_mem_wmask != ch3_spec_mem_wmask) begin
+          ch3_handle_error(408, "mismatch in mem_wmask");
+        end
+        if (!ch3_rvfi_mem_rmask[0] && ch3_spec_mem_rmask[0]) begin
+          ch3_handle_error(410, "mismatch in mem_rmask[0]");
+        end
+        if (ch3_rvfi_mem_wmask[0] && ch3_rvfi_mem_wdata[7:0] != ch3_spec_mem_wdata[7:0]) begin
+          ch3_handle_error(420, "mismatch in mem_wdata[7:0]");
+        end
+        if (!ch3_rvfi_mem_rmask[1] && ch3_spec_mem_rmask[1]) begin
+          ch3_handle_error(411, "mismatch in mem_rmask[1]");
+        end
+        if (ch3_rvfi_mem_wmask[1] && ch3_rvfi_mem_wdata[15:8] != ch3_spec_mem_wdata[15:8]) begin
+          ch3_handle_error(421, "mismatch in mem_wdata[15:8]");
+        end
+        if (!ch3_rvfi_mem_rmask[2] && ch3_spec_mem_rmask[2]) begin
+          ch3_handle_error(412, "mismatch in mem_rmask[2]");
+        end
+        if (ch3_rvfi_mem_wmask[2] && ch3_rvfi_mem_wdata[23:16] != ch3_spec_mem_wdata[23:16]) begin
+          ch3_handle_error(422, "mismatch in mem_wdata[23:16]");
+        end
+        if (!ch3_rvfi_mem_rmask[3] && ch3_spec_mem_rmask[3]) begin
+          ch3_handle_error(413, "mismatch in mem_rmask[3]");
+        end
+        if (ch3_rvfi_mem_wmask[3] && ch3_rvfi_mem_wdata[31:24] != ch3_spec_mem_wdata[31:24]) begin
+          ch3_handle_error(423, "mismatch in mem_wdata[31:24]");
+        end
+        if (ch3_rvfi_mem_addr != ch3_spec_mem_addr && (ch3_rvfi_mem_wmask || ch3_rvfi_mem_rmask)) begin
+          ch3_handle_error(407, "mismatch in mem_addr");
+        end
+      end
+    end
+  end
+
   wire rob_i0_valid;
   wire [63:0] rob_i0_order;
   wire [176:0] rob_i0_data;
@@ -223,9 +676,141 @@ module riscv_formal_monitor_rv32imc (
   wire [0:0] ro0_rvfi_trap = rob_o0_data[176:176];
   assign rob_i0_data[176:176] = ch0_rvfi_trap;
 
+  wire rob_i1_valid;
+  wire [63:0] rob_i1_order;
+  wire [176:0] rob_i1_data;
+
+  wire rob_o1_valid;
+  wire [63:0] rob_o1_order;
+  wire [176:0] rob_o1_data;
+
+  wire ro1_rvfi_valid = rob_o1_valid;
+  assign rob_i1_valid = ch1_rvfi_valid;
+
+  wire [63:0] ro1_rvfi_order = rob_o1_order;
+  assign rob_i1_order = ch1_rvfi_order;
+
+  wire [4:0] ro1_rvfi_rs1_addr = rob_o1_data[4:0];
+  assign rob_i1_data[4:0] = ch1_rvfi_rs1_addr;
+
+  wire [4:0] ro1_rvfi_rs2_addr = rob_o1_data[9:5];
+  assign rob_i1_data[9:5] = ch1_rvfi_rs2_addr;
+
+  wire [4:0] ro1_rvfi_rd_addr = rob_o1_data[14:10];
+  assign rob_i1_data[14:10] = ch1_rvfi_rd_addr;
+
+  wire [31:0] ro1_rvfi_rs1_rdata = rob_o1_data[46:15];
+  assign rob_i1_data[46:15] = ch1_rvfi_rs1_rdata;
+
+  wire [31:0] ro1_rvfi_rs2_rdata = rob_o1_data[78:47];
+  assign rob_i1_data[78:47] = ch1_rvfi_rs2_rdata;
+
+  wire [31:0] ro1_rvfi_rd_wdata = rob_o1_data[110:79];
+  assign rob_i1_data[110:79] = ch1_rvfi_rd_wdata;
+
+  wire [31:0] ro1_rvfi_pc_rdata = rob_o1_data[142:111];
+  assign rob_i1_data[142:111] = ch1_rvfi_pc_rdata;
+
+  wire [31:0] ro1_rvfi_pc_wdata = rob_o1_data[174:143];
+  assign rob_i1_data[174:143] = ch1_rvfi_pc_wdata;
+
+  wire [0:0] ro1_rvfi_intr = rob_o1_data[175:175];
+  assign rob_i1_data[175:175] = ch1_rvfi_intr;
+
+  wire [0:0] ro1_rvfi_trap = rob_o1_data[176:176];
+  assign rob_i1_data[176:176] = ch1_rvfi_trap;
+
+  wire rob_i2_valid;
+  wire [63:0] rob_i2_order;
+  wire [176:0] rob_i2_data;
+
+  wire rob_o2_valid;
+  wire [63:0] rob_o2_order;
+  wire [176:0] rob_o2_data;
+
+  wire ro2_rvfi_valid = rob_o2_valid;
+  assign rob_i2_valid = ch2_rvfi_valid;
+
+  wire [63:0] ro2_rvfi_order = rob_o2_order;
+  assign rob_i2_order = ch2_rvfi_order;
+
+  wire [4:0] ro2_rvfi_rs1_addr = rob_o2_data[4:0];
+  assign rob_i2_data[4:0] = ch2_rvfi_rs1_addr;
+
+  wire [4:0] ro2_rvfi_rs2_addr = rob_o2_data[9:5];
+  assign rob_i2_data[9:5] = ch2_rvfi_rs2_addr;
+
+  wire [4:0] ro2_rvfi_rd_addr = rob_o2_data[14:10];
+  assign rob_i2_data[14:10] = ch2_rvfi_rd_addr;
+
+  wire [31:0] ro2_rvfi_rs1_rdata = rob_o2_data[46:15];
+  assign rob_i2_data[46:15] = ch2_rvfi_rs1_rdata;
+
+  wire [31:0] ro2_rvfi_rs2_rdata = rob_o2_data[78:47];
+  assign rob_i2_data[78:47] = ch2_rvfi_rs2_rdata;
+
+  wire [31:0] ro2_rvfi_rd_wdata = rob_o2_data[110:79];
+  assign rob_i2_data[110:79] = ch2_rvfi_rd_wdata;
+
+  wire [31:0] ro2_rvfi_pc_rdata = rob_o2_data[142:111];
+  assign rob_i2_data[142:111] = ch2_rvfi_pc_rdata;
+
+  wire [31:0] ro2_rvfi_pc_wdata = rob_o2_data[174:143];
+  assign rob_i2_data[174:143] = ch2_rvfi_pc_wdata;
+
+  wire [0:0] ro2_rvfi_intr = rob_o2_data[175:175];
+  assign rob_i2_data[175:175] = ch2_rvfi_intr;
+
+  wire [0:0] ro2_rvfi_trap = rob_o2_data[176:176];
+  assign rob_i2_data[176:176] = ch2_rvfi_trap;
+
+  wire rob_i3_valid;
+  wire [63:0] rob_i3_order;
+  wire [176:0] rob_i3_data;
+
+  wire rob_o3_valid;
+  wire [63:0] rob_o3_order;
+  wire [176:0] rob_o3_data;
+
+  wire ro3_rvfi_valid = rob_o3_valid;
+  assign rob_i3_valid = ch3_rvfi_valid;
+
+  wire [63:0] ro3_rvfi_order = rob_o3_order;
+  assign rob_i3_order = ch3_rvfi_order;
+
+  wire [4:0] ro3_rvfi_rs1_addr = rob_o3_data[4:0];
+  assign rob_i3_data[4:0] = ch3_rvfi_rs1_addr;
+
+  wire [4:0] ro3_rvfi_rs2_addr = rob_o3_data[9:5];
+  assign rob_i3_data[9:5] = ch3_rvfi_rs2_addr;
+
+  wire [4:0] ro3_rvfi_rd_addr = rob_o3_data[14:10];
+  assign rob_i3_data[14:10] = ch3_rvfi_rd_addr;
+
+  wire [31:0] ro3_rvfi_rs1_rdata = rob_o3_data[46:15];
+  assign rob_i3_data[46:15] = ch3_rvfi_rs1_rdata;
+
+  wire [31:0] ro3_rvfi_rs2_rdata = rob_o3_data[78:47];
+  assign rob_i3_data[78:47] = ch3_rvfi_rs2_rdata;
+
+  wire [31:0] ro3_rvfi_rd_wdata = rob_o3_data[110:79];
+  assign rob_i3_data[110:79] = ch3_rvfi_rd_wdata;
+
+  wire [31:0] ro3_rvfi_pc_rdata = rob_o3_data[142:111];
+  assign rob_i3_data[142:111] = ch3_rvfi_pc_rdata;
+
+  wire [31:0] ro3_rvfi_pc_wdata = rob_o3_data[174:143];
+  assign rob_i3_data[174:143] = ch3_rvfi_pc_wdata;
+
+  wire [0:0] ro3_rvfi_intr = rob_o3_data[175:175];
+  assign rob_i3_data[175:175] = ch3_rvfi_intr;
+
+  wire [0:0] ro3_rvfi_trap = rob_o3_data[176:176];
+  assign rob_i3_data[176:176] = ch3_rvfi_trap;
+
   wire [15:0] rob_errcode;
 
-  riscv_formal_monitor_rv32imc_rob rob (
+  riscv_formal_monitor_rv32im_rob rob (
     .clock(clock),
     .reset(reset),
     .i0_valid(rob_i0_valid),
@@ -234,6 +819,24 @@ module riscv_formal_monitor_rv32imc (
     .o0_valid(rob_o0_valid),
     .o0_order(rob_o0_order),
     .o0_data(rob_o0_data),
+    .i1_valid(rob_i1_valid),
+    .i1_order(rob_i1_order),
+    .i1_data(rob_i1_data),
+    .o1_valid(rob_o1_valid),
+    .o1_order(rob_o1_order),
+    .o1_data(rob_o1_data),
+    .i2_valid(rob_i2_valid),
+    .i2_order(rob_i2_order),
+    .i2_data(rob_i2_data),
+    .o2_valid(rob_o2_valid),
+    .o2_order(rob_o2_order),
+    .o2_data(rob_o2_data),
+    .i3_valid(rob_i3_valid),
+    .i3_order(rob_i3_order),
+    .i3_data(rob_i3_data),
+    .o3_valid(rob_o3_valid),
+    .o3_order(rob_o3_order),
+    .o3_data(rob_o3_data),
     .errcode(rob_errcode)
   );
 
@@ -284,8 +887,149 @@ module riscv_formal_monitor_rv32imc (
     shadow0_pc_rdata = shadow_pc;
   end
 
+  reg shadow1_pc_valid;
+  reg shadow1_pc_trap;
+  reg [31:0] shadow1_pc_rdata;
+
+  reg [15:0] ro1_errcode_p;
+
+  task ro1_handle_error_p;
+    input [15:0] code;
+    input [511:0] msg;
+    begin
+      $display("-------- RVFI Monitor error %0d in reordered channel 1: %m at time %0t --------", code, $time);
+      $display("Error message: %0s", msg);
+      $display("rvfi_valid = %x", ro1_rvfi_valid);
+      $display("rvfi_order = %x", ro1_rvfi_order);
+      $display("rvfi_rs1_addr = %x", ro1_rvfi_rs1_addr);
+      $display("rvfi_rs2_addr = %x", ro1_rvfi_rs2_addr);
+      $display("rvfi_rs1_rdata = %x", ro1_rvfi_rs1_rdata);
+      $display("rvfi_rs2_rdata = %x", ro1_rvfi_rs2_rdata);
+      $display("rvfi_rd_addr = %x", ro1_rvfi_rd_addr);
+      $display("rvfi_rd_wdata = %x", ro1_rvfi_rd_wdata);
+      $display("rvfi_pc_rdata = %x", ro1_rvfi_pc_rdata);
+      $display("rvfi_pc_wdata = %x", ro1_rvfi_pc_wdata);
+      $display("rvfi_intr = %x", ro1_rvfi_intr);
+      $display("rvfi_trap = %x", ro1_rvfi_trap);
+      $display("shadow_pc_valid = %x", shadow1_pc_valid);
+      $display("shadow_pc_rdata = %x", shadow1_pc_rdata);
+      ro1_errcode_p <= code;
+    end
+  endtask
+
+  always @* begin
+    shadow1_pc_valid = shadow_pc_valid;
+    shadow1_pc_trap = shadow_pc_trap;
+    shadow1_pc_rdata = shadow_pc;
+    if (!reset && ro0_rvfi_valid) begin
+      shadow1_pc_valid = !ro1_rvfi_trap;
+      shadow1_pc_trap = ro1_rvfi_trap;
+      shadow1_pc_rdata = ro0_rvfi_pc_wdata;
+    end
+  end
+
+  reg shadow2_pc_valid;
+  reg shadow2_pc_trap;
+  reg [31:0] shadow2_pc_rdata;
+
+  reg [15:0] ro2_errcode_p;
+
+  task ro2_handle_error_p;
+    input [15:0] code;
+    input [511:0] msg;
+    begin
+      $display("-------- RVFI Monitor error %0d in reordered channel 2: %m at time %0t --------", code, $time);
+      $display("Error message: %0s", msg);
+      $display("rvfi_valid = %x", ro2_rvfi_valid);
+      $display("rvfi_order = %x", ro2_rvfi_order);
+      $display("rvfi_rs1_addr = %x", ro2_rvfi_rs1_addr);
+      $display("rvfi_rs2_addr = %x", ro2_rvfi_rs2_addr);
+      $display("rvfi_rs1_rdata = %x", ro2_rvfi_rs1_rdata);
+      $display("rvfi_rs2_rdata = %x", ro2_rvfi_rs2_rdata);
+      $display("rvfi_rd_addr = %x", ro2_rvfi_rd_addr);
+      $display("rvfi_rd_wdata = %x", ro2_rvfi_rd_wdata);
+      $display("rvfi_pc_rdata = %x", ro2_rvfi_pc_rdata);
+      $display("rvfi_pc_wdata = %x", ro2_rvfi_pc_wdata);
+      $display("rvfi_intr = %x", ro2_rvfi_intr);
+      $display("rvfi_trap = %x", ro2_rvfi_trap);
+      $display("shadow_pc_valid = %x", shadow2_pc_valid);
+      $display("shadow_pc_rdata = %x", shadow2_pc_rdata);
+      ro2_errcode_p <= code;
+    end
+  endtask
+
+  always @* begin
+    shadow2_pc_valid = shadow_pc_valid;
+    shadow2_pc_trap = shadow_pc_trap;
+    shadow2_pc_rdata = shadow_pc;
+    if (!reset && ro0_rvfi_valid) begin
+      shadow2_pc_valid = !ro2_rvfi_trap;
+      shadow2_pc_trap = ro2_rvfi_trap;
+      shadow2_pc_rdata = ro0_rvfi_pc_wdata;
+    end
+    if (!reset && ro1_rvfi_valid) begin
+      shadow2_pc_valid = !ro2_rvfi_trap;
+      shadow2_pc_trap = ro2_rvfi_trap;
+      shadow2_pc_rdata = ro1_rvfi_pc_wdata;
+    end
+  end
+
+  reg shadow3_pc_valid;
+  reg shadow3_pc_trap;
+  reg [31:0] shadow3_pc_rdata;
+
+  reg [15:0] ro3_errcode_p;
+
+  task ro3_handle_error_p;
+    input [15:0] code;
+    input [511:0] msg;
+    begin
+      $display("-------- RVFI Monitor error %0d in reordered channel 3: %m at time %0t --------", code, $time);
+      $display("Error message: %0s", msg);
+      $display("rvfi_valid = %x", ro3_rvfi_valid);
+      $display("rvfi_order = %x", ro3_rvfi_order);
+      $display("rvfi_rs1_addr = %x", ro3_rvfi_rs1_addr);
+      $display("rvfi_rs2_addr = %x", ro3_rvfi_rs2_addr);
+      $display("rvfi_rs1_rdata = %x", ro3_rvfi_rs1_rdata);
+      $display("rvfi_rs2_rdata = %x", ro3_rvfi_rs2_rdata);
+      $display("rvfi_rd_addr = %x", ro3_rvfi_rd_addr);
+      $display("rvfi_rd_wdata = %x", ro3_rvfi_rd_wdata);
+      $display("rvfi_pc_rdata = %x", ro3_rvfi_pc_rdata);
+      $display("rvfi_pc_wdata = %x", ro3_rvfi_pc_wdata);
+      $display("rvfi_intr = %x", ro3_rvfi_intr);
+      $display("rvfi_trap = %x", ro3_rvfi_trap);
+      $display("shadow_pc_valid = %x", shadow3_pc_valid);
+      $display("shadow_pc_rdata = %x", shadow3_pc_rdata);
+      ro3_errcode_p <= code;
+    end
+  endtask
+
+  always @* begin
+    shadow3_pc_valid = shadow_pc_valid;
+    shadow3_pc_trap = shadow_pc_trap;
+    shadow3_pc_rdata = shadow_pc;
+    if (!reset && ro0_rvfi_valid) begin
+      shadow3_pc_valid = !ro3_rvfi_trap;
+      shadow3_pc_trap = ro3_rvfi_trap;
+      shadow3_pc_rdata = ro0_rvfi_pc_wdata;
+    end
+    if (!reset && ro1_rvfi_valid) begin
+      shadow3_pc_valid = !ro3_rvfi_trap;
+      shadow3_pc_trap = ro3_rvfi_trap;
+      shadow3_pc_rdata = ro1_rvfi_pc_wdata;
+    end
+    if (!reset && ro2_rvfi_valid) begin
+      shadow3_pc_valid = !ro3_rvfi_trap;
+      shadow3_pc_trap = ro3_rvfi_trap;
+      shadow3_pc_rdata = ro2_rvfi_pc_wdata;
+    end
+  end
+
   always @(posedge clock) begin
     ro0_errcode_p <= 0;
+    ro1_errcode_p <= 0;
+    ro2_errcode_p <= 0;
+    ro3_errcode_p <= 0;
     if (reset) begin
       shadow_pc_valid <= 0;
       shadow_pc_trap <= 0;
@@ -300,6 +1044,39 @@ module riscv_formal_monitor_rv32imc (
       shadow_pc_valid <= !ro0_rvfi_trap;
       shadow_pc_trap <= ro0_rvfi_trap;
       shadow_pc <= ro0_rvfi_pc_wdata;
+    end
+    if (!reset && ro1_rvfi_valid) begin
+      if (shadow1_pc_valid && shadow1_pc_rdata != ro1_rvfi_pc_rdata && !ro1_rvfi_intr) begin
+        ro1_handle_error_p(230, "mismatch with shadow pc");
+      end
+      if (shadow1_pc_valid && shadow1_pc_trap && !ro1_rvfi_intr) begin
+        ro1_handle_error_p(233, "expected intr after trap");
+      end
+      shadow_pc_valid <= !ro1_rvfi_trap;
+      shadow_pc_trap <= ro1_rvfi_trap;
+      shadow_pc <= ro1_rvfi_pc_wdata;
+    end
+    if (!reset && ro2_rvfi_valid) begin
+      if (shadow2_pc_valid && shadow2_pc_rdata != ro2_rvfi_pc_rdata && !ro2_rvfi_intr) begin
+        ro2_handle_error_p(330, "mismatch with shadow pc");
+      end
+      if (shadow2_pc_valid && shadow2_pc_trap && !ro2_rvfi_intr) begin
+        ro2_handle_error_p(333, "expected intr after trap");
+      end
+      shadow_pc_valid <= !ro2_rvfi_trap;
+      shadow_pc_trap <= ro2_rvfi_trap;
+      shadow_pc <= ro2_rvfi_pc_wdata;
+    end
+    if (!reset && ro3_rvfi_valid) begin
+      if (shadow3_pc_valid && shadow3_pc_rdata != ro3_rvfi_pc_rdata && !ro3_rvfi_intr) begin
+        ro3_handle_error_p(430, "mismatch with shadow pc");
+      end
+      if (shadow3_pc_valid && shadow3_pc_trap && !ro3_rvfi_intr) begin
+        ro3_handle_error_p(433, "expected intr after trap");
+      end
+      shadow_pc_valid <= !ro3_rvfi_trap;
+      shadow_pc_trap <= ro3_rvfi_trap;
+      shadow_pc <= ro3_rvfi_pc_wdata;
     end
   end
 
@@ -357,8 +1134,212 @@ module riscv_formal_monitor_rv32imc (
     end
   end
 
+  reg shadow1_rs1_valid;
+  reg shadow1_rs2_valid;
+  reg [31:0] shadow1_rs1_rdata;
+  reg [31:0] shadow1_rs2_rdata;
+
+  reg [15:0] ro1_errcode_r;
+
+  task ro1_handle_error_r;
+    input [15:0] code;
+    input [511:0] msg;
+    begin
+      $display("-------- RVFI Monitor error %0d in reordered channel 1: %m at time %0t --------", code, $time);
+      $display("Error message: %0s", msg);
+      $display("rvfi_valid = %x", ro1_rvfi_valid);
+      $display("rvfi_order = %x", ro1_rvfi_order);
+      $display("rvfi_rs1_addr = %x", ro1_rvfi_rs1_addr);
+      $display("rvfi_rs2_addr = %x", ro1_rvfi_rs2_addr);
+      $display("rvfi_rs1_rdata = %x", ro1_rvfi_rs1_rdata);
+      $display("rvfi_rs2_rdata = %x", ro1_rvfi_rs2_rdata);
+      $display("rvfi_rd_addr = %x", ro1_rvfi_rd_addr);
+      $display("rvfi_rd_wdata = %x", ro1_rvfi_rd_wdata);
+      $display("rvfi_pc_rdata = %x", ro1_rvfi_pc_rdata);
+      $display("rvfi_pc_wdata = %x", ro1_rvfi_pc_wdata);
+      $display("rvfi_intr = %x", ro1_rvfi_intr);
+      $display("rvfi_trap = %x", ro1_rvfi_trap);
+      $display("shadow_rs1_valid = %x", shadow1_rs1_valid);
+      $display("shadow_rs1_rdata = %x", shadow1_rs1_rdata);
+      $display("shadow_rs2_valid = %x", shadow1_rs2_valid);
+      $display("shadow_rs2_rdata = %x", shadow1_rs2_rdata);
+      ro1_errcode_r <= code;
+    end
+  endtask
+
+  always @* begin
+    shadow1_rs1_valid = 0;
+    shadow1_rs1_rdata = 0;
+    if (!reset && ro1_rvfi_valid) begin
+      shadow1_rs1_valid = shadow_xregs_valid[ro1_rvfi_rs1_addr];
+      shadow1_rs1_rdata = shadow_xregs[ro1_rvfi_rs1_addr];
+      if (ro0_rvfi_valid && ro0_rvfi_rd_addr == ro1_rvfi_rs1_addr) begin
+        shadow1_rs1_valid = 1;
+        shadow1_rs1_rdata = ro0_rvfi_rd_wdata;
+      end
+    end
+  end
+
+  always @* begin
+    shadow1_rs2_valid = 0;
+    shadow1_rs2_rdata = 0;
+    if (!reset && ro1_rvfi_valid) begin
+      shadow1_rs2_valid = shadow_xregs_valid[ro1_rvfi_rs2_addr];
+      shadow1_rs2_rdata = shadow_xregs[ro1_rvfi_rs2_addr];
+      if (ro0_rvfi_valid && ro0_rvfi_rd_addr == ro1_rvfi_rs2_addr) begin
+        shadow1_rs2_valid = 1;
+        shadow1_rs2_rdata = ro0_rvfi_rd_wdata;
+      end
+    end
+  end
+
+  reg shadow2_rs1_valid;
+  reg shadow2_rs2_valid;
+  reg [31:0] shadow2_rs1_rdata;
+  reg [31:0] shadow2_rs2_rdata;
+
+  reg [15:0] ro2_errcode_r;
+
+  task ro2_handle_error_r;
+    input [15:0] code;
+    input [511:0] msg;
+    begin
+      $display("-------- RVFI Monitor error %0d in reordered channel 2: %m at time %0t --------", code, $time);
+      $display("Error message: %0s", msg);
+      $display("rvfi_valid = %x", ro2_rvfi_valid);
+      $display("rvfi_order = %x", ro2_rvfi_order);
+      $display("rvfi_rs1_addr = %x", ro2_rvfi_rs1_addr);
+      $display("rvfi_rs2_addr = %x", ro2_rvfi_rs2_addr);
+      $display("rvfi_rs1_rdata = %x", ro2_rvfi_rs1_rdata);
+      $display("rvfi_rs2_rdata = %x", ro2_rvfi_rs2_rdata);
+      $display("rvfi_rd_addr = %x", ro2_rvfi_rd_addr);
+      $display("rvfi_rd_wdata = %x", ro2_rvfi_rd_wdata);
+      $display("rvfi_pc_rdata = %x", ro2_rvfi_pc_rdata);
+      $display("rvfi_pc_wdata = %x", ro2_rvfi_pc_wdata);
+      $display("rvfi_intr = %x", ro2_rvfi_intr);
+      $display("rvfi_trap = %x", ro2_rvfi_trap);
+      $display("shadow_rs1_valid = %x", shadow2_rs1_valid);
+      $display("shadow_rs1_rdata = %x", shadow2_rs1_rdata);
+      $display("shadow_rs2_valid = %x", shadow2_rs2_valid);
+      $display("shadow_rs2_rdata = %x", shadow2_rs2_rdata);
+      ro2_errcode_r <= code;
+    end
+  endtask
+
+  always @* begin
+    shadow2_rs1_valid = 0;
+    shadow2_rs1_rdata = 0;
+    if (!reset && ro2_rvfi_valid) begin
+      shadow2_rs1_valid = shadow_xregs_valid[ro2_rvfi_rs1_addr];
+      shadow2_rs1_rdata = shadow_xregs[ro2_rvfi_rs1_addr];
+      if (ro0_rvfi_valid && ro0_rvfi_rd_addr == ro2_rvfi_rs1_addr) begin
+        shadow2_rs1_valid = 1;
+        shadow2_rs1_rdata = ro0_rvfi_rd_wdata;
+      end
+      if (ro1_rvfi_valid && ro1_rvfi_rd_addr == ro2_rvfi_rs1_addr) begin
+        shadow2_rs1_valid = 1;
+        shadow2_rs1_rdata = ro1_rvfi_rd_wdata;
+      end
+    end
+  end
+
+  always @* begin
+    shadow2_rs2_valid = 0;
+    shadow2_rs2_rdata = 0;
+    if (!reset && ro2_rvfi_valid) begin
+      shadow2_rs2_valid = shadow_xregs_valid[ro2_rvfi_rs2_addr];
+      shadow2_rs2_rdata = shadow_xregs[ro2_rvfi_rs2_addr];
+      if (ro0_rvfi_valid && ro0_rvfi_rd_addr == ro2_rvfi_rs2_addr) begin
+        shadow2_rs2_valid = 1;
+        shadow2_rs2_rdata = ro0_rvfi_rd_wdata;
+      end
+      if (ro1_rvfi_valid && ro1_rvfi_rd_addr == ro2_rvfi_rs2_addr) begin
+        shadow2_rs2_valid = 1;
+        shadow2_rs2_rdata = ro1_rvfi_rd_wdata;
+      end
+    end
+  end
+
+  reg shadow3_rs1_valid;
+  reg shadow3_rs2_valid;
+  reg [31:0] shadow3_rs1_rdata;
+  reg [31:0] shadow3_rs2_rdata;
+
+  reg [15:0] ro3_errcode_r;
+
+  task ro3_handle_error_r;
+    input [15:0] code;
+    input [511:0] msg;
+    begin
+      $display("-------- RVFI Monitor error %0d in reordered channel 3: %m at time %0t --------", code, $time);
+      $display("Error message: %0s", msg);
+      $display("rvfi_valid = %x", ro3_rvfi_valid);
+      $display("rvfi_order = %x", ro3_rvfi_order);
+      $display("rvfi_rs1_addr = %x", ro3_rvfi_rs1_addr);
+      $display("rvfi_rs2_addr = %x", ro3_rvfi_rs2_addr);
+      $display("rvfi_rs1_rdata = %x", ro3_rvfi_rs1_rdata);
+      $display("rvfi_rs2_rdata = %x", ro3_rvfi_rs2_rdata);
+      $display("rvfi_rd_addr = %x", ro3_rvfi_rd_addr);
+      $display("rvfi_rd_wdata = %x", ro3_rvfi_rd_wdata);
+      $display("rvfi_pc_rdata = %x", ro3_rvfi_pc_rdata);
+      $display("rvfi_pc_wdata = %x", ro3_rvfi_pc_wdata);
+      $display("rvfi_intr = %x", ro3_rvfi_intr);
+      $display("rvfi_trap = %x", ro3_rvfi_trap);
+      $display("shadow_rs1_valid = %x", shadow3_rs1_valid);
+      $display("shadow_rs1_rdata = %x", shadow3_rs1_rdata);
+      $display("shadow_rs2_valid = %x", shadow3_rs2_valid);
+      $display("shadow_rs2_rdata = %x", shadow3_rs2_rdata);
+      ro3_errcode_r <= code;
+    end
+  endtask
+
+  always @* begin
+    shadow3_rs1_valid = 0;
+    shadow3_rs1_rdata = 0;
+    if (!reset && ro3_rvfi_valid) begin
+      shadow3_rs1_valid = shadow_xregs_valid[ro3_rvfi_rs1_addr];
+      shadow3_rs1_rdata = shadow_xregs[ro3_rvfi_rs1_addr];
+      if (ro0_rvfi_valid && ro0_rvfi_rd_addr == ro3_rvfi_rs1_addr) begin
+        shadow3_rs1_valid = 1;
+        shadow3_rs1_rdata = ro0_rvfi_rd_wdata;
+      end
+      if (ro1_rvfi_valid && ro1_rvfi_rd_addr == ro3_rvfi_rs1_addr) begin
+        shadow3_rs1_valid = 1;
+        shadow3_rs1_rdata = ro1_rvfi_rd_wdata;
+      end
+      if (ro2_rvfi_valid && ro2_rvfi_rd_addr == ro3_rvfi_rs1_addr) begin
+        shadow3_rs1_valid = 1;
+        shadow3_rs1_rdata = ro2_rvfi_rd_wdata;
+      end
+    end
+  end
+
+  always @* begin
+    shadow3_rs2_valid = 0;
+    shadow3_rs2_rdata = 0;
+    if (!reset && ro3_rvfi_valid) begin
+      shadow3_rs2_valid = shadow_xregs_valid[ro3_rvfi_rs2_addr];
+      shadow3_rs2_rdata = shadow_xregs[ro3_rvfi_rs2_addr];
+      if (ro0_rvfi_valid && ro0_rvfi_rd_addr == ro3_rvfi_rs2_addr) begin
+        shadow3_rs2_valid = 1;
+        shadow3_rs2_rdata = ro0_rvfi_rd_wdata;
+      end
+      if (ro1_rvfi_valid && ro1_rvfi_rd_addr == ro3_rvfi_rs2_addr) begin
+        shadow3_rs2_valid = 1;
+        shadow3_rs2_rdata = ro1_rvfi_rd_wdata;
+      end
+      if (ro2_rvfi_valid && ro2_rvfi_rd_addr == ro3_rvfi_rs2_addr) begin
+        shadow3_rs2_valid = 1;
+        shadow3_rs2_rdata = ro2_rvfi_rd_wdata;
+      end
+    end
+  end
+
   always @(posedge clock) begin
     ro0_errcode_r <= 0;
+    ro1_errcode_r <= 0;
+    ro2_errcode_r <= 0;
+    ro3_errcode_r <= 0;
     if (reset) begin
       shadow_xregs_valid <= 1;
       shadow_xregs[0] <= 0;
@@ -373,20 +1354,59 @@ module riscv_formal_monitor_rv32imc (
       shadow_xregs_valid[ro0_rvfi_rd_addr] <= 1;
       shadow_xregs[ro0_rvfi_rd_addr] <= ro0_rvfi_rd_wdata;
     end
+    if (!reset && ro1_rvfi_valid) begin
+      if (shadow1_rs1_valid && shadow1_rs1_rdata != ro1_rvfi_rs1_rdata) begin
+        ro1_handle_error_r(231, "mismatch with shadow rs1");
+      end
+      if (shadow1_rs2_valid && shadow1_rs2_rdata != ro1_rvfi_rs2_rdata) begin
+        ro1_handle_error_r(232, "mismatch with shadow rs2");
+      end
+      shadow_xregs_valid[ro1_rvfi_rd_addr] <= 1;
+      shadow_xregs[ro1_rvfi_rd_addr] <= ro1_rvfi_rd_wdata;
+    end
+    if (!reset && ro2_rvfi_valid) begin
+      if (shadow2_rs1_valid && shadow2_rs1_rdata != ro2_rvfi_rs1_rdata) begin
+        ro2_handle_error_r(331, "mismatch with shadow rs1");
+      end
+      if (shadow2_rs2_valid && shadow2_rs2_rdata != ro2_rvfi_rs2_rdata) begin
+        ro2_handle_error_r(332, "mismatch with shadow rs2");
+      end
+      shadow_xregs_valid[ro2_rvfi_rd_addr] <= 1;
+      shadow_xregs[ro2_rvfi_rd_addr] <= ro2_rvfi_rd_wdata;
+    end
+    if (!reset && ro3_rvfi_valid) begin
+      if (shadow3_rs1_valid && shadow3_rs1_rdata != ro3_rvfi_rs1_rdata) begin
+        ro3_handle_error_r(431, "mismatch with shadow rs1");
+      end
+      if (shadow3_rs2_valid && shadow3_rs2_rdata != ro3_rvfi_rs2_rdata) begin
+        ro3_handle_error_r(432, "mismatch with shadow rs2");
+      end
+      shadow_xregs_valid[ro3_rvfi_rd_addr] <= 1;
+      shadow_xregs[ro3_rvfi_rd_addr] <= ro3_rvfi_rd_wdata;
+    end
   end
 
   always @(posedge clock) begin
     errcode <= 0;
     if (!reset) begin
       if (ch0_errcode) errcode <= ch0_errcode;
+      if (ch1_errcode) errcode <= ch1_errcode;
+      if (ch2_errcode) errcode <= ch2_errcode;
+      if (ch3_errcode) errcode <= ch3_errcode;
       if (rob_errcode) errcode <= rob_errcode;
       if (ro0_errcode_p) errcode <= ro0_errcode_p;
+      if (ro1_errcode_p) errcode <= ro1_errcode_p;
+      if (ro2_errcode_p) errcode <= ro2_errcode_p;
+      if (ro3_errcode_p) errcode <= ro3_errcode_p;
       if (ro0_errcode_r) errcode <= ro0_errcode_r;
+      if (ro1_errcode_r) errcode <= ro1_errcode_r;
+      if (ro2_errcode_r) errcode <= ro2_errcode_r;
+      if (ro3_errcode_r) errcode <= ro3_errcode_r;
     end
   end
 endmodule
 
-module riscv_formal_monitor_rv32imc_rob (
+module riscv_formal_monitor_rv32im_rob (
   input clock,
   input reset,
     input i0_valid,
@@ -395,6 +1415,24 @@ module riscv_formal_monitor_rv32imc_rob (
     output reg o0_valid,
     output reg [63:0] o0_order,
     output reg [176:0] o0_data,
+    input i1_valid,
+    input [63:0] i1_order,
+    input [176:0] i1_data,
+    output reg o1_valid,
+    output reg [63:0] o1_order,
+    output reg [176:0] o1_data,
+    input i2_valid,
+    input [63:0] i2_order,
+    input [176:0] i2_data,
+    output reg o2_valid,
+    output reg [63:0] o2_order,
+    output reg [176:0] o2_data,
+    input i3_valid,
+    input [63:0] i3_order,
+    input [176:0] i3_data,
+    output reg o3_valid,
+    output reg [63:0] o3_order,
+    output reg [176:0] o3_data,
   output reg [15:0] errcode
 );
   reg [240:0] buffer [0:255];
@@ -404,6 +1442,9 @@ module riscv_formal_monitor_rv32imc_rob (
 
   always @(posedge clock) begin
     o0_valid <= 0;
+    o1_valid <= 0;
+    o2_valid <= 0;
+    o3_valid <= 0;
     errcode <= 0;
     continue_flag = 1;
     if (reset) begin
@@ -416,6 +1457,24 @@ module riscv_formal_monitor_rv32imc_rob (
         buffer[i0_order[7:0]] <= {i0_data, i0_order};
         valid[i0_order[7:0]] <= 1;
       end
+      if (i1_valid) begin
+        if (valid[i1_order[7:0]])
+          errcode <= 60000 + i1_order[7:0];
+        buffer[i1_order[7:0]] <= {i1_data, i1_order};
+        valid[i1_order[7:0]] <= 1;
+      end
+      if (i2_valid) begin
+        if (valid[i2_order[7:0]])
+          errcode <= 60000 + i2_order[7:0];
+        buffer[i2_order[7:0]] <= {i2_data, i2_order};
+        valid[i2_order[7:0]] <= 1;
+      end
+      if (i3_valid) begin
+        if (valid[i3_order[7:0]])
+          errcode <= 60000 + i3_order[7:0];
+        buffer[i3_order[7:0]] <= {i3_data, i3_order};
+        valid[i3_order[7:0]] <= 1;
+      end
       if (continue_flag && valid[cursor[7:0]]) begin
         if (buffer[cursor[7:0]][63:0] != cursor)
           errcode <= 61000 + cursor[7:0];
@@ -427,13 +1486,46 @@ module riscv_formal_monitor_rv32imc_rob (
       end else begin
         continue_flag = 0;
       end
+      if (continue_flag && valid[cursor[7:0]]) begin
+        if (buffer[cursor[7:0]][63:0] != cursor)
+          errcode <= 61000 + cursor[7:0];
+        o1_valid <= 1;
+        o1_order <= buffer[cursor[7:0]][63:0];
+        o1_data <= buffer[cursor[7:0]][240:64];
+        valid[cursor[7:0]] <= 0;
+        cursor = cursor + 1;
+      end else begin
+        continue_flag = 0;
+      end
+      if (continue_flag && valid[cursor[7:0]]) begin
+        if (buffer[cursor[7:0]][63:0] != cursor)
+          errcode <= 61000 + cursor[7:0];
+        o2_valid <= 1;
+        o2_order <= buffer[cursor[7:0]][63:0];
+        o2_data <= buffer[cursor[7:0]][240:64];
+        valid[cursor[7:0]] <= 0;
+        cursor = cursor + 1;
+      end else begin
+        continue_flag = 0;
+      end
+      if (continue_flag && valid[cursor[7:0]]) begin
+        if (buffer[cursor[7:0]][63:0] != cursor)
+          errcode <= 61000 + cursor[7:0];
+        o3_valid <= 1;
+        o3_order <= buffer[cursor[7:0]][63:0];
+        o3_data <= buffer[cursor[7:0]][240:64];
+        valid[cursor[7:0]] <= 0;
+        cursor = cursor + 1;
+      end else begin
+        continue_flag = 0;
+      end
     end
   end
 endmodule
 
 // DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
 
-module riscv_formal_monitor_rv32imc_isa_spec (
+module riscv_formal_monitor_rv32im_isa_spec (
   input                                 rvfi_valid,
   input  [32   - 1 : 0] rvfi_insn,
   input  [32   - 1 : 0] rvfi_pc_rdata,
@@ -465,7 +1557,7 @@ module riscv_formal_monitor_rv32imc_isa_spec (
   wire [32/8 - 1 : 0] spec_insn_add_mem_wmask;
   wire [32   - 1 : 0] spec_insn_add_mem_wdata;
 
-  riscv_formal_monitor_rv32imc_insn_add insn_add (
+  riscv_formal_monitor_rv32im_insn_add insn_add (
     .rvfi_valid(rvfi_valid),
     .rvfi_insn(rvfi_insn),
     .rvfi_pc_rdata(rvfi_pc_rdata),
@@ -497,7 +1589,7 @@ module riscv_formal_monitor_rv32imc_isa_spec (
   wire [32/8 - 1 : 0] spec_insn_addi_mem_wmask;
   wire [32   - 1 : 0] spec_insn_addi_mem_wdata;
 
-  riscv_formal_monitor_rv32imc_insn_addi insn_addi (
+  riscv_formal_monitor_rv32im_insn_addi insn_addi (
     .rvfi_valid(rvfi_valid),
     .rvfi_insn(rvfi_insn),
     .rvfi_pc_rdata(rvfi_pc_rdata),
@@ -529,7 +1621,7 @@ module riscv_formal_monitor_rv32imc_isa_spec (
   wire [32/8 - 1 : 0] spec_insn_and_mem_wmask;
   wire [32   - 1 : 0] spec_insn_and_mem_wdata;
 
-  riscv_formal_monitor_rv32imc_insn_and insn_and (
+  riscv_formal_monitor_rv32im_insn_and insn_and (
     .rvfi_valid(rvfi_valid),
     .rvfi_insn(rvfi_insn),
     .rvfi_pc_rdata(rvfi_pc_rdata),
@@ -561,7 +1653,7 @@ module riscv_formal_monitor_rv32imc_isa_spec (
   wire [32/8 - 1 : 0] spec_insn_andi_mem_wmask;
   wire [32   - 1 : 0] spec_insn_andi_mem_wdata;
 
-  riscv_formal_monitor_rv32imc_insn_andi insn_andi (
+  riscv_formal_monitor_rv32im_insn_andi insn_andi (
     .rvfi_valid(rvfi_valid),
     .rvfi_insn(rvfi_insn),
     .rvfi_pc_rdata(rvfi_pc_rdata),
@@ -593,7 +1685,7 @@ module riscv_formal_monitor_rv32imc_isa_spec (
   wire [32/8 - 1 : 0] spec_insn_auipc_mem_wmask;
   wire [32   - 1 : 0] spec_insn_auipc_mem_wdata;
 
-  riscv_formal_monitor_rv32imc_insn_auipc insn_auipc (
+  riscv_formal_monitor_rv32im_insn_auipc insn_auipc (
     .rvfi_valid(rvfi_valid),
     .rvfi_insn(rvfi_insn),
     .rvfi_pc_rdata(rvfi_pc_rdata),
@@ -625,7 +1717,7 @@ module riscv_formal_monitor_rv32imc_isa_spec (
   wire [32/8 - 1 : 0] spec_insn_beq_mem_wmask;
   wire [32   - 1 : 0] spec_insn_beq_mem_wdata;
 
-  riscv_formal_monitor_rv32imc_insn_beq insn_beq (
+  riscv_formal_monitor_rv32im_insn_beq insn_beq (
     .rvfi_valid(rvfi_valid),
     .rvfi_insn(rvfi_insn),
     .rvfi_pc_rdata(rvfi_pc_rdata),
@@ -657,7 +1749,7 @@ module riscv_formal_monitor_rv32imc_isa_spec (
   wire [32/8 - 1 : 0] spec_insn_bge_mem_wmask;
   wire [32   - 1 : 0] spec_insn_bge_mem_wdata;
 
-  riscv_formal_monitor_rv32imc_insn_bge insn_bge (
+  riscv_formal_monitor_rv32im_insn_bge insn_bge (
     .rvfi_valid(rvfi_valid),
     .rvfi_insn(rvfi_insn),
     .rvfi_pc_rdata(rvfi_pc_rdata),
@@ -689,7 +1781,7 @@ module riscv_formal_monitor_rv32imc_isa_spec (
   wire [32/8 - 1 : 0] spec_insn_bgeu_mem_wmask;
   wire [32   - 1 : 0] spec_insn_bgeu_mem_wdata;
 
-  riscv_formal_monitor_rv32imc_insn_bgeu insn_bgeu (
+  riscv_formal_monitor_rv32im_insn_bgeu insn_bgeu (
     .rvfi_valid(rvfi_valid),
     .rvfi_insn(rvfi_insn),
     .rvfi_pc_rdata(rvfi_pc_rdata),
@@ -721,7 +1813,7 @@ module riscv_formal_monitor_rv32imc_isa_spec (
   wire [32/8 - 1 : 0] spec_insn_blt_mem_wmask;
   wire [32   - 1 : 0] spec_insn_blt_mem_wdata;
 
-  riscv_formal_monitor_rv32imc_insn_blt insn_blt (
+  riscv_formal_monitor_rv32im_insn_blt insn_blt (
     .rvfi_valid(rvfi_valid),
     .rvfi_insn(rvfi_insn),
     .rvfi_pc_rdata(rvfi_pc_rdata),
@@ -753,7 +1845,7 @@ module riscv_formal_monitor_rv32imc_isa_spec (
   wire [32/8 - 1 : 0] spec_insn_bltu_mem_wmask;
   wire [32   - 1 : 0] spec_insn_bltu_mem_wdata;
 
-  riscv_formal_monitor_rv32imc_insn_bltu insn_bltu (
+  riscv_formal_monitor_rv32im_insn_bltu insn_bltu (
     .rvfi_valid(rvfi_valid),
     .rvfi_insn(rvfi_insn),
     .rvfi_pc_rdata(rvfi_pc_rdata),
@@ -785,7 +1877,7 @@ module riscv_formal_monitor_rv32imc_isa_spec (
   wire [32/8 - 1 : 0] spec_insn_bne_mem_wmask;
   wire [32   - 1 : 0] spec_insn_bne_mem_wdata;
 
-  riscv_formal_monitor_rv32imc_insn_bne insn_bne (
+  riscv_formal_monitor_rv32im_insn_bne insn_bne (
     .rvfi_valid(rvfi_valid),
     .rvfi_insn(rvfi_insn),
     .rvfi_pc_rdata(rvfi_pc_rdata),
@@ -805,806 +1897,6 @@ module riscv_formal_monitor_rv32imc_isa_spec (
     .spec_mem_wdata(spec_insn_bne_mem_wdata)
   );
 
-  wire                                spec_insn_c_add_valid;
-  wire                                spec_insn_c_add_trap;
-  wire [                       4 : 0] spec_insn_c_add_rs1_addr;
-  wire [                       4 : 0] spec_insn_c_add_rs2_addr;
-  wire [                       4 : 0] spec_insn_c_add_rd_addr;
-  wire [32   - 1 : 0] spec_insn_c_add_rd_wdata;
-  wire [32   - 1 : 0] spec_insn_c_add_pc_wdata;
-  wire [32   - 1 : 0] spec_insn_c_add_mem_addr;
-  wire [32/8 - 1 : 0] spec_insn_c_add_mem_rmask;
-  wire [32/8 - 1 : 0] spec_insn_c_add_mem_wmask;
-  wire [32   - 1 : 0] spec_insn_c_add_mem_wdata;
-
-  riscv_formal_monitor_rv32imc_insn_c_add insn_c_add (
-    .rvfi_valid(rvfi_valid),
-    .rvfi_insn(rvfi_insn),
-    .rvfi_pc_rdata(rvfi_pc_rdata),
-    .rvfi_rs1_rdata(rvfi_rs1_rdata),
-    .rvfi_rs2_rdata(rvfi_rs2_rdata),
-    .rvfi_mem_rdata(rvfi_mem_rdata),
-    .spec_valid(spec_insn_c_add_valid),
-    .spec_trap(spec_insn_c_add_trap),
-    .spec_rs1_addr(spec_insn_c_add_rs1_addr),
-    .spec_rs2_addr(spec_insn_c_add_rs2_addr),
-    .spec_rd_addr(spec_insn_c_add_rd_addr),
-    .spec_rd_wdata(spec_insn_c_add_rd_wdata),
-    .spec_pc_wdata(spec_insn_c_add_pc_wdata),
-    .spec_mem_addr(spec_insn_c_add_mem_addr),
-    .spec_mem_rmask(spec_insn_c_add_mem_rmask),
-    .spec_mem_wmask(spec_insn_c_add_mem_wmask),
-    .spec_mem_wdata(spec_insn_c_add_mem_wdata)
-  );
-
-  wire                                spec_insn_c_addi_valid;
-  wire                                spec_insn_c_addi_trap;
-  wire [                       4 : 0] spec_insn_c_addi_rs1_addr;
-  wire [                       4 : 0] spec_insn_c_addi_rs2_addr;
-  wire [                       4 : 0] spec_insn_c_addi_rd_addr;
-  wire [32   - 1 : 0] spec_insn_c_addi_rd_wdata;
-  wire [32   - 1 : 0] spec_insn_c_addi_pc_wdata;
-  wire [32   - 1 : 0] spec_insn_c_addi_mem_addr;
-  wire [32/8 - 1 : 0] spec_insn_c_addi_mem_rmask;
-  wire [32/8 - 1 : 0] spec_insn_c_addi_mem_wmask;
-  wire [32   - 1 : 0] spec_insn_c_addi_mem_wdata;
-
-  riscv_formal_monitor_rv32imc_insn_c_addi insn_c_addi (
-    .rvfi_valid(rvfi_valid),
-    .rvfi_insn(rvfi_insn),
-    .rvfi_pc_rdata(rvfi_pc_rdata),
-    .rvfi_rs1_rdata(rvfi_rs1_rdata),
-    .rvfi_rs2_rdata(rvfi_rs2_rdata),
-    .rvfi_mem_rdata(rvfi_mem_rdata),
-    .spec_valid(spec_insn_c_addi_valid),
-    .spec_trap(spec_insn_c_addi_trap),
-    .spec_rs1_addr(spec_insn_c_addi_rs1_addr),
-    .spec_rs2_addr(spec_insn_c_addi_rs2_addr),
-    .spec_rd_addr(spec_insn_c_addi_rd_addr),
-    .spec_rd_wdata(spec_insn_c_addi_rd_wdata),
-    .spec_pc_wdata(spec_insn_c_addi_pc_wdata),
-    .spec_mem_addr(spec_insn_c_addi_mem_addr),
-    .spec_mem_rmask(spec_insn_c_addi_mem_rmask),
-    .spec_mem_wmask(spec_insn_c_addi_mem_wmask),
-    .spec_mem_wdata(spec_insn_c_addi_mem_wdata)
-  );
-
-  wire                                spec_insn_c_addi16sp_valid;
-  wire                                spec_insn_c_addi16sp_trap;
-  wire [                       4 : 0] spec_insn_c_addi16sp_rs1_addr;
-  wire [                       4 : 0] spec_insn_c_addi16sp_rs2_addr;
-  wire [                       4 : 0] spec_insn_c_addi16sp_rd_addr;
-  wire [32   - 1 : 0] spec_insn_c_addi16sp_rd_wdata;
-  wire [32   - 1 : 0] spec_insn_c_addi16sp_pc_wdata;
-  wire [32   - 1 : 0] spec_insn_c_addi16sp_mem_addr;
-  wire [32/8 - 1 : 0] spec_insn_c_addi16sp_mem_rmask;
-  wire [32/8 - 1 : 0] spec_insn_c_addi16sp_mem_wmask;
-  wire [32   - 1 : 0] spec_insn_c_addi16sp_mem_wdata;
-
-  riscv_formal_monitor_rv32imc_insn_c_addi16sp insn_c_addi16sp (
-    .rvfi_valid(rvfi_valid),
-    .rvfi_insn(rvfi_insn),
-    .rvfi_pc_rdata(rvfi_pc_rdata),
-    .rvfi_rs1_rdata(rvfi_rs1_rdata),
-    .rvfi_rs2_rdata(rvfi_rs2_rdata),
-    .rvfi_mem_rdata(rvfi_mem_rdata),
-    .spec_valid(spec_insn_c_addi16sp_valid),
-    .spec_trap(spec_insn_c_addi16sp_trap),
-    .spec_rs1_addr(spec_insn_c_addi16sp_rs1_addr),
-    .spec_rs2_addr(spec_insn_c_addi16sp_rs2_addr),
-    .spec_rd_addr(spec_insn_c_addi16sp_rd_addr),
-    .spec_rd_wdata(spec_insn_c_addi16sp_rd_wdata),
-    .spec_pc_wdata(spec_insn_c_addi16sp_pc_wdata),
-    .spec_mem_addr(spec_insn_c_addi16sp_mem_addr),
-    .spec_mem_rmask(spec_insn_c_addi16sp_mem_rmask),
-    .spec_mem_wmask(spec_insn_c_addi16sp_mem_wmask),
-    .spec_mem_wdata(spec_insn_c_addi16sp_mem_wdata)
-  );
-
-  wire                                spec_insn_c_addi4spn_valid;
-  wire                                spec_insn_c_addi4spn_trap;
-  wire [                       4 : 0] spec_insn_c_addi4spn_rs1_addr;
-  wire [                       4 : 0] spec_insn_c_addi4spn_rs2_addr;
-  wire [                       4 : 0] spec_insn_c_addi4spn_rd_addr;
-  wire [32   - 1 : 0] spec_insn_c_addi4spn_rd_wdata;
-  wire [32   - 1 : 0] spec_insn_c_addi4spn_pc_wdata;
-  wire [32   - 1 : 0] spec_insn_c_addi4spn_mem_addr;
-  wire [32/8 - 1 : 0] spec_insn_c_addi4spn_mem_rmask;
-  wire [32/8 - 1 : 0] spec_insn_c_addi4spn_mem_wmask;
-  wire [32   - 1 : 0] spec_insn_c_addi4spn_mem_wdata;
-
-  riscv_formal_monitor_rv32imc_insn_c_addi4spn insn_c_addi4spn (
-    .rvfi_valid(rvfi_valid),
-    .rvfi_insn(rvfi_insn),
-    .rvfi_pc_rdata(rvfi_pc_rdata),
-    .rvfi_rs1_rdata(rvfi_rs1_rdata),
-    .rvfi_rs2_rdata(rvfi_rs2_rdata),
-    .rvfi_mem_rdata(rvfi_mem_rdata),
-    .spec_valid(spec_insn_c_addi4spn_valid),
-    .spec_trap(spec_insn_c_addi4spn_trap),
-    .spec_rs1_addr(spec_insn_c_addi4spn_rs1_addr),
-    .spec_rs2_addr(spec_insn_c_addi4spn_rs2_addr),
-    .spec_rd_addr(spec_insn_c_addi4spn_rd_addr),
-    .spec_rd_wdata(spec_insn_c_addi4spn_rd_wdata),
-    .spec_pc_wdata(spec_insn_c_addi4spn_pc_wdata),
-    .spec_mem_addr(spec_insn_c_addi4spn_mem_addr),
-    .spec_mem_rmask(spec_insn_c_addi4spn_mem_rmask),
-    .spec_mem_wmask(spec_insn_c_addi4spn_mem_wmask),
-    .spec_mem_wdata(spec_insn_c_addi4spn_mem_wdata)
-  );
-
-  wire                                spec_insn_c_and_valid;
-  wire                                spec_insn_c_and_trap;
-  wire [                       4 : 0] spec_insn_c_and_rs1_addr;
-  wire [                       4 : 0] spec_insn_c_and_rs2_addr;
-  wire [                       4 : 0] spec_insn_c_and_rd_addr;
-  wire [32   - 1 : 0] spec_insn_c_and_rd_wdata;
-  wire [32   - 1 : 0] spec_insn_c_and_pc_wdata;
-  wire [32   - 1 : 0] spec_insn_c_and_mem_addr;
-  wire [32/8 - 1 : 0] spec_insn_c_and_mem_rmask;
-  wire [32/8 - 1 : 0] spec_insn_c_and_mem_wmask;
-  wire [32   - 1 : 0] spec_insn_c_and_mem_wdata;
-
-  riscv_formal_monitor_rv32imc_insn_c_and insn_c_and (
-    .rvfi_valid(rvfi_valid),
-    .rvfi_insn(rvfi_insn),
-    .rvfi_pc_rdata(rvfi_pc_rdata),
-    .rvfi_rs1_rdata(rvfi_rs1_rdata),
-    .rvfi_rs2_rdata(rvfi_rs2_rdata),
-    .rvfi_mem_rdata(rvfi_mem_rdata),
-    .spec_valid(spec_insn_c_and_valid),
-    .spec_trap(spec_insn_c_and_trap),
-    .spec_rs1_addr(spec_insn_c_and_rs1_addr),
-    .spec_rs2_addr(spec_insn_c_and_rs2_addr),
-    .spec_rd_addr(spec_insn_c_and_rd_addr),
-    .spec_rd_wdata(spec_insn_c_and_rd_wdata),
-    .spec_pc_wdata(spec_insn_c_and_pc_wdata),
-    .spec_mem_addr(spec_insn_c_and_mem_addr),
-    .spec_mem_rmask(spec_insn_c_and_mem_rmask),
-    .spec_mem_wmask(spec_insn_c_and_mem_wmask),
-    .spec_mem_wdata(spec_insn_c_and_mem_wdata)
-  );
-
-  wire                                spec_insn_c_andi_valid;
-  wire                                spec_insn_c_andi_trap;
-  wire [                       4 : 0] spec_insn_c_andi_rs1_addr;
-  wire [                       4 : 0] spec_insn_c_andi_rs2_addr;
-  wire [                       4 : 0] spec_insn_c_andi_rd_addr;
-  wire [32   - 1 : 0] spec_insn_c_andi_rd_wdata;
-  wire [32   - 1 : 0] spec_insn_c_andi_pc_wdata;
-  wire [32   - 1 : 0] spec_insn_c_andi_mem_addr;
-  wire [32/8 - 1 : 0] spec_insn_c_andi_mem_rmask;
-  wire [32/8 - 1 : 0] spec_insn_c_andi_mem_wmask;
-  wire [32   - 1 : 0] spec_insn_c_andi_mem_wdata;
-
-  riscv_formal_monitor_rv32imc_insn_c_andi insn_c_andi (
-    .rvfi_valid(rvfi_valid),
-    .rvfi_insn(rvfi_insn),
-    .rvfi_pc_rdata(rvfi_pc_rdata),
-    .rvfi_rs1_rdata(rvfi_rs1_rdata),
-    .rvfi_rs2_rdata(rvfi_rs2_rdata),
-    .rvfi_mem_rdata(rvfi_mem_rdata),
-    .spec_valid(spec_insn_c_andi_valid),
-    .spec_trap(spec_insn_c_andi_trap),
-    .spec_rs1_addr(spec_insn_c_andi_rs1_addr),
-    .spec_rs2_addr(spec_insn_c_andi_rs2_addr),
-    .spec_rd_addr(spec_insn_c_andi_rd_addr),
-    .spec_rd_wdata(spec_insn_c_andi_rd_wdata),
-    .spec_pc_wdata(spec_insn_c_andi_pc_wdata),
-    .spec_mem_addr(spec_insn_c_andi_mem_addr),
-    .spec_mem_rmask(spec_insn_c_andi_mem_rmask),
-    .spec_mem_wmask(spec_insn_c_andi_mem_wmask),
-    .spec_mem_wdata(spec_insn_c_andi_mem_wdata)
-  );
-
-  wire                                spec_insn_c_beqz_valid;
-  wire                                spec_insn_c_beqz_trap;
-  wire [                       4 : 0] spec_insn_c_beqz_rs1_addr;
-  wire [                       4 : 0] spec_insn_c_beqz_rs2_addr;
-  wire [                       4 : 0] spec_insn_c_beqz_rd_addr;
-  wire [32   - 1 : 0] spec_insn_c_beqz_rd_wdata;
-  wire [32   - 1 : 0] spec_insn_c_beqz_pc_wdata;
-  wire [32   - 1 : 0] spec_insn_c_beqz_mem_addr;
-  wire [32/8 - 1 : 0] spec_insn_c_beqz_mem_rmask;
-  wire [32/8 - 1 : 0] spec_insn_c_beqz_mem_wmask;
-  wire [32   - 1 : 0] spec_insn_c_beqz_mem_wdata;
-
-  riscv_formal_monitor_rv32imc_insn_c_beqz insn_c_beqz (
-    .rvfi_valid(rvfi_valid),
-    .rvfi_insn(rvfi_insn),
-    .rvfi_pc_rdata(rvfi_pc_rdata),
-    .rvfi_rs1_rdata(rvfi_rs1_rdata),
-    .rvfi_rs2_rdata(rvfi_rs2_rdata),
-    .rvfi_mem_rdata(rvfi_mem_rdata),
-    .spec_valid(spec_insn_c_beqz_valid),
-    .spec_trap(spec_insn_c_beqz_trap),
-    .spec_rs1_addr(spec_insn_c_beqz_rs1_addr),
-    .spec_rs2_addr(spec_insn_c_beqz_rs2_addr),
-    .spec_rd_addr(spec_insn_c_beqz_rd_addr),
-    .spec_rd_wdata(spec_insn_c_beqz_rd_wdata),
-    .spec_pc_wdata(spec_insn_c_beqz_pc_wdata),
-    .spec_mem_addr(spec_insn_c_beqz_mem_addr),
-    .spec_mem_rmask(spec_insn_c_beqz_mem_rmask),
-    .spec_mem_wmask(spec_insn_c_beqz_mem_wmask),
-    .spec_mem_wdata(spec_insn_c_beqz_mem_wdata)
-  );
-
-  wire                                spec_insn_c_bnez_valid;
-  wire                                spec_insn_c_bnez_trap;
-  wire [                       4 : 0] spec_insn_c_bnez_rs1_addr;
-  wire [                       4 : 0] spec_insn_c_bnez_rs2_addr;
-  wire [                       4 : 0] spec_insn_c_bnez_rd_addr;
-  wire [32   - 1 : 0] spec_insn_c_bnez_rd_wdata;
-  wire [32   - 1 : 0] spec_insn_c_bnez_pc_wdata;
-  wire [32   - 1 : 0] spec_insn_c_bnez_mem_addr;
-  wire [32/8 - 1 : 0] spec_insn_c_bnez_mem_rmask;
-  wire [32/8 - 1 : 0] spec_insn_c_bnez_mem_wmask;
-  wire [32   - 1 : 0] spec_insn_c_bnez_mem_wdata;
-
-  riscv_formal_monitor_rv32imc_insn_c_bnez insn_c_bnez (
-    .rvfi_valid(rvfi_valid),
-    .rvfi_insn(rvfi_insn),
-    .rvfi_pc_rdata(rvfi_pc_rdata),
-    .rvfi_rs1_rdata(rvfi_rs1_rdata),
-    .rvfi_rs2_rdata(rvfi_rs2_rdata),
-    .rvfi_mem_rdata(rvfi_mem_rdata),
-    .spec_valid(spec_insn_c_bnez_valid),
-    .spec_trap(spec_insn_c_bnez_trap),
-    .spec_rs1_addr(spec_insn_c_bnez_rs1_addr),
-    .spec_rs2_addr(spec_insn_c_bnez_rs2_addr),
-    .spec_rd_addr(spec_insn_c_bnez_rd_addr),
-    .spec_rd_wdata(spec_insn_c_bnez_rd_wdata),
-    .spec_pc_wdata(spec_insn_c_bnez_pc_wdata),
-    .spec_mem_addr(spec_insn_c_bnez_mem_addr),
-    .spec_mem_rmask(spec_insn_c_bnez_mem_rmask),
-    .spec_mem_wmask(spec_insn_c_bnez_mem_wmask),
-    .spec_mem_wdata(spec_insn_c_bnez_mem_wdata)
-  );
-
-  wire                                spec_insn_c_j_valid;
-  wire                                spec_insn_c_j_trap;
-  wire [                       4 : 0] spec_insn_c_j_rs1_addr;
-  wire [                       4 : 0] spec_insn_c_j_rs2_addr;
-  wire [                       4 : 0] spec_insn_c_j_rd_addr;
-  wire [32   - 1 : 0] spec_insn_c_j_rd_wdata;
-  wire [32   - 1 : 0] spec_insn_c_j_pc_wdata;
-  wire [32   - 1 : 0] spec_insn_c_j_mem_addr;
-  wire [32/8 - 1 : 0] spec_insn_c_j_mem_rmask;
-  wire [32/8 - 1 : 0] spec_insn_c_j_mem_wmask;
-  wire [32   - 1 : 0] spec_insn_c_j_mem_wdata;
-
-  riscv_formal_monitor_rv32imc_insn_c_j insn_c_j (
-    .rvfi_valid(rvfi_valid),
-    .rvfi_insn(rvfi_insn),
-    .rvfi_pc_rdata(rvfi_pc_rdata),
-    .rvfi_rs1_rdata(rvfi_rs1_rdata),
-    .rvfi_rs2_rdata(rvfi_rs2_rdata),
-    .rvfi_mem_rdata(rvfi_mem_rdata),
-    .spec_valid(spec_insn_c_j_valid),
-    .spec_trap(spec_insn_c_j_trap),
-    .spec_rs1_addr(spec_insn_c_j_rs1_addr),
-    .spec_rs2_addr(spec_insn_c_j_rs2_addr),
-    .spec_rd_addr(spec_insn_c_j_rd_addr),
-    .spec_rd_wdata(spec_insn_c_j_rd_wdata),
-    .spec_pc_wdata(spec_insn_c_j_pc_wdata),
-    .spec_mem_addr(spec_insn_c_j_mem_addr),
-    .spec_mem_rmask(spec_insn_c_j_mem_rmask),
-    .spec_mem_wmask(spec_insn_c_j_mem_wmask),
-    .spec_mem_wdata(spec_insn_c_j_mem_wdata)
-  );
-
-  wire                                spec_insn_c_jal_valid;
-  wire                                spec_insn_c_jal_trap;
-  wire [                       4 : 0] spec_insn_c_jal_rs1_addr;
-  wire [                       4 : 0] spec_insn_c_jal_rs2_addr;
-  wire [                       4 : 0] spec_insn_c_jal_rd_addr;
-  wire [32   - 1 : 0] spec_insn_c_jal_rd_wdata;
-  wire [32   - 1 : 0] spec_insn_c_jal_pc_wdata;
-  wire [32   - 1 : 0] spec_insn_c_jal_mem_addr;
-  wire [32/8 - 1 : 0] spec_insn_c_jal_mem_rmask;
-  wire [32/8 - 1 : 0] spec_insn_c_jal_mem_wmask;
-  wire [32   - 1 : 0] spec_insn_c_jal_mem_wdata;
-
-  riscv_formal_monitor_rv32imc_insn_c_jal insn_c_jal (
-    .rvfi_valid(rvfi_valid),
-    .rvfi_insn(rvfi_insn),
-    .rvfi_pc_rdata(rvfi_pc_rdata),
-    .rvfi_rs1_rdata(rvfi_rs1_rdata),
-    .rvfi_rs2_rdata(rvfi_rs2_rdata),
-    .rvfi_mem_rdata(rvfi_mem_rdata),
-    .spec_valid(spec_insn_c_jal_valid),
-    .spec_trap(spec_insn_c_jal_trap),
-    .spec_rs1_addr(spec_insn_c_jal_rs1_addr),
-    .spec_rs2_addr(spec_insn_c_jal_rs2_addr),
-    .spec_rd_addr(spec_insn_c_jal_rd_addr),
-    .spec_rd_wdata(spec_insn_c_jal_rd_wdata),
-    .spec_pc_wdata(spec_insn_c_jal_pc_wdata),
-    .spec_mem_addr(spec_insn_c_jal_mem_addr),
-    .spec_mem_rmask(spec_insn_c_jal_mem_rmask),
-    .spec_mem_wmask(spec_insn_c_jal_mem_wmask),
-    .spec_mem_wdata(spec_insn_c_jal_mem_wdata)
-  );
-
-  wire                                spec_insn_c_jalr_valid;
-  wire                                spec_insn_c_jalr_trap;
-  wire [                       4 : 0] spec_insn_c_jalr_rs1_addr;
-  wire [                       4 : 0] spec_insn_c_jalr_rs2_addr;
-  wire [                       4 : 0] spec_insn_c_jalr_rd_addr;
-  wire [32   - 1 : 0] spec_insn_c_jalr_rd_wdata;
-  wire [32   - 1 : 0] spec_insn_c_jalr_pc_wdata;
-  wire [32   - 1 : 0] spec_insn_c_jalr_mem_addr;
-  wire [32/8 - 1 : 0] spec_insn_c_jalr_mem_rmask;
-  wire [32/8 - 1 : 0] spec_insn_c_jalr_mem_wmask;
-  wire [32   - 1 : 0] spec_insn_c_jalr_mem_wdata;
-
-  riscv_formal_monitor_rv32imc_insn_c_jalr insn_c_jalr (
-    .rvfi_valid(rvfi_valid),
-    .rvfi_insn(rvfi_insn),
-    .rvfi_pc_rdata(rvfi_pc_rdata),
-    .rvfi_rs1_rdata(rvfi_rs1_rdata),
-    .rvfi_rs2_rdata(rvfi_rs2_rdata),
-    .rvfi_mem_rdata(rvfi_mem_rdata),
-    .spec_valid(spec_insn_c_jalr_valid),
-    .spec_trap(spec_insn_c_jalr_trap),
-    .spec_rs1_addr(spec_insn_c_jalr_rs1_addr),
-    .spec_rs2_addr(spec_insn_c_jalr_rs2_addr),
-    .spec_rd_addr(spec_insn_c_jalr_rd_addr),
-    .spec_rd_wdata(spec_insn_c_jalr_rd_wdata),
-    .spec_pc_wdata(spec_insn_c_jalr_pc_wdata),
-    .spec_mem_addr(spec_insn_c_jalr_mem_addr),
-    .spec_mem_rmask(spec_insn_c_jalr_mem_rmask),
-    .spec_mem_wmask(spec_insn_c_jalr_mem_wmask),
-    .spec_mem_wdata(spec_insn_c_jalr_mem_wdata)
-  );
-
-  wire                                spec_insn_c_jr_valid;
-  wire                                spec_insn_c_jr_trap;
-  wire [                       4 : 0] spec_insn_c_jr_rs1_addr;
-  wire [                       4 : 0] spec_insn_c_jr_rs2_addr;
-  wire [                       4 : 0] spec_insn_c_jr_rd_addr;
-  wire [32   - 1 : 0] spec_insn_c_jr_rd_wdata;
-  wire [32   - 1 : 0] spec_insn_c_jr_pc_wdata;
-  wire [32   - 1 : 0] spec_insn_c_jr_mem_addr;
-  wire [32/8 - 1 : 0] spec_insn_c_jr_mem_rmask;
-  wire [32/8 - 1 : 0] spec_insn_c_jr_mem_wmask;
-  wire [32   - 1 : 0] spec_insn_c_jr_mem_wdata;
-
-  riscv_formal_monitor_rv32imc_insn_c_jr insn_c_jr (
-    .rvfi_valid(rvfi_valid),
-    .rvfi_insn(rvfi_insn),
-    .rvfi_pc_rdata(rvfi_pc_rdata),
-    .rvfi_rs1_rdata(rvfi_rs1_rdata),
-    .rvfi_rs2_rdata(rvfi_rs2_rdata),
-    .rvfi_mem_rdata(rvfi_mem_rdata),
-    .spec_valid(spec_insn_c_jr_valid),
-    .spec_trap(spec_insn_c_jr_trap),
-    .spec_rs1_addr(spec_insn_c_jr_rs1_addr),
-    .spec_rs2_addr(spec_insn_c_jr_rs2_addr),
-    .spec_rd_addr(spec_insn_c_jr_rd_addr),
-    .spec_rd_wdata(spec_insn_c_jr_rd_wdata),
-    .spec_pc_wdata(spec_insn_c_jr_pc_wdata),
-    .spec_mem_addr(spec_insn_c_jr_mem_addr),
-    .spec_mem_rmask(spec_insn_c_jr_mem_rmask),
-    .spec_mem_wmask(spec_insn_c_jr_mem_wmask),
-    .spec_mem_wdata(spec_insn_c_jr_mem_wdata)
-  );
-
-  wire                                spec_insn_c_li_valid;
-  wire                                spec_insn_c_li_trap;
-  wire [                       4 : 0] spec_insn_c_li_rs1_addr;
-  wire [                       4 : 0] spec_insn_c_li_rs2_addr;
-  wire [                       4 : 0] spec_insn_c_li_rd_addr;
-  wire [32   - 1 : 0] spec_insn_c_li_rd_wdata;
-  wire [32   - 1 : 0] spec_insn_c_li_pc_wdata;
-  wire [32   - 1 : 0] spec_insn_c_li_mem_addr;
-  wire [32/8 - 1 : 0] spec_insn_c_li_mem_rmask;
-  wire [32/8 - 1 : 0] spec_insn_c_li_mem_wmask;
-  wire [32   - 1 : 0] spec_insn_c_li_mem_wdata;
-
-  riscv_formal_monitor_rv32imc_insn_c_li insn_c_li (
-    .rvfi_valid(rvfi_valid),
-    .rvfi_insn(rvfi_insn),
-    .rvfi_pc_rdata(rvfi_pc_rdata),
-    .rvfi_rs1_rdata(rvfi_rs1_rdata),
-    .rvfi_rs2_rdata(rvfi_rs2_rdata),
-    .rvfi_mem_rdata(rvfi_mem_rdata),
-    .spec_valid(spec_insn_c_li_valid),
-    .spec_trap(spec_insn_c_li_trap),
-    .spec_rs1_addr(spec_insn_c_li_rs1_addr),
-    .spec_rs2_addr(spec_insn_c_li_rs2_addr),
-    .spec_rd_addr(spec_insn_c_li_rd_addr),
-    .spec_rd_wdata(spec_insn_c_li_rd_wdata),
-    .spec_pc_wdata(spec_insn_c_li_pc_wdata),
-    .spec_mem_addr(spec_insn_c_li_mem_addr),
-    .spec_mem_rmask(spec_insn_c_li_mem_rmask),
-    .spec_mem_wmask(spec_insn_c_li_mem_wmask),
-    .spec_mem_wdata(spec_insn_c_li_mem_wdata)
-  );
-
-  wire                                spec_insn_c_lui_valid;
-  wire                                spec_insn_c_lui_trap;
-  wire [                       4 : 0] spec_insn_c_lui_rs1_addr;
-  wire [                       4 : 0] spec_insn_c_lui_rs2_addr;
-  wire [                       4 : 0] spec_insn_c_lui_rd_addr;
-  wire [32   - 1 : 0] spec_insn_c_lui_rd_wdata;
-  wire [32   - 1 : 0] spec_insn_c_lui_pc_wdata;
-  wire [32   - 1 : 0] spec_insn_c_lui_mem_addr;
-  wire [32/8 - 1 : 0] spec_insn_c_lui_mem_rmask;
-  wire [32/8 - 1 : 0] spec_insn_c_lui_mem_wmask;
-  wire [32   - 1 : 0] spec_insn_c_lui_mem_wdata;
-
-  riscv_formal_monitor_rv32imc_insn_c_lui insn_c_lui (
-    .rvfi_valid(rvfi_valid),
-    .rvfi_insn(rvfi_insn),
-    .rvfi_pc_rdata(rvfi_pc_rdata),
-    .rvfi_rs1_rdata(rvfi_rs1_rdata),
-    .rvfi_rs2_rdata(rvfi_rs2_rdata),
-    .rvfi_mem_rdata(rvfi_mem_rdata),
-    .spec_valid(spec_insn_c_lui_valid),
-    .spec_trap(spec_insn_c_lui_trap),
-    .spec_rs1_addr(spec_insn_c_lui_rs1_addr),
-    .spec_rs2_addr(spec_insn_c_lui_rs2_addr),
-    .spec_rd_addr(spec_insn_c_lui_rd_addr),
-    .spec_rd_wdata(spec_insn_c_lui_rd_wdata),
-    .spec_pc_wdata(spec_insn_c_lui_pc_wdata),
-    .spec_mem_addr(spec_insn_c_lui_mem_addr),
-    .spec_mem_rmask(spec_insn_c_lui_mem_rmask),
-    .spec_mem_wmask(spec_insn_c_lui_mem_wmask),
-    .spec_mem_wdata(spec_insn_c_lui_mem_wdata)
-  );
-
-  wire                                spec_insn_c_lw_valid;
-  wire                                spec_insn_c_lw_trap;
-  wire [                       4 : 0] spec_insn_c_lw_rs1_addr;
-  wire [                       4 : 0] spec_insn_c_lw_rs2_addr;
-  wire [                       4 : 0] spec_insn_c_lw_rd_addr;
-  wire [32   - 1 : 0] spec_insn_c_lw_rd_wdata;
-  wire [32   - 1 : 0] spec_insn_c_lw_pc_wdata;
-  wire [32   - 1 : 0] spec_insn_c_lw_mem_addr;
-  wire [32/8 - 1 : 0] spec_insn_c_lw_mem_rmask;
-  wire [32/8 - 1 : 0] spec_insn_c_lw_mem_wmask;
-  wire [32   - 1 : 0] spec_insn_c_lw_mem_wdata;
-
-  riscv_formal_monitor_rv32imc_insn_c_lw insn_c_lw (
-    .rvfi_valid(rvfi_valid),
-    .rvfi_insn(rvfi_insn),
-    .rvfi_pc_rdata(rvfi_pc_rdata),
-    .rvfi_rs1_rdata(rvfi_rs1_rdata),
-    .rvfi_rs2_rdata(rvfi_rs2_rdata),
-    .rvfi_mem_rdata(rvfi_mem_rdata),
-    .spec_valid(spec_insn_c_lw_valid),
-    .spec_trap(spec_insn_c_lw_trap),
-    .spec_rs1_addr(spec_insn_c_lw_rs1_addr),
-    .spec_rs2_addr(spec_insn_c_lw_rs2_addr),
-    .spec_rd_addr(spec_insn_c_lw_rd_addr),
-    .spec_rd_wdata(spec_insn_c_lw_rd_wdata),
-    .spec_pc_wdata(spec_insn_c_lw_pc_wdata),
-    .spec_mem_addr(spec_insn_c_lw_mem_addr),
-    .spec_mem_rmask(spec_insn_c_lw_mem_rmask),
-    .spec_mem_wmask(spec_insn_c_lw_mem_wmask),
-    .spec_mem_wdata(spec_insn_c_lw_mem_wdata)
-  );
-
-  wire                                spec_insn_c_lwsp_valid;
-  wire                                spec_insn_c_lwsp_trap;
-  wire [                       4 : 0] spec_insn_c_lwsp_rs1_addr;
-  wire [                       4 : 0] spec_insn_c_lwsp_rs2_addr;
-  wire [                       4 : 0] spec_insn_c_lwsp_rd_addr;
-  wire [32   - 1 : 0] spec_insn_c_lwsp_rd_wdata;
-  wire [32   - 1 : 0] spec_insn_c_lwsp_pc_wdata;
-  wire [32   - 1 : 0] spec_insn_c_lwsp_mem_addr;
-  wire [32/8 - 1 : 0] spec_insn_c_lwsp_mem_rmask;
-  wire [32/8 - 1 : 0] spec_insn_c_lwsp_mem_wmask;
-  wire [32   - 1 : 0] spec_insn_c_lwsp_mem_wdata;
-
-  riscv_formal_monitor_rv32imc_insn_c_lwsp insn_c_lwsp (
-    .rvfi_valid(rvfi_valid),
-    .rvfi_insn(rvfi_insn),
-    .rvfi_pc_rdata(rvfi_pc_rdata),
-    .rvfi_rs1_rdata(rvfi_rs1_rdata),
-    .rvfi_rs2_rdata(rvfi_rs2_rdata),
-    .rvfi_mem_rdata(rvfi_mem_rdata),
-    .spec_valid(spec_insn_c_lwsp_valid),
-    .spec_trap(spec_insn_c_lwsp_trap),
-    .spec_rs1_addr(spec_insn_c_lwsp_rs1_addr),
-    .spec_rs2_addr(spec_insn_c_lwsp_rs2_addr),
-    .spec_rd_addr(spec_insn_c_lwsp_rd_addr),
-    .spec_rd_wdata(spec_insn_c_lwsp_rd_wdata),
-    .spec_pc_wdata(spec_insn_c_lwsp_pc_wdata),
-    .spec_mem_addr(spec_insn_c_lwsp_mem_addr),
-    .spec_mem_rmask(spec_insn_c_lwsp_mem_rmask),
-    .spec_mem_wmask(spec_insn_c_lwsp_mem_wmask),
-    .spec_mem_wdata(spec_insn_c_lwsp_mem_wdata)
-  );
-
-  wire                                spec_insn_c_mv_valid;
-  wire                                spec_insn_c_mv_trap;
-  wire [                       4 : 0] spec_insn_c_mv_rs1_addr;
-  wire [                       4 : 0] spec_insn_c_mv_rs2_addr;
-  wire [                       4 : 0] spec_insn_c_mv_rd_addr;
-  wire [32   - 1 : 0] spec_insn_c_mv_rd_wdata;
-  wire [32   - 1 : 0] spec_insn_c_mv_pc_wdata;
-  wire [32   - 1 : 0] spec_insn_c_mv_mem_addr;
-  wire [32/8 - 1 : 0] spec_insn_c_mv_mem_rmask;
-  wire [32/8 - 1 : 0] spec_insn_c_mv_mem_wmask;
-  wire [32   - 1 : 0] spec_insn_c_mv_mem_wdata;
-
-  riscv_formal_monitor_rv32imc_insn_c_mv insn_c_mv (
-    .rvfi_valid(rvfi_valid),
-    .rvfi_insn(rvfi_insn),
-    .rvfi_pc_rdata(rvfi_pc_rdata),
-    .rvfi_rs1_rdata(rvfi_rs1_rdata),
-    .rvfi_rs2_rdata(rvfi_rs2_rdata),
-    .rvfi_mem_rdata(rvfi_mem_rdata),
-    .spec_valid(spec_insn_c_mv_valid),
-    .spec_trap(spec_insn_c_mv_trap),
-    .spec_rs1_addr(spec_insn_c_mv_rs1_addr),
-    .spec_rs2_addr(spec_insn_c_mv_rs2_addr),
-    .spec_rd_addr(spec_insn_c_mv_rd_addr),
-    .spec_rd_wdata(spec_insn_c_mv_rd_wdata),
-    .spec_pc_wdata(spec_insn_c_mv_pc_wdata),
-    .spec_mem_addr(spec_insn_c_mv_mem_addr),
-    .spec_mem_rmask(spec_insn_c_mv_mem_rmask),
-    .spec_mem_wmask(spec_insn_c_mv_mem_wmask),
-    .spec_mem_wdata(spec_insn_c_mv_mem_wdata)
-  );
-
-  wire                                spec_insn_c_or_valid;
-  wire                                spec_insn_c_or_trap;
-  wire [                       4 : 0] spec_insn_c_or_rs1_addr;
-  wire [                       4 : 0] spec_insn_c_or_rs2_addr;
-  wire [                       4 : 0] spec_insn_c_or_rd_addr;
-  wire [32   - 1 : 0] spec_insn_c_or_rd_wdata;
-  wire [32   - 1 : 0] spec_insn_c_or_pc_wdata;
-  wire [32   - 1 : 0] spec_insn_c_or_mem_addr;
-  wire [32/8 - 1 : 0] spec_insn_c_or_mem_rmask;
-  wire [32/8 - 1 : 0] spec_insn_c_or_mem_wmask;
-  wire [32   - 1 : 0] spec_insn_c_or_mem_wdata;
-
-  riscv_formal_monitor_rv32imc_insn_c_or insn_c_or (
-    .rvfi_valid(rvfi_valid),
-    .rvfi_insn(rvfi_insn),
-    .rvfi_pc_rdata(rvfi_pc_rdata),
-    .rvfi_rs1_rdata(rvfi_rs1_rdata),
-    .rvfi_rs2_rdata(rvfi_rs2_rdata),
-    .rvfi_mem_rdata(rvfi_mem_rdata),
-    .spec_valid(spec_insn_c_or_valid),
-    .spec_trap(spec_insn_c_or_trap),
-    .spec_rs1_addr(spec_insn_c_or_rs1_addr),
-    .spec_rs2_addr(spec_insn_c_or_rs2_addr),
-    .spec_rd_addr(spec_insn_c_or_rd_addr),
-    .spec_rd_wdata(spec_insn_c_or_rd_wdata),
-    .spec_pc_wdata(spec_insn_c_or_pc_wdata),
-    .spec_mem_addr(spec_insn_c_or_mem_addr),
-    .spec_mem_rmask(spec_insn_c_or_mem_rmask),
-    .spec_mem_wmask(spec_insn_c_or_mem_wmask),
-    .spec_mem_wdata(spec_insn_c_or_mem_wdata)
-  );
-
-  wire                                spec_insn_c_slli_valid;
-  wire                                spec_insn_c_slli_trap;
-  wire [                       4 : 0] spec_insn_c_slli_rs1_addr;
-  wire [                       4 : 0] spec_insn_c_slli_rs2_addr;
-  wire [                       4 : 0] spec_insn_c_slli_rd_addr;
-  wire [32   - 1 : 0] spec_insn_c_slli_rd_wdata;
-  wire [32   - 1 : 0] spec_insn_c_slli_pc_wdata;
-  wire [32   - 1 : 0] spec_insn_c_slli_mem_addr;
-  wire [32/8 - 1 : 0] spec_insn_c_slli_mem_rmask;
-  wire [32/8 - 1 : 0] spec_insn_c_slli_mem_wmask;
-  wire [32   - 1 : 0] spec_insn_c_slli_mem_wdata;
-
-  riscv_formal_monitor_rv32imc_insn_c_slli insn_c_slli (
-    .rvfi_valid(rvfi_valid),
-    .rvfi_insn(rvfi_insn),
-    .rvfi_pc_rdata(rvfi_pc_rdata),
-    .rvfi_rs1_rdata(rvfi_rs1_rdata),
-    .rvfi_rs2_rdata(rvfi_rs2_rdata),
-    .rvfi_mem_rdata(rvfi_mem_rdata),
-    .spec_valid(spec_insn_c_slli_valid),
-    .spec_trap(spec_insn_c_slli_trap),
-    .spec_rs1_addr(spec_insn_c_slli_rs1_addr),
-    .spec_rs2_addr(spec_insn_c_slli_rs2_addr),
-    .spec_rd_addr(spec_insn_c_slli_rd_addr),
-    .spec_rd_wdata(spec_insn_c_slli_rd_wdata),
-    .spec_pc_wdata(spec_insn_c_slli_pc_wdata),
-    .spec_mem_addr(spec_insn_c_slli_mem_addr),
-    .spec_mem_rmask(spec_insn_c_slli_mem_rmask),
-    .spec_mem_wmask(spec_insn_c_slli_mem_wmask),
-    .spec_mem_wdata(spec_insn_c_slli_mem_wdata)
-  );
-
-  wire                                spec_insn_c_srai_valid;
-  wire                                spec_insn_c_srai_trap;
-  wire [                       4 : 0] spec_insn_c_srai_rs1_addr;
-  wire [                       4 : 0] spec_insn_c_srai_rs2_addr;
-  wire [                       4 : 0] spec_insn_c_srai_rd_addr;
-  wire [32   - 1 : 0] spec_insn_c_srai_rd_wdata;
-  wire [32   - 1 : 0] spec_insn_c_srai_pc_wdata;
-  wire [32   - 1 : 0] spec_insn_c_srai_mem_addr;
-  wire [32/8 - 1 : 0] spec_insn_c_srai_mem_rmask;
-  wire [32/8 - 1 : 0] spec_insn_c_srai_mem_wmask;
-  wire [32   - 1 : 0] spec_insn_c_srai_mem_wdata;
-
-  riscv_formal_monitor_rv32imc_insn_c_srai insn_c_srai (
-    .rvfi_valid(rvfi_valid),
-    .rvfi_insn(rvfi_insn),
-    .rvfi_pc_rdata(rvfi_pc_rdata),
-    .rvfi_rs1_rdata(rvfi_rs1_rdata),
-    .rvfi_rs2_rdata(rvfi_rs2_rdata),
-    .rvfi_mem_rdata(rvfi_mem_rdata),
-    .spec_valid(spec_insn_c_srai_valid),
-    .spec_trap(spec_insn_c_srai_trap),
-    .spec_rs1_addr(spec_insn_c_srai_rs1_addr),
-    .spec_rs2_addr(spec_insn_c_srai_rs2_addr),
-    .spec_rd_addr(spec_insn_c_srai_rd_addr),
-    .spec_rd_wdata(spec_insn_c_srai_rd_wdata),
-    .spec_pc_wdata(spec_insn_c_srai_pc_wdata),
-    .spec_mem_addr(spec_insn_c_srai_mem_addr),
-    .spec_mem_rmask(spec_insn_c_srai_mem_rmask),
-    .spec_mem_wmask(spec_insn_c_srai_mem_wmask),
-    .spec_mem_wdata(spec_insn_c_srai_mem_wdata)
-  );
-
-  wire                                spec_insn_c_srli_valid;
-  wire                                spec_insn_c_srli_trap;
-  wire [                       4 : 0] spec_insn_c_srli_rs1_addr;
-  wire [                       4 : 0] spec_insn_c_srli_rs2_addr;
-  wire [                       4 : 0] spec_insn_c_srli_rd_addr;
-  wire [32   - 1 : 0] spec_insn_c_srli_rd_wdata;
-  wire [32   - 1 : 0] spec_insn_c_srli_pc_wdata;
-  wire [32   - 1 : 0] spec_insn_c_srli_mem_addr;
-  wire [32/8 - 1 : 0] spec_insn_c_srli_mem_rmask;
-  wire [32/8 - 1 : 0] spec_insn_c_srli_mem_wmask;
-  wire [32   - 1 : 0] spec_insn_c_srli_mem_wdata;
-
-  riscv_formal_monitor_rv32imc_insn_c_srli insn_c_srli (
-    .rvfi_valid(rvfi_valid),
-    .rvfi_insn(rvfi_insn),
-    .rvfi_pc_rdata(rvfi_pc_rdata),
-    .rvfi_rs1_rdata(rvfi_rs1_rdata),
-    .rvfi_rs2_rdata(rvfi_rs2_rdata),
-    .rvfi_mem_rdata(rvfi_mem_rdata),
-    .spec_valid(spec_insn_c_srli_valid),
-    .spec_trap(spec_insn_c_srli_trap),
-    .spec_rs1_addr(spec_insn_c_srli_rs1_addr),
-    .spec_rs2_addr(spec_insn_c_srli_rs2_addr),
-    .spec_rd_addr(spec_insn_c_srli_rd_addr),
-    .spec_rd_wdata(spec_insn_c_srli_rd_wdata),
-    .spec_pc_wdata(spec_insn_c_srli_pc_wdata),
-    .spec_mem_addr(spec_insn_c_srli_mem_addr),
-    .spec_mem_rmask(spec_insn_c_srli_mem_rmask),
-    .spec_mem_wmask(spec_insn_c_srli_mem_wmask),
-    .spec_mem_wdata(spec_insn_c_srli_mem_wdata)
-  );
-
-  wire                                spec_insn_c_sub_valid;
-  wire                                spec_insn_c_sub_trap;
-  wire [                       4 : 0] spec_insn_c_sub_rs1_addr;
-  wire [                       4 : 0] spec_insn_c_sub_rs2_addr;
-  wire [                       4 : 0] spec_insn_c_sub_rd_addr;
-  wire [32   - 1 : 0] spec_insn_c_sub_rd_wdata;
-  wire [32   - 1 : 0] spec_insn_c_sub_pc_wdata;
-  wire [32   - 1 : 0] spec_insn_c_sub_mem_addr;
-  wire [32/8 - 1 : 0] spec_insn_c_sub_mem_rmask;
-  wire [32/8 - 1 : 0] spec_insn_c_sub_mem_wmask;
-  wire [32   - 1 : 0] spec_insn_c_sub_mem_wdata;
-
-  riscv_formal_monitor_rv32imc_insn_c_sub insn_c_sub (
-    .rvfi_valid(rvfi_valid),
-    .rvfi_insn(rvfi_insn),
-    .rvfi_pc_rdata(rvfi_pc_rdata),
-    .rvfi_rs1_rdata(rvfi_rs1_rdata),
-    .rvfi_rs2_rdata(rvfi_rs2_rdata),
-    .rvfi_mem_rdata(rvfi_mem_rdata),
-    .spec_valid(spec_insn_c_sub_valid),
-    .spec_trap(spec_insn_c_sub_trap),
-    .spec_rs1_addr(spec_insn_c_sub_rs1_addr),
-    .spec_rs2_addr(spec_insn_c_sub_rs2_addr),
-    .spec_rd_addr(spec_insn_c_sub_rd_addr),
-    .spec_rd_wdata(spec_insn_c_sub_rd_wdata),
-    .spec_pc_wdata(spec_insn_c_sub_pc_wdata),
-    .spec_mem_addr(spec_insn_c_sub_mem_addr),
-    .spec_mem_rmask(spec_insn_c_sub_mem_rmask),
-    .spec_mem_wmask(spec_insn_c_sub_mem_wmask),
-    .spec_mem_wdata(spec_insn_c_sub_mem_wdata)
-  );
-
-  wire                                spec_insn_c_sw_valid;
-  wire                                spec_insn_c_sw_trap;
-  wire [                       4 : 0] spec_insn_c_sw_rs1_addr;
-  wire [                       4 : 0] spec_insn_c_sw_rs2_addr;
-  wire [                       4 : 0] spec_insn_c_sw_rd_addr;
-  wire [32   - 1 : 0] spec_insn_c_sw_rd_wdata;
-  wire [32   - 1 : 0] spec_insn_c_sw_pc_wdata;
-  wire [32   - 1 : 0] spec_insn_c_sw_mem_addr;
-  wire [32/8 - 1 : 0] spec_insn_c_sw_mem_rmask;
-  wire [32/8 - 1 : 0] spec_insn_c_sw_mem_wmask;
-  wire [32   - 1 : 0] spec_insn_c_sw_mem_wdata;
-
-  riscv_formal_monitor_rv32imc_insn_c_sw insn_c_sw (
-    .rvfi_valid(rvfi_valid),
-    .rvfi_insn(rvfi_insn),
-    .rvfi_pc_rdata(rvfi_pc_rdata),
-    .rvfi_rs1_rdata(rvfi_rs1_rdata),
-    .rvfi_rs2_rdata(rvfi_rs2_rdata),
-    .rvfi_mem_rdata(rvfi_mem_rdata),
-    .spec_valid(spec_insn_c_sw_valid),
-    .spec_trap(spec_insn_c_sw_trap),
-    .spec_rs1_addr(spec_insn_c_sw_rs1_addr),
-    .spec_rs2_addr(spec_insn_c_sw_rs2_addr),
-    .spec_rd_addr(spec_insn_c_sw_rd_addr),
-    .spec_rd_wdata(spec_insn_c_sw_rd_wdata),
-    .spec_pc_wdata(spec_insn_c_sw_pc_wdata),
-    .spec_mem_addr(spec_insn_c_sw_mem_addr),
-    .spec_mem_rmask(spec_insn_c_sw_mem_rmask),
-    .spec_mem_wmask(spec_insn_c_sw_mem_wmask),
-    .spec_mem_wdata(spec_insn_c_sw_mem_wdata)
-  );
-
-  wire                                spec_insn_c_swsp_valid;
-  wire                                spec_insn_c_swsp_trap;
-  wire [                       4 : 0] spec_insn_c_swsp_rs1_addr;
-  wire [                       4 : 0] spec_insn_c_swsp_rs2_addr;
-  wire [                       4 : 0] spec_insn_c_swsp_rd_addr;
-  wire [32   - 1 : 0] spec_insn_c_swsp_rd_wdata;
-  wire [32   - 1 : 0] spec_insn_c_swsp_pc_wdata;
-  wire [32   - 1 : 0] spec_insn_c_swsp_mem_addr;
-  wire [32/8 - 1 : 0] spec_insn_c_swsp_mem_rmask;
-  wire [32/8 - 1 : 0] spec_insn_c_swsp_mem_wmask;
-  wire [32   - 1 : 0] spec_insn_c_swsp_mem_wdata;
-
-  riscv_formal_monitor_rv32imc_insn_c_swsp insn_c_swsp (
-    .rvfi_valid(rvfi_valid),
-    .rvfi_insn(rvfi_insn),
-    .rvfi_pc_rdata(rvfi_pc_rdata),
-    .rvfi_rs1_rdata(rvfi_rs1_rdata),
-    .rvfi_rs2_rdata(rvfi_rs2_rdata),
-    .rvfi_mem_rdata(rvfi_mem_rdata),
-    .spec_valid(spec_insn_c_swsp_valid),
-    .spec_trap(spec_insn_c_swsp_trap),
-    .spec_rs1_addr(spec_insn_c_swsp_rs1_addr),
-    .spec_rs2_addr(spec_insn_c_swsp_rs2_addr),
-    .spec_rd_addr(spec_insn_c_swsp_rd_addr),
-    .spec_rd_wdata(spec_insn_c_swsp_rd_wdata),
-    .spec_pc_wdata(spec_insn_c_swsp_pc_wdata),
-    .spec_mem_addr(spec_insn_c_swsp_mem_addr),
-    .spec_mem_rmask(spec_insn_c_swsp_mem_rmask),
-    .spec_mem_wmask(spec_insn_c_swsp_mem_wmask),
-    .spec_mem_wdata(spec_insn_c_swsp_mem_wdata)
-  );
-
-  wire                                spec_insn_c_xor_valid;
-  wire                                spec_insn_c_xor_trap;
-  wire [                       4 : 0] spec_insn_c_xor_rs1_addr;
-  wire [                       4 : 0] spec_insn_c_xor_rs2_addr;
-  wire [                       4 : 0] spec_insn_c_xor_rd_addr;
-  wire [32   - 1 : 0] spec_insn_c_xor_rd_wdata;
-  wire [32   - 1 : 0] spec_insn_c_xor_pc_wdata;
-  wire [32   - 1 : 0] spec_insn_c_xor_mem_addr;
-  wire [32/8 - 1 : 0] spec_insn_c_xor_mem_rmask;
-  wire [32/8 - 1 : 0] spec_insn_c_xor_mem_wmask;
-  wire [32   - 1 : 0] spec_insn_c_xor_mem_wdata;
-
-  riscv_formal_monitor_rv32imc_insn_c_xor insn_c_xor (
-    .rvfi_valid(rvfi_valid),
-    .rvfi_insn(rvfi_insn),
-    .rvfi_pc_rdata(rvfi_pc_rdata),
-    .rvfi_rs1_rdata(rvfi_rs1_rdata),
-    .rvfi_rs2_rdata(rvfi_rs2_rdata),
-    .rvfi_mem_rdata(rvfi_mem_rdata),
-    .spec_valid(spec_insn_c_xor_valid),
-    .spec_trap(spec_insn_c_xor_trap),
-    .spec_rs1_addr(spec_insn_c_xor_rs1_addr),
-    .spec_rs2_addr(spec_insn_c_xor_rs2_addr),
-    .spec_rd_addr(spec_insn_c_xor_rd_addr),
-    .spec_rd_wdata(spec_insn_c_xor_rd_wdata),
-    .spec_pc_wdata(spec_insn_c_xor_pc_wdata),
-    .spec_mem_addr(spec_insn_c_xor_mem_addr),
-    .spec_mem_rmask(spec_insn_c_xor_mem_rmask),
-    .spec_mem_wmask(spec_insn_c_xor_mem_wmask),
-    .spec_mem_wdata(spec_insn_c_xor_mem_wdata)
-  );
-
   wire                                spec_insn_div_valid;
   wire                                spec_insn_div_trap;
   wire [                       4 : 0] spec_insn_div_rs1_addr;
@@ -1617,7 +1909,7 @@ module riscv_formal_monitor_rv32imc_isa_spec (
   wire [32/8 - 1 : 0] spec_insn_div_mem_wmask;
   wire [32   - 1 : 0] spec_insn_div_mem_wdata;
 
-  riscv_formal_monitor_rv32imc_insn_div insn_div (
+  riscv_formal_monitor_rv32im_insn_div insn_div (
     .rvfi_valid(rvfi_valid),
     .rvfi_insn(rvfi_insn),
     .rvfi_pc_rdata(rvfi_pc_rdata),
@@ -1649,7 +1941,7 @@ module riscv_formal_monitor_rv32imc_isa_spec (
   wire [32/8 - 1 : 0] spec_insn_divu_mem_wmask;
   wire [32   - 1 : 0] spec_insn_divu_mem_wdata;
 
-  riscv_formal_monitor_rv32imc_insn_divu insn_divu (
+  riscv_formal_monitor_rv32im_insn_divu insn_divu (
     .rvfi_valid(rvfi_valid),
     .rvfi_insn(rvfi_insn),
     .rvfi_pc_rdata(rvfi_pc_rdata),
@@ -1681,7 +1973,7 @@ module riscv_formal_monitor_rv32imc_isa_spec (
   wire [32/8 - 1 : 0] spec_insn_jal_mem_wmask;
   wire [32   - 1 : 0] spec_insn_jal_mem_wdata;
 
-  riscv_formal_monitor_rv32imc_insn_jal insn_jal (
+  riscv_formal_monitor_rv32im_insn_jal insn_jal (
     .rvfi_valid(rvfi_valid),
     .rvfi_insn(rvfi_insn),
     .rvfi_pc_rdata(rvfi_pc_rdata),
@@ -1713,7 +2005,7 @@ module riscv_formal_monitor_rv32imc_isa_spec (
   wire [32/8 - 1 : 0] spec_insn_jalr_mem_wmask;
   wire [32   - 1 : 0] spec_insn_jalr_mem_wdata;
 
-  riscv_formal_monitor_rv32imc_insn_jalr insn_jalr (
+  riscv_formal_monitor_rv32im_insn_jalr insn_jalr (
     .rvfi_valid(rvfi_valid),
     .rvfi_insn(rvfi_insn),
     .rvfi_pc_rdata(rvfi_pc_rdata),
@@ -1745,7 +2037,7 @@ module riscv_formal_monitor_rv32imc_isa_spec (
   wire [32/8 - 1 : 0] spec_insn_lb_mem_wmask;
   wire [32   - 1 : 0] spec_insn_lb_mem_wdata;
 
-  riscv_formal_monitor_rv32imc_insn_lb insn_lb (
+  riscv_formal_monitor_rv32im_insn_lb insn_lb (
     .rvfi_valid(rvfi_valid),
     .rvfi_insn(rvfi_insn),
     .rvfi_pc_rdata(rvfi_pc_rdata),
@@ -1777,7 +2069,7 @@ module riscv_formal_monitor_rv32imc_isa_spec (
   wire [32/8 - 1 : 0] spec_insn_lbu_mem_wmask;
   wire [32   - 1 : 0] spec_insn_lbu_mem_wdata;
 
-  riscv_formal_monitor_rv32imc_insn_lbu insn_lbu (
+  riscv_formal_monitor_rv32im_insn_lbu insn_lbu (
     .rvfi_valid(rvfi_valid),
     .rvfi_insn(rvfi_insn),
     .rvfi_pc_rdata(rvfi_pc_rdata),
@@ -1809,7 +2101,7 @@ module riscv_formal_monitor_rv32imc_isa_spec (
   wire [32/8 - 1 : 0] spec_insn_lh_mem_wmask;
   wire [32   - 1 : 0] spec_insn_lh_mem_wdata;
 
-  riscv_formal_monitor_rv32imc_insn_lh insn_lh (
+  riscv_formal_monitor_rv32im_insn_lh insn_lh (
     .rvfi_valid(rvfi_valid),
     .rvfi_insn(rvfi_insn),
     .rvfi_pc_rdata(rvfi_pc_rdata),
@@ -1841,7 +2133,7 @@ module riscv_formal_monitor_rv32imc_isa_spec (
   wire [32/8 - 1 : 0] spec_insn_lhu_mem_wmask;
   wire [32   - 1 : 0] spec_insn_lhu_mem_wdata;
 
-  riscv_formal_monitor_rv32imc_insn_lhu insn_lhu (
+  riscv_formal_monitor_rv32im_insn_lhu insn_lhu (
     .rvfi_valid(rvfi_valid),
     .rvfi_insn(rvfi_insn),
     .rvfi_pc_rdata(rvfi_pc_rdata),
@@ -1873,7 +2165,7 @@ module riscv_formal_monitor_rv32imc_isa_spec (
   wire [32/8 - 1 : 0] spec_insn_lui_mem_wmask;
   wire [32   - 1 : 0] spec_insn_lui_mem_wdata;
 
-  riscv_formal_monitor_rv32imc_insn_lui insn_lui (
+  riscv_formal_monitor_rv32im_insn_lui insn_lui (
     .rvfi_valid(rvfi_valid),
     .rvfi_insn(rvfi_insn),
     .rvfi_pc_rdata(rvfi_pc_rdata),
@@ -1905,7 +2197,7 @@ module riscv_formal_monitor_rv32imc_isa_spec (
   wire [32/8 - 1 : 0] spec_insn_lw_mem_wmask;
   wire [32   - 1 : 0] spec_insn_lw_mem_wdata;
 
-  riscv_formal_monitor_rv32imc_insn_lw insn_lw (
+  riscv_formal_monitor_rv32im_insn_lw insn_lw (
     .rvfi_valid(rvfi_valid),
     .rvfi_insn(rvfi_insn),
     .rvfi_pc_rdata(rvfi_pc_rdata),
@@ -1937,7 +2229,7 @@ module riscv_formal_monitor_rv32imc_isa_spec (
   wire [32/8 - 1 : 0] spec_insn_mul_mem_wmask;
   wire [32   - 1 : 0] spec_insn_mul_mem_wdata;
 
-  riscv_formal_monitor_rv32imc_insn_mul insn_mul (
+  riscv_formal_monitor_rv32im_insn_mul insn_mul (
     .rvfi_valid(rvfi_valid),
     .rvfi_insn(rvfi_insn),
     .rvfi_pc_rdata(rvfi_pc_rdata),
@@ -1969,7 +2261,7 @@ module riscv_formal_monitor_rv32imc_isa_spec (
   wire [32/8 - 1 : 0] spec_insn_mulh_mem_wmask;
   wire [32   - 1 : 0] spec_insn_mulh_mem_wdata;
 
-  riscv_formal_monitor_rv32imc_insn_mulh insn_mulh (
+  riscv_formal_monitor_rv32im_insn_mulh insn_mulh (
     .rvfi_valid(rvfi_valid),
     .rvfi_insn(rvfi_insn),
     .rvfi_pc_rdata(rvfi_pc_rdata),
@@ -2001,7 +2293,7 @@ module riscv_formal_monitor_rv32imc_isa_spec (
   wire [32/8 - 1 : 0] spec_insn_mulhsu_mem_wmask;
   wire [32   - 1 : 0] spec_insn_mulhsu_mem_wdata;
 
-  riscv_formal_monitor_rv32imc_insn_mulhsu insn_mulhsu (
+  riscv_formal_monitor_rv32im_insn_mulhsu insn_mulhsu (
     .rvfi_valid(rvfi_valid),
     .rvfi_insn(rvfi_insn),
     .rvfi_pc_rdata(rvfi_pc_rdata),
@@ -2033,7 +2325,7 @@ module riscv_formal_monitor_rv32imc_isa_spec (
   wire [32/8 - 1 : 0] spec_insn_mulhu_mem_wmask;
   wire [32   - 1 : 0] spec_insn_mulhu_mem_wdata;
 
-  riscv_formal_monitor_rv32imc_insn_mulhu insn_mulhu (
+  riscv_formal_monitor_rv32im_insn_mulhu insn_mulhu (
     .rvfi_valid(rvfi_valid),
     .rvfi_insn(rvfi_insn),
     .rvfi_pc_rdata(rvfi_pc_rdata),
@@ -2065,7 +2357,7 @@ module riscv_formal_monitor_rv32imc_isa_spec (
   wire [32/8 - 1 : 0] spec_insn_or_mem_wmask;
   wire [32   - 1 : 0] spec_insn_or_mem_wdata;
 
-  riscv_formal_monitor_rv32imc_insn_or insn_or (
+  riscv_formal_monitor_rv32im_insn_or insn_or (
     .rvfi_valid(rvfi_valid),
     .rvfi_insn(rvfi_insn),
     .rvfi_pc_rdata(rvfi_pc_rdata),
@@ -2097,7 +2389,7 @@ module riscv_formal_monitor_rv32imc_isa_spec (
   wire [32/8 - 1 : 0] spec_insn_ori_mem_wmask;
   wire [32   - 1 : 0] spec_insn_ori_mem_wdata;
 
-  riscv_formal_monitor_rv32imc_insn_ori insn_ori (
+  riscv_formal_monitor_rv32im_insn_ori insn_ori (
     .rvfi_valid(rvfi_valid),
     .rvfi_insn(rvfi_insn),
     .rvfi_pc_rdata(rvfi_pc_rdata),
@@ -2129,7 +2421,7 @@ module riscv_formal_monitor_rv32imc_isa_spec (
   wire [32/8 - 1 : 0] spec_insn_rem_mem_wmask;
   wire [32   - 1 : 0] spec_insn_rem_mem_wdata;
 
-  riscv_formal_monitor_rv32imc_insn_rem insn_rem (
+  riscv_formal_monitor_rv32im_insn_rem insn_rem (
     .rvfi_valid(rvfi_valid),
     .rvfi_insn(rvfi_insn),
     .rvfi_pc_rdata(rvfi_pc_rdata),
@@ -2161,7 +2453,7 @@ module riscv_formal_monitor_rv32imc_isa_spec (
   wire [32/8 - 1 : 0] spec_insn_remu_mem_wmask;
   wire [32   - 1 : 0] spec_insn_remu_mem_wdata;
 
-  riscv_formal_monitor_rv32imc_insn_remu insn_remu (
+  riscv_formal_monitor_rv32im_insn_remu insn_remu (
     .rvfi_valid(rvfi_valid),
     .rvfi_insn(rvfi_insn),
     .rvfi_pc_rdata(rvfi_pc_rdata),
@@ -2193,7 +2485,7 @@ module riscv_formal_monitor_rv32imc_isa_spec (
   wire [32/8 - 1 : 0] spec_insn_sb_mem_wmask;
   wire [32   - 1 : 0] spec_insn_sb_mem_wdata;
 
-  riscv_formal_monitor_rv32imc_insn_sb insn_sb (
+  riscv_formal_monitor_rv32im_insn_sb insn_sb (
     .rvfi_valid(rvfi_valid),
     .rvfi_insn(rvfi_insn),
     .rvfi_pc_rdata(rvfi_pc_rdata),
@@ -2225,7 +2517,7 @@ module riscv_formal_monitor_rv32imc_isa_spec (
   wire [32/8 - 1 : 0] spec_insn_sh_mem_wmask;
   wire [32   - 1 : 0] spec_insn_sh_mem_wdata;
 
-  riscv_formal_monitor_rv32imc_insn_sh insn_sh (
+  riscv_formal_monitor_rv32im_insn_sh insn_sh (
     .rvfi_valid(rvfi_valid),
     .rvfi_insn(rvfi_insn),
     .rvfi_pc_rdata(rvfi_pc_rdata),
@@ -2257,7 +2549,7 @@ module riscv_formal_monitor_rv32imc_isa_spec (
   wire [32/8 - 1 : 0] spec_insn_sll_mem_wmask;
   wire [32   - 1 : 0] spec_insn_sll_mem_wdata;
 
-  riscv_formal_monitor_rv32imc_insn_sll insn_sll (
+  riscv_formal_monitor_rv32im_insn_sll insn_sll (
     .rvfi_valid(rvfi_valid),
     .rvfi_insn(rvfi_insn),
     .rvfi_pc_rdata(rvfi_pc_rdata),
@@ -2289,7 +2581,7 @@ module riscv_formal_monitor_rv32imc_isa_spec (
   wire [32/8 - 1 : 0] spec_insn_slli_mem_wmask;
   wire [32   - 1 : 0] spec_insn_slli_mem_wdata;
 
-  riscv_formal_monitor_rv32imc_insn_slli insn_slli (
+  riscv_formal_monitor_rv32im_insn_slli insn_slli (
     .rvfi_valid(rvfi_valid),
     .rvfi_insn(rvfi_insn),
     .rvfi_pc_rdata(rvfi_pc_rdata),
@@ -2321,7 +2613,7 @@ module riscv_formal_monitor_rv32imc_isa_spec (
   wire [32/8 - 1 : 0] spec_insn_slt_mem_wmask;
   wire [32   - 1 : 0] spec_insn_slt_mem_wdata;
 
-  riscv_formal_monitor_rv32imc_insn_slt insn_slt (
+  riscv_formal_monitor_rv32im_insn_slt insn_slt (
     .rvfi_valid(rvfi_valid),
     .rvfi_insn(rvfi_insn),
     .rvfi_pc_rdata(rvfi_pc_rdata),
@@ -2353,7 +2645,7 @@ module riscv_formal_monitor_rv32imc_isa_spec (
   wire [32/8 - 1 : 0] spec_insn_slti_mem_wmask;
   wire [32   - 1 : 0] spec_insn_slti_mem_wdata;
 
-  riscv_formal_monitor_rv32imc_insn_slti insn_slti (
+  riscv_formal_monitor_rv32im_insn_slti insn_slti (
     .rvfi_valid(rvfi_valid),
     .rvfi_insn(rvfi_insn),
     .rvfi_pc_rdata(rvfi_pc_rdata),
@@ -2385,7 +2677,7 @@ module riscv_formal_monitor_rv32imc_isa_spec (
   wire [32/8 - 1 : 0] spec_insn_sltiu_mem_wmask;
   wire [32   - 1 : 0] spec_insn_sltiu_mem_wdata;
 
-  riscv_formal_monitor_rv32imc_insn_sltiu insn_sltiu (
+  riscv_formal_monitor_rv32im_insn_sltiu insn_sltiu (
     .rvfi_valid(rvfi_valid),
     .rvfi_insn(rvfi_insn),
     .rvfi_pc_rdata(rvfi_pc_rdata),
@@ -2417,7 +2709,7 @@ module riscv_formal_monitor_rv32imc_isa_spec (
   wire [32/8 - 1 : 0] spec_insn_sltu_mem_wmask;
   wire [32   - 1 : 0] spec_insn_sltu_mem_wdata;
 
-  riscv_formal_monitor_rv32imc_insn_sltu insn_sltu (
+  riscv_formal_monitor_rv32im_insn_sltu insn_sltu (
     .rvfi_valid(rvfi_valid),
     .rvfi_insn(rvfi_insn),
     .rvfi_pc_rdata(rvfi_pc_rdata),
@@ -2449,7 +2741,7 @@ module riscv_formal_monitor_rv32imc_isa_spec (
   wire [32/8 - 1 : 0] spec_insn_sra_mem_wmask;
   wire [32   - 1 : 0] spec_insn_sra_mem_wdata;
 
-  riscv_formal_monitor_rv32imc_insn_sra insn_sra (
+  riscv_formal_monitor_rv32im_insn_sra insn_sra (
     .rvfi_valid(rvfi_valid),
     .rvfi_insn(rvfi_insn),
     .rvfi_pc_rdata(rvfi_pc_rdata),
@@ -2481,7 +2773,7 @@ module riscv_formal_monitor_rv32imc_isa_spec (
   wire [32/8 - 1 : 0] spec_insn_srai_mem_wmask;
   wire [32   - 1 : 0] spec_insn_srai_mem_wdata;
 
-  riscv_formal_monitor_rv32imc_insn_srai insn_srai (
+  riscv_formal_monitor_rv32im_insn_srai insn_srai (
     .rvfi_valid(rvfi_valid),
     .rvfi_insn(rvfi_insn),
     .rvfi_pc_rdata(rvfi_pc_rdata),
@@ -2513,7 +2805,7 @@ module riscv_formal_monitor_rv32imc_isa_spec (
   wire [32/8 - 1 : 0] spec_insn_srl_mem_wmask;
   wire [32   - 1 : 0] spec_insn_srl_mem_wdata;
 
-  riscv_formal_monitor_rv32imc_insn_srl insn_srl (
+  riscv_formal_monitor_rv32im_insn_srl insn_srl (
     .rvfi_valid(rvfi_valid),
     .rvfi_insn(rvfi_insn),
     .rvfi_pc_rdata(rvfi_pc_rdata),
@@ -2545,7 +2837,7 @@ module riscv_formal_monitor_rv32imc_isa_spec (
   wire [32/8 - 1 : 0] spec_insn_srli_mem_wmask;
   wire [32   - 1 : 0] spec_insn_srli_mem_wdata;
 
-  riscv_formal_monitor_rv32imc_insn_srli insn_srli (
+  riscv_formal_monitor_rv32im_insn_srli insn_srli (
     .rvfi_valid(rvfi_valid),
     .rvfi_insn(rvfi_insn),
     .rvfi_pc_rdata(rvfi_pc_rdata),
@@ -2577,7 +2869,7 @@ module riscv_formal_monitor_rv32imc_isa_spec (
   wire [32/8 - 1 : 0] spec_insn_sub_mem_wmask;
   wire [32   - 1 : 0] spec_insn_sub_mem_wdata;
 
-  riscv_formal_monitor_rv32imc_insn_sub insn_sub (
+  riscv_formal_monitor_rv32im_insn_sub insn_sub (
     .rvfi_valid(rvfi_valid),
     .rvfi_insn(rvfi_insn),
     .rvfi_pc_rdata(rvfi_pc_rdata),
@@ -2609,7 +2901,7 @@ module riscv_formal_monitor_rv32imc_isa_spec (
   wire [32/8 - 1 : 0] spec_insn_sw_mem_wmask;
   wire [32   - 1 : 0] spec_insn_sw_mem_wdata;
 
-  riscv_formal_monitor_rv32imc_insn_sw insn_sw (
+  riscv_formal_monitor_rv32im_insn_sw insn_sw (
     .rvfi_valid(rvfi_valid),
     .rvfi_insn(rvfi_insn),
     .rvfi_pc_rdata(rvfi_pc_rdata),
@@ -2641,7 +2933,7 @@ module riscv_formal_monitor_rv32imc_isa_spec (
   wire [32/8 - 1 : 0] spec_insn_xor_mem_wmask;
   wire [32   - 1 : 0] spec_insn_xor_mem_wdata;
 
-  riscv_formal_monitor_rv32imc_insn_xor insn_xor (
+  riscv_formal_monitor_rv32im_insn_xor insn_xor (
     .rvfi_valid(rvfi_valid),
     .rvfi_insn(rvfi_insn),
     .rvfi_pc_rdata(rvfi_pc_rdata),
@@ -2673,7 +2965,7 @@ module riscv_formal_monitor_rv32imc_isa_spec (
   wire [32/8 - 1 : 0] spec_insn_xori_mem_wmask;
   wire [32   - 1 : 0] spec_insn_xori_mem_wdata;
 
-  riscv_formal_monitor_rv32imc_insn_xori insn_xori (
+  riscv_formal_monitor_rv32im_insn_xori insn_xori (
     .rvfi_valid(rvfi_valid),
     .rvfi_insn(rvfi_insn),
     .rvfi_pc_rdata(rvfi_pc_rdata),
@@ -2705,31 +2997,6 @@ module riscv_formal_monitor_rv32imc_isa_spec (
 		spec_insn_blt_valid ? spec_insn_blt_valid :
 		spec_insn_bltu_valid ? spec_insn_bltu_valid :
 		spec_insn_bne_valid ? spec_insn_bne_valid :
-		spec_insn_c_add_valid ? spec_insn_c_add_valid :
-		spec_insn_c_addi_valid ? spec_insn_c_addi_valid :
-		spec_insn_c_addi16sp_valid ? spec_insn_c_addi16sp_valid :
-		spec_insn_c_addi4spn_valid ? spec_insn_c_addi4spn_valid :
-		spec_insn_c_and_valid ? spec_insn_c_and_valid :
-		spec_insn_c_andi_valid ? spec_insn_c_andi_valid :
-		spec_insn_c_beqz_valid ? spec_insn_c_beqz_valid :
-		spec_insn_c_bnez_valid ? spec_insn_c_bnez_valid :
-		spec_insn_c_j_valid ? spec_insn_c_j_valid :
-		spec_insn_c_jal_valid ? spec_insn_c_jal_valid :
-		spec_insn_c_jalr_valid ? spec_insn_c_jalr_valid :
-		spec_insn_c_jr_valid ? spec_insn_c_jr_valid :
-		spec_insn_c_li_valid ? spec_insn_c_li_valid :
-		spec_insn_c_lui_valid ? spec_insn_c_lui_valid :
-		spec_insn_c_lw_valid ? spec_insn_c_lw_valid :
-		spec_insn_c_lwsp_valid ? spec_insn_c_lwsp_valid :
-		spec_insn_c_mv_valid ? spec_insn_c_mv_valid :
-		spec_insn_c_or_valid ? spec_insn_c_or_valid :
-		spec_insn_c_slli_valid ? spec_insn_c_slli_valid :
-		spec_insn_c_srai_valid ? spec_insn_c_srai_valid :
-		spec_insn_c_srli_valid ? spec_insn_c_srli_valid :
-		spec_insn_c_sub_valid ? spec_insn_c_sub_valid :
-		spec_insn_c_sw_valid ? spec_insn_c_sw_valid :
-		spec_insn_c_swsp_valid ? spec_insn_c_swsp_valid :
-		spec_insn_c_xor_valid ? spec_insn_c_xor_valid :
 		spec_insn_div_valid ? spec_insn_div_valid :
 		spec_insn_divu_valid ? spec_insn_divu_valid :
 		spec_insn_jal_valid ? spec_insn_jal_valid :
@@ -2776,31 +3043,6 @@ module riscv_formal_monitor_rv32imc_isa_spec (
 		spec_insn_blt_valid ? spec_insn_blt_trap :
 		spec_insn_bltu_valid ? spec_insn_bltu_trap :
 		spec_insn_bne_valid ? spec_insn_bne_trap :
-		spec_insn_c_add_valid ? spec_insn_c_add_trap :
-		spec_insn_c_addi_valid ? spec_insn_c_addi_trap :
-		spec_insn_c_addi16sp_valid ? spec_insn_c_addi16sp_trap :
-		spec_insn_c_addi4spn_valid ? spec_insn_c_addi4spn_trap :
-		spec_insn_c_and_valid ? spec_insn_c_and_trap :
-		spec_insn_c_andi_valid ? spec_insn_c_andi_trap :
-		spec_insn_c_beqz_valid ? spec_insn_c_beqz_trap :
-		spec_insn_c_bnez_valid ? spec_insn_c_bnez_trap :
-		spec_insn_c_j_valid ? spec_insn_c_j_trap :
-		spec_insn_c_jal_valid ? spec_insn_c_jal_trap :
-		spec_insn_c_jalr_valid ? spec_insn_c_jalr_trap :
-		spec_insn_c_jr_valid ? spec_insn_c_jr_trap :
-		spec_insn_c_li_valid ? spec_insn_c_li_trap :
-		spec_insn_c_lui_valid ? spec_insn_c_lui_trap :
-		spec_insn_c_lw_valid ? spec_insn_c_lw_trap :
-		spec_insn_c_lwsp_valid ? spec_insn_c_lwsp_trap :
-		spec_insn_c_mv_valid ? spec_insn_c_mv_trap :
-		spec_insn_c_or_valid ? spec_insn_c_or_trap :
-		spec_insn_c_slli_valid ? spec_insn_c_slli_trap :
-		spec_insn_c_srai_valid ? spec_insn_c_srai_trap :
-		spec_insn_c_srli_valid ? spec_insn_c_srli_trap :
-		spec_insn_c_sub_valid ? spec_insn_c_sub_trap :
-		spec_insn_c_sw_valid ? spec_insn_c_sw_trap :
-		spec_insn_c_swsp_valid ? spec_insn_c_swsp_trap :
-		spec_insn_c_xor_valid ? spec_insn_c_xor_trap :
 		spec_insn_div_valid ? spec_insn_div_trap :
 		spec_insn_divu_valid ? spec_insn_divu_trap :
 		spec_insn_jal_valid ? spec_insn_jal_trap :
@@ -2847,31 +3089,6 @@ module riscv_formal_monitor_rv32imc_isa_spec (
 		spec_insn_blt_valid ? spec_insn_blt_rs1_addr :
 		spec_insn_bltu_valid ? spec_insn_bltu_rs1_addr :
 		spec_insn_bne_valid ? spec_insn_bne_rs1_addr :
-		spec_insn_c_add_valid ? spec_insn_c_add_rs1_addr :
-		spec_insn_c_addi_valid ? spec_insn_c_addi_rs1_addr :
-		spec_insn_c_addi16sp_valid ? spec_insn_c_addi16sp_rs1_addr :
-		spec_insn_c_addi4spn_valid ? spec_insn_c_addi4spn_rs1_addr :
-		spec_insn_c_and_valid ? spec_insn_c_and_rs1_addr :
-		spec_insn_c_andi_valid ? spec_insn_c_andi_rs1_addr :
-		spec_insn_c_beqz_valid ? spec_insn_c_beqz_rs1_addr :
-		spec_insn_c_bnez_valid ? spec_insn_c_bnez_rs1_addr :
-		spec_insn_c_j_valid ? spec_insn_c_j_rs1_addr :
-		spec_insn_c_jal_valid ? spec_insn_c_jal_rs1_addr :
-		spec_insn_c_jalr_valid ? spec_insn_c_jalr_rs1_addr :
-		spec_insn_c_jr_valid ? spec_insn_c_jr_rs1_addr :
-		spec_insn_c_li_valid ? spec_insn_c_li_rs1_addr :
-		spec_insn_c_lui_valid ? spec_insn_c_lui_rs1_addr :
-		spec_insn_c_lw_valid ? spec_insn_c_lw_rs1_addr :
-		spec_insn_c_lwsp_valid ? spec_insn_c_lwsp_rs1_addr :
-		spec_insn_c_mv_valid ? spec_insn_c_mv_rs1_addr :
-		spec_insn_c_or_valid ? spec_insn_c_or_rs1_addr :
-		spec_insn_c_slli_valid ? spec_insn_c_slli_rs1_addr :
-		spec_insn_c_srai_valid ? spec_insn_c_srai_rs1_addr :
-		spec_insn_c_srli_valid ? spec_insn_c_srli_rs1_addr :
-		spec_insn_c_sub_valid ? spec_insn_c_sub_rs1_addr :
-		spec_insn_c_sw_valid ? spec_insn_c_sw_rs1_addr :
-		spec_insn_c_swsp_valid ? spec_insn_c_swsp_rs1_addr :
-		spec_insn_c_xor_valid ? spec_insn_c_xor_rs1_addr :
 		spec_insn_div_valid ? spec_insn_div_rs1_addr :
 		spec_insn_divu_valid ? spec_insn_divu_rs1_addr :
 		spec_insn_jal_valid ? spec_insn_jal_rs1_addr :
@@ -2918,31 +3135,6 @@ module riscv_formal_monitor_rv32imc_isa_spec (
 		spec_insn_blt_valid ? spec_insn_blt_rs2_addr :
 		spec_insn_bltu_valid ? spec_insn_bltu_rs2_addr :
 		spec_insn_bne_valid ? spec_insn_bne_rs2_addr :
-		spec_insn_c_add_valid ? spec_insn_c_add_rs2_addr :
-		spec_insn_c_addi_valid ? spec_insn_c_addi_rs2_addr :
-		spec_insn_c_addi16sp_valid ? spec_insn_c_addi16sp_rs2_addr :
-		spec_insn_c_addi4spn_valid ? spec_insn_c_addi4spn_rs2_addr :
-		spec_insn_c_and_valid ? spec_insn_c_and_rs2_addr :
-		spec_insn_c_andi_valid ? spec_insn_c_andi_rs2_addr :
-		spec_insn_c_beqz_valid ? spec_insn_c_beqz_rs2_addr :
-		spec_insn_c_bnez_valid ? spec_insn_c_bnez_rs2_addr :
-		spec_insn_c_j_valid ? spec_insn_c_j_rs2_addr :
-		spec_insn_c_jal_valid ? spec_insn_c_jal_rs2_addr :
-		spec_insn_c_jalr_valid ? spec_insn_c_jalr_rs2_addr :
-		spec_insn_c_jr_valid ? spec_insn_c_jr_rs2_addr :
-		spec_insn_c_li_valid ? spec_insn_c_li_rs2_addr :
-		spec_insn_c_lui_valid ? spec_insn_c_lui_rs2_addr :
-		spec_insn_c_lw_valid ? spec_insn_c_lw_rs2_addr :
-		spec_insn_c_lwsp_valid ? spec_insn_c_lwsp_rs2_addr :
-		spec_insn_c_mv_valid ? spec_insn_c_mv_rs2_addr :
-		spec_insn_c_or_valid ? spec_insn_c_or_rs2_addr :
-		spec_insn_c_slli_valid ? spec_insn_c_slli_rs2_addr :
-		spec_insn_c_srai_valid ? spec_insn_c_srai_rs2_addr :
-		spec_insn_c_srli_valid ? spec_insn_c_srli_rs2_addr :
-		spec_insn_c_sub_valid ? spec_insn_c_sub_rs2_addr :
-		spec_insn_c_sw_valid ? spec_insn_c_sw_rs2_addr :
-		spec_insn_c_swsp_valid ? spec_insn_c_swsp_rs2_addr :
-		spec_insn_c_xor_valid ? spec_insn_c_xor_rs2_addr :
 		spec_insn_div_valid ? spec_insn_div_rs2_addr :
 		spec_insn_divu_valid ? spec_insn_divu_rs2_addr :
 		spec_insn_jal_valid ? spec_insn_jal_rs2_addr :
@@ -2989,31 +3181,6 @@ module riscv_formal_monitor_rv32imc_isa_spec (
 		spec_insn_blt_valid ? spec_insn_blt_rd_addr :
 		spec_insn_bltu_valid ? spec_insn_bltu_rd_addr :
 		spec_insn_bne_valid ? spec_insn_bne_rd_addr :
-		spec_insn_c_add_valid ? spec_insn_c_add_rd_addr :
-		spec_insn_c_addi_valid ? spec_insn_c_addi_rd_addr :
-		spec_insn_c_addi16sp_valid ? spec_insn_c_addi16sp_rd_addr :
-		spec_insn_c_addi4spn_valid ? spec_insn_c_addi4spn_rd_addr :
-		spec_insn_c_and_valid ? spec_insn_c_and_rd_addr :
-		spec_insn_c_andi_valid ? spec_insn_c_andi_rd_addr :
-		spec_insn_c_beqz_valid ? spec_insn_c_beqz_rd_addr :
-		spec_insn_c_bnez_valid ? spec_insn_c_bnez_rd_addr :
-		spec_insn_c_j_valid ? spec_insn_c_j_rd_addr :
-		spec_insn_c_jal_valid ? spec_insn_c_jal_rd_addr :
-		spec_insn_c_jalr_valid ? spec_insn_c_jalr_rd_addr :
-		spec_insn_c_jr_valid ? spec_insn_c_jr_rd_addr :
-		spec_insn_c_li_valid ? spec_insn_c_li_rd_addr :
-		spec_insn_c_lui_valid ? spec_insn_c_lui_rd_addr :
-		spec_insn_c_lw_valid ? spec_insn_c_lw_rd_addr :
-		spec_insn_c_lwsp_valid ? spec_insn_c_lwsp_rd_addr :
-		spec_insn_c_mv_valid ? spec_insn_c_mv_rd_addr :
-		spec_insn_c_or_valid ? spec_insn_c_or_rd_addr :
-		spec_insn_c_slli_valid ? spec_insn_c_slli_rd_addr :
-		spec_insn_c_srai_valid ? spec_insn_c_srai_rd_addr :
-		spec_insn_c_srli_valid ? spec_insn_c_srli_rd_addr :
-		spec_insn_c_sub_valid ? spec_insn_c_sub_rd_addr :
-		spec_insn_c_sw_valid ? spec_insn_c_sw_rd_addr :
-		spec_insn_c_swsp_valid ? spec_insn_c_swsp_rd_addr :
-		spec_insn_c_xor_valid ? spec_insn_c_xor_rd_addr :
 		spec_insn_div_valid ? spec_insn_div_rd_addr :
 		spec_insn_divu_valid ? spec_insn_divu_rd_addr :
 		spec_insn_jal_valid ? spec_insn_jal_rd_addr :
@@ -3060,31 +3227,6 @@ module riscv_formal_monitor_rv32imc_isa_spec (
 		spec_insn_blt_valid ? spec_insn_blt_rd_wdata :
 		spec_insn_bltu_valid ? spec_insn_bltu_rd_wdata :
 		spec_insn_bne_valid ? spec_insn_bne_rd_wdata :
-		spec_insn_c_add_valid ? spec_insn_c_add_rd_wdata :
-		spec_insn_c_addi_valid ? spec_insn_c_addi_rd_wdata :
-		spec_insn_c_addi16sp_valid ? spec_insn_c_addi16sp_rd_wdata :
-		spec_insn_c_addi4spn_valid ? spec_insn_c_addi4spn_rd_wdata :
-		spec_insn_c_and_valid ? spec_insn_c_and_rd_wdata :
-		spec_insn_c_andi_valid ? spec_insn_c_andi_rd_wdata :
-		spec_insn_c_beqz_valid ? spec_insn_c_beqz_rd_wdata :
-		spec_insn_c_bnez_valid ? spec_insn_c_bnez_rd_wdata :
-		spec_insn_c_j_valid ? spec_insn_c_j_rd_wdata :
-		spec_insn_c_jal_valid ? spec_insn_c_jal_rd_wdata :
-		spec_insn_c_jalr_valid ? spec_insn_c_jalr_rd_wdata :
-		spec_insn_c_jr_valid ? spec_insn_c_jr_rd_wdata :
-		spec_insn_c_li_valid ? spec_insn_c_li_rd_wdata :
-		spec_insn_c_lui_valid ? spec_insn_c_lui_rd_wdata :
-		spec_insn_c_lw_valid ? spec_insn_c_lw_rd_wdata :
-		spec_insn_c_lwsp_valid ? spec_insn_c_lwsp_rd_wdata :
-		spec_insn_c_mv_valid ? spec_insn_c_mv_rd_wdata :
-		spec_insn_c_or_valid ? spec_insn_c_or_rd_wdata :
-		spec_insn_c_slli_valid ? spec_insn_c_slli_rd_wdata :
-		spec_insn_c_srai_valid ? spec_insn_c_srai_rd_wdata :
-		spec_insn_c_srli_valid ? spec_insn_c_srli_rd_wdata :
-		spec_insn_c_sub_valid ? spec_insn_c_sub_rd_wdata :
-		spec_insn_c_sw_valid ? spec_insn_c_sw_rd_wdata :
-		spec_insn_c_swsp_valid ? spec_insn_c_swsp_rd_wdata :
-		spec_insn_c_xor_valid ? spec_insn_c_xor_rd_wdata :
 		spec_insn_div_valid ? spec_insn_div_rd_wdata :
 		spec_insn_divu_valid ? spec_insn_divu_rd_wdata :
 		spec_insn_jal_valid ? spec_insn_jal_rd_wdata :
@@ -3131,31 +3273,6 @@ module riscv_formal_monitor_rv32imc_isa_spec (
 		spec_insn_blt_valid ? spec_insn_blt_pc_wdata :
 		spec_insn_bltu_valid ? spec_insn_bltu_pc_wdata :
 		spec_insn_bne_valid ? spec_insn_bne_pc_wdata :
-		spec_insn_c_add_valid ? spec_insn_c_add_pc_wdata :
-		spec_insn_c_addi_valid ? spec_insn_c_addi_pc_wdata :
-		spec_insn_c_addi16sp_valid ? spec_insn_c_addi16sp_pc_wdata :
-		spec_insn_c_addi4spn_valid ? spec_insn_c_addi4spn_pc_wdata :
-		spec_insn_c_and_valid ? spec_insn_c_and_pc_wdata :
-		spec_insn_c_andi_valid ? spec_insn_c_andi_pc_wdata :
-		spec_insn_c_beqz_valid ? spec_insn_c_beqz_pc_wdata :
-		spec_insn_c_bnez_valid ? spec_insn_c_bnez_pc_wdata :
-		spec_insn_c_j_valid ? spec_insn_c_j_pc_wdata :
-		spec_insn_c_jal_valid ? spec_insn_c_jal_pc_wdata :
-		spec_insn_c_jalr_valid ? spec_insn_c_jalr_pc_wdata :
-		spec_insn_c_jr_valid ? spec_insn_c_jr_pc_wdata :
-		spec_insn_c_li_valid ? spec_insn_c_li_pc_wdata :
-		spec_insn_c_lui_valid ? spec_insn_c_lui_pc_wdata :
-		spec_insn_c_lw_valid ? spec_insn_c_lw_pc_wdata :
-		spec_insn_c_lwsp_valid ? spec_insn_c_lwsp_pc_wdata :
-		spec_insn_c_mv_valid ? spec_insn_c_mv_pc_wdata :
-		spec_insn_c_or_valid ? spec_insn_c_or_pc_wdata :
-		spec_insn_c_slli_valid ? spec_insn_c_slli_pc_wdata :
-		spec_insn_c_srai_valid ? spec_insn_c_srai_pc_wdata :
-		spec_insn_c_srli_valid ? spec_insn_c_srli_pc_wdata :
-		spec_insn_c_sub_valid ? spec_insn_c_sub_pc_wdata :
-		spec_insn_c_sw_valid ? spec_insn_c_sw_pc_wdata :
-		spec_insn_c_swsp_valid ? spec_insn_c_swsp_pc_wdata :
-		spec_insn_c_xor_valid ? spec_insn_c_xor_pc_wdata :
 		spec_insn_div_valid ? spec_insn_div_pc_wdata :
 		spec_insn_divu_valid ? spec_insn_divu_pc_wdata :
 		spec_insn_jal_valid ? spec_insn_jal_pc_wdata :
@@ -3202,31 +3319,6 @@ module riscv_formal_monitor_rv32imc_isa_spec (
 		spec_insn_blt_valid ? spec_insn_blt_mem_addr :
 		spec_insn_bltu_valid ? spec_insn_bltu_mem_addr :
 		spec_insn_bne_valid ? spec_insn_bne_mem_addr :
-		spec_insn_c_add_valid ? spec_insn_c_add_mem_addr :
-		spec_insn_c_addi_valid ? spec_insn_c_addi_mem_addr :
-		spec_insn_c_addi16sp_valid ? spec_insn_c_addi16sp_mem_addr :
-		spec_insn_c_addi4spn_valid ? spec_insn_c_addi4spn_mem_addr :
-		spec_insn_c_and_valid ? spec_insn_c_and_mem_addr :
-		spec_insn_c_andi_valid ? spec_insn_c_andi_mem_addr :
-		spec_insn_c_beqz_valid ? spec_insn_c_beqz_mem_addr :
-		spec_insn_c_bnez_valid ? spec_insn_c_bnez_mem_addr :
-		spec_insn_c_j_valid ? spec_insn_c_j_mem_addr :
-		spec_insn_c_jal_valid ? spec_insn_c_jal_mem_addr :
-		spec_insn_c_jalr_valid ? spec_insn_c_jalr_mem_addr :
-		spec_insn_c_jr_valid ? spec_insn_c_jr_mem_addr :
-		spec_insn_c_li_valid ? spec_insn_c_li_mem_addr :
-		spec_insn_c_lui_valid ? spec_insn_c_lui_mem_addr :
-		spec_insn_c_lw_valid ? spec_insn_c_lw_mem_addr :
-		spec_insn_c_lwsp_valid ? spec_insn_c_lwsp_mem_addr :
-		spec_insn_c_mv_valid ? spec_insn_c_mv_mem_addr :
-		spec_insn_c_or_valid ? spec_insn_c_or_mem_addr :
-		spec_insn_c_slli_valid ? spec_insn_c_slli_mem_addr :
-		spec_insn_c_srai_valid ? spec_insn_c_srai_mem_addr :
-		spec_insn_c_srli_valid ? spec_insn_c_srli_mem_addr :
-		spec_insn_c_sub_valid ? spec_insn_c_sub_mem_addr :
-		spec_insn_c_sw_valid ? spec_insn_c_sw_mem_addr :
-		spec_insn_c_swsp_valid ? spec_insn_c_swsp_mem_addr :
-		spec_insn_c_xor_valid ? spec_insn_c_xor_mem_addr :
 		spec_insn_div_valid ? spec_insn_div_mem_addr :
 		spec_insn_divu_valid ? spec_insn_divu_mem_addr :
 		spec_insn_jal_valid ? spec_insn_jal_mem_addr :
@@ -3273,31 +3365,6 @@ module riscv_formal_monitor_rv32imc_isa_spec (
 		spec_insn_blt_valid ? spec_insn_blt_mem_rmask :
 		spec_insn_bltu_valid ? spec_insn_bltu_mem_rmask :
 		spec_insn_bne_valid ? spec_insn_bne_mem_rmask :
-		spec_insn_c_add_valid ? spec_insn_c_add_mem_rmask :
-		spec_insn_c_addi_valid ? spec_insn_c_addi_mem_rmask :
-		spec_insn_c_addi16sp_valid ? spec_insn_c_addi16sp_mem_rmask :
-		spec_insn_c_addi4spn_valid ? spec_insn_c_addi4spn_mem_rmask :
-		spec_insn_c_and_valid ? spec_insn_c_and_mem_rmask :
-		spec_insn_c_andi_valid ? spec_insn_c_andi_mem_rmask :
-		spec_insn_c_beqz_valid ? spec_insn_c_beqz_mem_rmask :
-		spec_insn_c_bnez_valid ? spec_insn_c_bnez_mem_rmask :
-		spec_insn_c_j_valid ? spec_insn_c_j_mem_rmask :
-		spec_insn_c_jal_valid ? spec_insn_c_jal_mem_rmask :
-		spec_insn_c_jalr_valid ? spec_insn_c_jalr_mem_rmask :
-		spec_insn_c_jr_valid ? spec_insn_c_jr_mem_rmask :
-		spec_insn_c_li_valid ? spec_insn_c_li_mem_rmask :
-		spec_insn_c_lui_valid ? spec_insn_c_lui_mem_rmask :
-		spec_insn_c_lw_valid ? spec_insn_c_lw_mem_rmask :
-		spec_insn_c_lwsp_valid ? spec_insn_c_lwsp_mem_rmask :
-		spec_insn_c_mv_valid ? spec_insn_c_mv_mem_rmask :
-		spec_insn_c_or_valid ? spec_insn_c_or_mem_rmask :
-		spec_insn_c_slli_valid ? spec_insn_c_slli_mem_rmask :
-		spec_insn_c_srai_valid ? spec_insn_c_srai_mem_rmask :
-		spec_insn_c_srli_valid ? spec_insn_c_srli_mem_rmask :
-		spec_insn_c_sub_valid ? spec_insn_c_sub_mem_rmask :
-		spec_insn_c_sw_valid ? spec_insn_c_sw_mem_rmask :
-		spec_insn_c_swsp_valid ? spec_insn_c_swsp_mem_rmask :
-		spec_insn_c_xor_valid ? spec_insn_c_xor_mem_rmask :
 		spec_insn_div_valid ? spec_insn_div_mem_rmask :
 		spec_insn_divu_valid ? spec_insn_divu_mem_rmask :
 		spec_insn_jal_valid ? spec_insn_jal_mem_rmask :
@@ -3344,31 +3411,6 @@ module riscv_formal_monitor_rv32imc_isa_spec (
 		spec_insn_blt_valid ? spec_insn_blt_mem_wmask :
 		spec_insn_bltu_valid ? spec_insn_bltu_mem_wmask :
 		spec_insn_bne_valid ? spec_insn_bne_mem_wmask :
-		spec_insn_c_add_valid ? spec_insn_c_add_mem_wmask :
-		spec_insn_c_addi_valid ? spec_insn_c_addi_mem_wmask :
-		spec_insn_c_addi16sp_valid ? spec_insn_c_addi16sp_mem_wmask :
-		spec_insn_c_addi4spn_valid ? spec_insn_c_addi4spn_mem_wmask :
-		spec_insn_c_and_valid ? spec_insn_c_and_mem_wmask :
-		spec_insn_c_andi_valid ? spec_insn_c_andi_mem_wmask :
-		spec_insn_c_beqz_valid ? spec_insn_c_beqz_mem_wmask :
-		spec_insn_c_bnez_valid ? spec_insn_c_bnez_mem_wmask :
-		spec_insn_c_j_valid ? spec_insn_c_j_mem_wmask :
-		spec_insn_c_jal_valid ? spec_insn_c_jal_mem_wmask :
-		spec_insn_c_jalr_valid ? spec_insn_c_jalr_mem_wmask :
-		spec_insn_c_jr_valid ? spec_insn_c_jr_mem_wmask :
-		spec_insn_c_li_valid ? spec_insn_c_li_mem_wmask :
-		spec_insn_c_lui_valid ? spec_insn_c_lui_mem_wmask :
-		spec_insn_c_lw_valid ? spec_insn_c_lw_mem_wmask :
-		spec_insn_c_lwsp_valid ? spec_insn_c_lwsp_mem_wmask :
-		spec_insn_c_mv_valid ? spec_insn_c_mv_mem_wmask :
-		spec_insn_c_or_valid ? spec_insn_c_or_mem_wmask :
-		spec_insn_c_slli_valid ? spec_insn_c_slli_mem_wmask :
-		spec_insn_c_srai_valid ? spec_insn_c_srai_mem_wmask :
-		spec_insn_c_srli_valid ? spec_insn_c_srli_mem_wmask :
-		spec_insn_c_sub_valid ? spec_insn_c_sub_mem_wmask :
-		spec_insn_c_sw_valid ? spec_insn_c_sw_mem_wmask :
-		spec_insn_c_swsp_valid ? spec_insn_c_swsp_mem_wmask :
-		spec_insn_c_xor_valid ? spec_insn_c_xor_mem_wmask :
 		spec_insn_div_valid ? spec_insn_div_mem_wmask :
 		spec_insn_divu_valid ? spec_insn_divu_mem_wmask :
 		spec_insn_jal_valid ? spec_insn_jal_mem_wmask :
@@ -3415,31 +3457,6 @@ module riscv_formal_monitor_rv32imc_isa_spec (
 		spec_insn_blt_valid ? spec_insn_blt_mem_wdata :
 		spec_insn_bltu_valid ? spec_insn_bltu_mem_wdata :
 		spec_insn_bne_valid ? spec_insn_bne_mem_wdata :
-		spec_insn_c_add_valid ? spec_insn_c_add_mem_wdata :
-		spec_insn_c_addi_valid ? spec_insn_c_addi_mem_wdata :
-		spec_insn_c_addi16sp_valid ? spec_insn_c_addi16sp_mem_wdata :
-		spec_insn_c_addi4spn_valid ? spec_insn_c_addi4spn_mem_wdata :
-		spec_insn_c_and_valid ? spec_insn_c_and_mem_wdata :
-		spec_insn_c_andi_valid ? spec_insn_c_andi_mem_wdata :
-		spec_insn_c_beqz_valid ? spec_insn_c_beqz_mem_wdata :
-		spec_insn_c_bnez_valid ? spec_insn_c_bnez_mem_wdata :
-		spec_insn_c_j_valid ? spec_insn_c_j_mem_wdata :
-		spec_insn_c_jal_valid ? spec_insn_c_jal_mem_wdata :
-		spec_insn_c_jalr_valid ? spec_insn_c_jalr_mem_wdata :
-		spec_insn_c_jr_valid ? spec_insn_c_jr_mem_wdata :
-		spec_insn_c_li_valid ? spec_insn_c_li_mem_wdata :
-		spec_insn_c_lui_valid ? spec_insn_c_lui_mem_wdata :
-		spec_insn_c_lw_valid ? spec_insn_c_lw_mem_wdata :
-		spec_insn_c_lwsp_valid ? spec_insn_c_lwsp_mem_wdata :
-		spec_insn_c_mv_valid ? spec_insn_c_mv_mem_wdata :
-		spec_insn_c_or_valid ? spec_insn_c_or_mem_wdata :
-		spec_insn_c_slli_valid ? spec_insn_c_slli_mem_wdata :
-		spec_insn_c_srai_valid ? spec_insn_c_srai_mem_wdata :
-		spec_insn_c_srli_valid ? spec_insn_c_srli_mem_wdata :
-		spec_insn_c_sub_valid ? spec_insn_c_sub_mem_wdata :
-		spec_insn_c_sw_valid ? spec_insn_c_sw_mem_wdata :
-		spec_insn_c_swsp_valid ? spec_insn_c_swsp_mem_wdata :
-		spec_insn_c_xor_valid ? spec_insn_c_xor_mem_wdata :
 		spec_insn_div_valid ? spec_insn_div_mem_wdata :
 		spec_insn_divu_valid ? spec_insn_divu_mem_wdata :
 		spec_insn_jal_valid ? spec_insn_jal_mem_wdata :
@@ -3478,7 +3495,7 @@ endmodule
 
 // DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
 
-module riscv_formal_monitor_rv32imc_insn_add (
+module riscv_formal_monitor_rv32im_insn_add (
   input                                 rvfi_valid,
   input  [32   - 1 : 0] rvfi_insn,
   input  [32   - 1 : 0] rvfi_pc_rdata,
@@ -3529,7 +3546,7 @@ endmodule
 
 // DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
 
-module riscv_formal_monitor_rv32imc_insn_addi (
+module riscv_formal_monitor_rv32im_insn_addi (
   input                                 rvfi_valid,
   input  [32   - 1 : 0] rvfi_insn,
   input  [32   - 1 : 0] rvfi_pc_rdata,
@@ -3579,7 +3596,7 @@ endmodule
 
 // DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
 
-module riscv_formal_monitor_rv32imc_insn_and (
+module riscv_formal_monitor_rv32im_insn_and (
   input                                 rvfi_valid,
   input  [32   - 1 : 0] rvfi_insn,
   input  [32   - 1 : 0] rvfi_pc_rdata,
@@ -3630,7 +3647,7 @@ endmodule
 
 // DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
 
-module riscv_formal_monitor_rv32imc_insn_andi (
+module riscv_formal_monitor_rv32im_insn_andi (
   input                                 rvfi_valid,
   input  [32   - 1 : 0] rvfi_insn,
   input  [32   - 1 : 0] rvfi_pc_rdata,
@@ -3680,7 +3697,7 @@ endmodule
 
 // DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
 
-module riscv_formal_monitor_rv32imc_insn_auipc (
+module riscv_formal_monitor_rv32im_insn_auipc (
   input                                 rvfi_valid,
   input  [32   - 1 : 0] rvfi_insn,
   input  [32   - 1 : 0] rvfi_pc_rdata,
@@ -3727,7 +3744,7 @@ endmodule
 
 // DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
 
-module riscv_formal_monitor_rv32imc_insn_beq (
+module riscv_formal_monitor_rv32im_insn_beq (
   input                                 rvfi_valid,
   input  [32   - 1 : 0] rvfi_insn,
   input  [32   - 1 : 0] rvfi_pc_rdata,
@@ -3757,7 +3774,7 @@ module riscv_formal_monitor_rv32imc_insn_beq (
   wire [6:0] insn_opcode = rvfi_insn[ 6: 0];
 
   wire misa_ok = 1;
-  wire ialign16 = 1;
+  wire ialign16 = 0;
 
   // BEQ instruction
   wire cond = rvfi_rs1_rdata == rvfi_rs2_rdata;
@@ -3779,7 +3796,7 @@ endmodule
 
 // DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
 
-module riscv_formal_monitor_rv32imc_insn_bge (
+module riscv_formal_monitor_rv32im_insn_bge (
   input                                 rvfi_valid,
   input  [32   - 1 : 0] rvfi_insn,
   input  [32   - 1 : 0] rvfi_pc_rdata,
@@ -3809,7 +3826,7 @@ module riscv_formal_monitor_rv32imc_insn_bge (
   wire [6:0] insn_opcode = rvfi_insn[ 6: 0];
 
   wire misa_ok = 1;
-  wire ialign16 = 1;
+  wire ialign16 = 0;
 
   // BGE instruction
   wire cond = $signed(rvfi_rs1_rdata) >= $signed(rvfi_rs2_rdata);
@@ -3831,7 +3848,7 @@ endmodule
 
 // DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
 
-module riscv_formal_monitor_rv32imc_insn_bgeu (
+module riscv_formal_monitor_rv32im_insn_bgeu (
   input                                 rvfi_valid,
   input  [32   - 1 : 0] rvfi_insn,
   input  [32   - 1 : 0] rvfi_pc_rdata,
@@ -3861,7 +3878,7 @@ module riscv_formal_monitor_rv32imc_insn_bgeu (
   wire [6:0] insn_opcode = rvfi_insn[ 6: 0];
 
   wire misa_ok = 1;
-  wire ialign16 = 1;
+  wire ialign16 = 0;
 
   // BGEU instruction
   wire cond = rvfi_rs1_rdata >= rvfi_rs2_rdata;
@@ -3883,7 +3900,7 @@ endmodule
 
 // DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
 
-module riscv_formal_monitor_rv32imc_insn_blt (
+module riscv_formal_monitor_rv32im_insn_blt (
   input                                 rvfi_valid,
   input  [32   - 1 : 0] rvfi_insn,
   input  [32   - 1 : 0] rvfi_pc_rdata,
@@ -3913,7 +3930,7 @@ module riscv_formal_monitor_rv32imc_insn_blt (
   wire [6:0] insn_opcode = rvfi_insn[ 6: 0];
 
   wire misa_ok = 1;
-  wire ialign16 = 1;
+  wire ialign16 = 0;
 
   // BLT instruction
   wire cond = $signed(rvfi_rs1_rdata) < $signed(rvfi_rs2_rdata);
@@ -3935,7 +3952,7 @@ endmodule
 
 // DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
 
-module riscv_formal_monitor_rv32imc_insn_bltu (
+module riscv_formal_monitor_rv32im_insn_bltu (
   input                                 rvfi_valid,
   input  [32   - 1 : 0] rvfi_insn,
   input  [32   - 1 : 0] rvfi_pc_rdata,
@@ -3965,7 +3982,7 @@ module riscv_formal_monitor_rv32imc_insn_bltu (
   wire [6:0] insn_opcode = rvfi_insn[ 6: 0];
 
   wire misa_ok = 1;
-  wire ialign16 = 1;
+  wire ialign16 = 0;
 
   // BLTU instruction
   wire cond = rvfi_rs1_rdata < rvfi_rs2_rdata;
@@ -3987,7 +4004,7 @@ endmodule
 
 // DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
 
-module riscv_formal_monitor_rv32imc_insn_bne (
+module riscv_formal_monitor_rv32im_insn_bne (
   input                                 rvfi_valid,
   input  [32   - 1 : 0] rvfi_insn,
   input  [32   - 1 : 0] rvfi_pc_rdata,
@@ -4017,7 +4034,7 @@ module riscv_formal_monitor_rv32imc_insn_bne (
   wire [6:0] insn_opcode = rvfi_insn[ 6: 0];
 
   wire misa_ok = 1;
-  wire ialign16 = 1;
+  wire ialign16 = 0;
 
   // BNE instruction
   wire cond = rvfi_rs1_rdata != rvfi_rs2_rdata;
@@ -4039,7 +4056,7 @@ endmodule
 
 // DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
 
-module riscv_formal_monitor_rv32imc_insn_c_add (
+module riscv_formal_monitor_rv32im_insn_div (
   input                                 rvfi_valid,
   input  [32   - 1 : 0] rvfi_insn,
   input  [32   - 1 : 0] rvfi_pc_rdata,
@@ -4059,1252 +4076,6 @@ module riscv_formal_monitor_rv32imc_insn_c_add (
   output [32/8 - 1 : 0] spec_mem_wmask,
   output [32   - 1 : 0] spec_mem_wdata
 );
-
-  // CI-type instruction format
-  wire [32-1:0] insn_padding = rvfi_insn >> 16;
-  wire [3:0] insn_funct4 = rvfi_insn[15:12];
-  wire [4:0] insn_rs1_rd = rvfi_insn[11:7];
-  wire [4:0] insn_rs2 = rvfi_insn[6:2];
-  wire [1:0] insn_opcode = rvfi_insn[1:0];
-
-  wire misa_ok = 1;
-
-  // C_ADD instruction
-  wire [32-1:0] result = rvfi_rs1_rdata + rvfi_rs2_rdata;
-  assign spec_valid = rvfi_valid && !insn_padding && insn_funct4 == 4'b 1001 && insn_rs2 && insn_opcode == 2'b 10;
-  assign spec_rs1_addr = insn_rs1_rd;
-  assign spec_rs2_addr = insn_rs2;
-  assign spec_rd_addr = insn_rs1_rd;
-  assign spec_rd_wdata = spec_rd_addr ? result : 0;
-  assign spec_pc_wdata = rvfi_pc_rdata + 2;
-
-  // default assignments
-  assign spec_trap = !misa_ok;
-  assign spec_mem_addr = 0;
-  assign spec_mem_rmask = 0;
-  assign spec_mem_wmask = 0;
-  assign spec_mem_wdata = 0;
-endmodule
-
-// DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
-
-module riscv_formal_monitor_rv32imc_insn_c_addi (
-  input                                 rvfi_valid,
-  input  [32   - 1 : 0] rvfi_insn,
-  input  [32   - 1 : 0] rvfi_pc_rdata,
-  input  [32   - 1 : 0] rvfi_rs1_rdata,
-  input  [32   - 1 : 0] rvfi_rs2_rdata,
-  input  [32   - 1 : 0] rvfi_mem_rdata,
-
-  output                                spec_valid,
-  output                                spec_trap,
-  output [                       4 : 0] spec_rs1_addr,
-  output [                       4 : 0] spec_rs2_addr,
-  output [                       4 : 0] spec_rd_addr,
-  output [32   - 1 : 0] spec_rd_wdata,
-  output [32   - 1 : 0] spec_pc_wdata,
-  output [32   - 1 : 0] spec_mem_addr,
-  output [32/8 - 1 : 0] spec_mem_rmask,
-  output [32/8 - 1 : 0] spec_mem_wmask,
-  output [32   - 1 : 0] spec_mem_wdata
-);
-
-  // CI-type instruction format
-  wire [32-1:0] insn_padding = rvfi_insn >> 16;
-  wire [32-1:0] insn_imm = $signed({rvfi_insn[12], rvfi_insn[6:2]});
-  wire [2:0] insn_funct3 = rvfi_insn[15:13];
-  wire [4:0] insn_rs1_rd = rvfi_insn[11:7];
-  wire [1:0] insn_opcode = rvfi_insn[1:0];
-
-  wire misa_ok = 1;
-
-  // C_ADDI instruction
-  wire [32-1:0] result = rvfi_rs1_rdata + insn_imm;
-  assign spec_valid = rvfi_valid && !insn_padding && insn_funct3 == 3'b 000 && insn_opcode == 2'b 01;
-  assign spec_rs1_addr = insn_rs1_rd;
-  assign spec_rd_addr = insn_rs1_rd;
-  assign spec_rd_wdata = spec_rd_addr ? result : 0;
-  assign spec_pc_wdata = rvfi_pc_rdata + 2;
-
-  // default assignments
-  assign spec_rs2_addr = 0;
-  assign spec_trap = !misa_ok;
-  assign spec_mem_addr = 0;
-  assign spec_mem_rmask = 0;
-  assign spec_mem_wmask = 0;
-  assign spec_mem_wdata = 0;
-endmodule
-
-// DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
-
-module riscv_formal_monitor_rv32imc_insn_c_addi16sp (
-  input                                 rvfi_valid,
-  input  [32   - 1 : 0] rvfi_insn,
-  input  [32   - 1 : 0] rvfi_pc_rdata,
-  input  [32   - 1 : 0] rvfi_rs1_rdata,
-  input  [32   - 1 : 0] rvfi_rs2_rdata,
-  input  [32   - 1 : 0] rvfi_mem_rdata,
-
-  output                                spec_valid,
-  output                                spec_trap,
-  output [                       4 : 0] spec_rs1_addr,
-  output [                       4 : 0] spec_rs2_addr,
-  output [                       4 : 0] spec_rd_addr,
-  output [32   - 1 : 0] spec_rd_wdata,
-  output [32   - 1 : 0] spec_pc_wdata,
-  output [32   - 1 : 0] spec_mem_addr,
-  output [32/8 - 1 : 0] spec_mem_rmask,
-  output [32/8 - 1 : 0] spec_mem_wmask,
-  output [32   - 1 : 0] spec_mem_wdata
-);
-
-  // CI-type instruction format (SP variation)
-  wire [32-1:0] insn_padding = rvfi_insn >> 16;
-  wire [32-1:0] insn_imm = $signed({rvfi_insn[12], rvfi_insn[4:3], rvfi_insn[5], rvfi_insn[2], rvfi_insn[6], 4'b0});
-  wire [2:0] insn_funct3 = rvfi_insn[15:13];
-  wire [4:0] insn_rs1_rd = rvfi_insn[11:7];
-  wire [1:0] insn_opcode = rvfi_insn[1:0];
-
-  wire misa_ok = 1;
-
-  // C_ADDI16SP instruction
-  wire [32-1:0] result = rvfi_rs1_rdata + insn_imm;
-  assign spec_valid = rvfi_valid && !insn_padding && insn_funct3 == 3'b 011 && insn_opcode == 2'b 01 && insn_rs1_rd == 5'd 2 && insn_imm;
-  assign spec_rs1_addr = insn_rs1_rd;
-  assign spec_rd_addr = insn_rs1_rd;
-  assign spec_rd_wdata = spec_rd_addr ? result : 0;
-  assign spec_pc_wdata = rvfi_pc_rdata + 2;
-
-  // default assignments
-  assign spec_rs2_addr = 0;
-  assign spec_trap = !misa_ok;
-  assign spec_mem_addr = 0;
-  assign spec_mem_rmask = 0;
-  assign spec_mem_wmask = 0;
-  assign spec_mem_wdata = 0;
-endmodule
-
-// DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
-
-module riscv_formal_monitor_rv32imc_insn_c_addi4spn (
-  input                                 rvfi_valid,
-  input  [32   - 1 : 0] rvfi_insn,
-  input  [32   - 1 : 0] rvfi_pc_rdata,
-  input  [32   - 1 : 0] rvfi_rs1_rdata,
-  input  [32   - 1 : 0] rvfi_rs2_rdata,
-  input  [32   - 1 : 0] rvfi_mem_rdata,
-
-  output                                spec_valid,
-  output                                spec_trap,
-  output [                       4 : 0] spec_rs1_addr,
-  output [                       4 : 0] spec_rs2_addr,
-  output [                       4 : 0] spec_rd_addr,
-  output [32   - 1 : 0] spec_rd_wdata,
-  output [32   - 1 : 0] spec_pc_wdata,
-  output [32   - 1 : 0] spec_mem_addr,
-  output [32/8 - 1 : 0] spec_mem_rmask,
-  output [32/8 - 1 : 0] spec_mem_wmask,
-  output [32   - 1 : 0] spec_mem_wdata
-);
-
-  // CIW-type instruction format
-  wire [32-1:0] insn_padding = rvfi_insn >> 16;
-  wire [32-1:0] insn_imm = {rvfi_insn[10:7], rvfi_insn[12:11], rvfi_insn[5], rvfi_insn[6], 2'b00};
-  wire [2:0] insn_funct3 = rvfi_insn[15:13];
-  wire [4:0] insn_rd = {1'b1, rvfi_insn[4:2]};
-  wire [1:0] insn_opcode = rvfi_insn[1:0];
-
-  wire misa_ok = 1;
-
-  // C_ADDI4SPN instruction
-  wire [32-1:0] result = rvfi_rs1_rdata + insn_imm;
-  assign spec_valid = rvfi_valid && !insn_padding && insn_funct3 == 3'b 000 && insn_opcode == 2'b 00 && insn_imm;
-  assign spec_rs1_addr = 2;
-  assign spec_rd_addr = insn_rd;
-  assign spec_rd_wdata = spec_rd_addr ? result : 0;
-  assign spec_pc_wdata = rvfi_pc_rdata + 2;
-
-  // default assignments
-  assign spec_rs2_addr = 0;
-  assign spec_trap = !misa_ok;
-  assign spec_mem_addr = 0;
-  assign spec_mem_rmask = 0;
-  assign spec_mem_wmask = 0;
-  assign spec_mem_wdata = 0;
-endmodule
-
-// DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
-
-module riscv_formal_monitor_rv32imc_insn_c_and (
-  input                                 rvfi_valid,
-  input  [32   - 1 : 0] rvfi_insn,
-  input  [32   - 1 : 0] rvfi_pc_rdata,
-  input  [32   - 1 : 0] rvfi_rs1_rdata,
-  input  [32   - 1 : 0] rvfi_rs2_rdata,
-  input  [32   - 1 : 0] rvfi_mem_rdata,
-
-  output                                spec_valid,
-  output                                spec_trap,
-  output [                       4 : 0] spec_rs1_addr,
-  output [                       4 : 0] spec_rs2_addr,
-  output [                       4 : 0] spec_rd_addr,
-  output [32   - 1 : 0] spec_rd_wdata,
-  output [32   - 1 : 0] spec_pc_wdata,
-  output [32   - 1 : 0] spec_mem_addr,
-  output [32/8 - 1 : 0] spec_mem_rmask,
-  output [32/8 - 1 : 0] spec_mem_wmask,
-  output [32   - 1 : 0] spec_mem_wdata
-);
-
-  // CS-type instruction format (ALU version)
-  wire [32-1:0] insn_padding = rvfi_insn >> 16;
-  wire [5:0] insn_funct6 = rvfi_insn[15:10];
-  wire [1:0] insn_funct2 = rvfi_insn[6:5];
-  wire [4:0] insn_rs1_rd = {1'b1, rvfi_insn[9:7]};
-  wire [4:0] insn_rs2 = {1'b1, rvfi_insn[4:2]};
-  wire [1:0] insn_opcode = rvfi_insn[1:0];
-
-  wire misa_ok = 1;
-
-  // C_AND instruction
-  wire [32-1:0] result = rvfi_rs1_rdata & rvfi_rs2_rdata;
-  assign spec_valid = rvfi_valid && !insn_padding && insn_funct6 == 6'b 100011 && insn_funct2 == 2'b 11 && insn_opcode == 2'b 01;
-  assign spec_rs1_addr = insn_rs1_rd;
-  assign spec_rs2_addr = insn_rs2;
-  assign spec_rd_addr = insn_rs1_rd;
-  assign spec_rd_wdata = spec_rd_addr ? result : 0;
-  assign spec_pc_wdata = rvfi_pc_rdata + 2;
-
-  // default assignments
-  assign spec_trap = !misa_ok;
-  assign spec_mem_addr = 0;
-  assign spec_mem_rmask = 0;
-  assign spec_mem_wmask = 0;
-  assign spec_mem_wdata = 0;
-endmodule
-
-// DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
-
-module riscv_formal_monitor_rv32imc_insn_c_andi (
-  input                                 rvfi_valid,
-  input  [32   - 1 : 0] rvfi_insn,
-  input  [32   - 1 : 0] rvfi_pc_rdata,
-  input  [32   - 1 : 0] rvfi_rs1_rdata,
-  input  [32   - 1 : 0] rvfi_rs2_rdata,
-  input  [32   - 1 : 0] rvfi_mem_rdata,
-
-  output                                spec_valid,
-  output                                spec_trap,
-  output [                       4 : 0] spec_rs1_addr,
-  output [                       4 : 0] spec_rs2_addr,
-  output [                       4 : 0] spec_rd_addr,
-  output [32   - 1 : 0] spec_rd_wdata,
-  output [32   - 1 : 0] spec_pc_wdata,
-  output [32   - 1 : 0] spec_mem_addr,
-  output [32/8 - 1 : 0] spec_mem_rmask,
-  output [32/8 - 1 : 0] spec_mem_wmask,
-  output [32   - 1 : 0] spec_mem_wdata
-);
-
-  // CI-type instruction format (ANDI variation)
-  wire [32-1:0] insn_padding = rvfi_insn >> 16;
-  wire [32-1:0] insn_imm = $signed({rvfi_insn[12], rvfi_insn[6:2]});
-  wire [2:0] insn_funct3 = rvfi_insn[15:13];
-  wire [1:0] insn_funct2 = rvfi_insn[11:10];
-  wire [4:0] insn_rs1_rd = {1'b1, rvfi_insn[9:7]};
-  wire [1:0] insn_opcode = rvfi_insn[1:0];
-
-  wire misa_ok = 1;
-
-  // C_ANDI instruction
-  wire [32-1:0] result = rvfi_rs1_rdata & insn_imm;
-  assign spec_valid = rvfi_valid && !insn_padding && insn_funct3 == 3'b 100 && insn_funct2 == 2'b 10 && insn_opcode == 2'b 01;
-  assign spec_rs1_addr = insn_rs1_rd;
-  assign spec_rd_addr = insn_rs1_rd;
-  assign spec_rd_wdata = spec_rd_addr ? result : 0;
-  assign spec_pc_wdata = rvfi_pc_rdata + 2;
-
-  // default assignments
-  assign spec_rs2_addr = 0;
-  assign spec_trap = !misa_ok;
-  assign spec_mem_addr = 0;
-  assign spec_mem_rmask = 0;
-  assign spec_mem_wmask = 0;
-  assign spec_mem_wdata = 0;
-endmodule
-
-// DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
-
-module riscv_formal_monitor_rv32imc_insn_c_beqz (
-  input                                 rvfi_valid,
-  input  [32   - 1 : 0] rvfi_insn,
-  input  [32   - 1 : 0] rvfi_pc_rdata,
-  input  [32   - 1 : 0] rvfi_rs1_rdata,
-  input  [32   - 1 : 0] rvfi_rs2_rdata,
-  input  [32   - 1 : 0] rvfi_mem_rdata,
-
-  output                                spec_valid,
-  output                                spec_trap,
-  output [                       4 : 0] spec_rs1_addr,
-  output [                       4 : 0] spec_rs2_addr,
-  output [                       4 : 0] spec_rd_addr,
-  output [32   - 1 : 0] spec_rd_wdata,
-  output [32   - 1 : 0] spec_pc_wdata,
-  output [32   - 1 : 0] spec_mem_addr,
-  output [32/8 - 1 : 0] spec_mem_rmask,
-  output [32/8 - 1 : 0] spec_mem_wmask,
-  output [32   - 1 : 0] spec_mem_wdata
-);
-
-  // CB-type instruction format
-  wire [32-1:0] insn_padding = rvfi_insn >> 16;
-  wire [32-1:0] insn_imm = $signed({rvfi_insn[12], rvfi_insn[6:5], rvfi_insn[2], rvfi_insn[11:10], rvfi_insn[4:3], 1'b0});
-  wire [2:0] insn_funct3 = rvfi_insn[15:13];
-  wire [4:0] insn_rs1 = {1'b1, rvfi_insn[9:7]};
-  wire [1:0] insn_opcode = rvfi_insn[1:0];
-
-  wire misa_ok = 1;
-
-  // C_BEQZ instruction
-  wire cond = rvfi_rs1_rdata == 0;
-  wire [32-1:0] next_pc = cond ? rvfi_pc_rdata + insn_imm : rvfi_pc_rdata + 2;
-  assign spec_valid = rvfi_valid && !insn_padding && insn_funct3 == 3'b 110 && insn_opcode == 2'b 01;
-  assign spec_rs1_addr = insn_rs1;
-  assign spec_pc_wdata = next_pc;
-  assign spec_trap = (next_pc[0] != 0) || !misa_ok;
-
-  // default assignments
-  assign spec_rs2_addr = 0;
-  assign spec_rd_addr = 0;
-  assign spec_rd_wdata = 0;
-  assign spec_mem_addr = 0;
-  assign spec_mem_rmask = 0;
-  assign spec_mem_wmask = 0;
-  assign spec_mem_wdata = 0;
-endmodule
-
-// DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
-
-module riscv_formal_monitor_rv32imc_insn_c_bnez (
-  input                                 rvfi_valid,
-  input  [32   - 1 : 0] rvfi_insn,
-  input  [32   - 1 : 0] rvfi_pc_rdata,
-  input  [32   - 1 : 0] rvfi_rs1_rdata,
-  input  [32   - 1 : 0] rvfi_rs2_rdata,
-  input  [32   - 1 : 0] rvfi_mem_rdata,
-
-  output                                spec_valid,
-  output                                spec_trap,
-  output [                       4 : 0] spec_rs1_addr,
-  output [                       4 : 0] spec_rs2_addr,
-  output [                       4 : 0] spec_rd_addr,
-  output [32   - 1 : 0] spec_rd_wdata,
-  output [32   - 1 : 0] spec_pc_wdata,
-  output [32   - 1 : 0] spec_mem_addr,
-  output [32/8 - 1 : 0] spec_mem_rmask,
-  output [32/8 - 1 : 0] spec_mem_wmask,
-  output [32   - 1 : 0] spec_mem_wdata
-);
-
-  // CB-type instruction format
-  wire [32-1:0] insn_padding = rvfi_insn >> 16;
-  wire [32-1:0] insn_imm = $signed({rvfi_insn[12], rvfi_insn[6:5], rvfi_insn[2], rvfi_insn[11:10], rvfi_insn[4:3], 1'b0});
-  wire [2:0] insn_funct3 = rvfi_insn[15:13];
-  wire [4:0] insn_rs1 = {1'b1, rvfi_insn[9:7]};
-  wire [1:0] insn_opcode = rvfi_insn[1:0];
-
-  wire misa_ok = 1;
-
-  // C_BNEZ instruction
-  wire cond = rvfi_rs1_rdata != 0;
-  wire [32-1:0] next_pc = cond ? rvfi_pc_rdata + insn_imm : rvfi_pc_rdata + 2;
-  assign spec_valid = rvfi_valid && !insn_padding && insn_funct3 == 3'b 111 && insn_opcode == 2'b 01;
-  assign spec_rs1_addr = insn_rs1;
-  assign spec_pc_wdata = next_pc;
-  assign spec_trap = (next_pc[0] != 0) || !misa_ok;
-
-  // default assignments
-  assign spec_rs2_addr = 0;
-  assign spec_rd_addr = 0;
-  assign spec_rd_wdata = 0;
-  assign spec_mem_addr = 0;
-  assign spec_mem_rmask = 0;
-  assign spec_mem_wmask = 0;
-  assign spec_mem_wdata = 0;
-endmodule
-
-// DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
-
-module riscv_formal_monitor_rv32imc_insn_c_j (
-  input                                 rvfi_valid,
-  input  [32   - 1 : 0] rvfi_insn,
-  input  [32   - 1 : 0] rvfi_pc_rdata,
-  input  [32   - 1 : 0] rvfi_rs1_rdata,
-  input  [32   - 1 : 0] rvfi_rs2_rdata,
-  input  [32   - 1 : 0] rvfi_mem_rdata,
-
-  output                                spec_valid,
-  output                                spec_trap,
-  output [                       4 : 0] spec_rs1_addr,
-  output [                       4 : 0] spec_rs2_addr,
-  output [                       4 : 0] spec_rd_addr,
-  output [32   - 1 : 0] spec_rd_wdata,
-  output [32   - 1 : 0] spec_pc_wdata,
-  output [32   - 1 : 0] spec_mem_addr,
-  output [32/8 - 1 : 0] spec_mem_rmask,
-  output [32/8 - 1 : 0] spec_mem_wmask,
-  output [32   - 1 : 0] spec_mem_wdata
-);
-
-  // CJ-type instruction format
-  wire [32-1:0] insn_padding = rvfi_insn >> 16;
-  wire [32-1:0] insn_imm = $signed({rvfi_insn[12], rvfi_insn[8], rvfi_insn[10], rvfi_insn[9],
-      rvfi_insn[6], rvfi_insn[7], rvfi_insn[2], rvfi_insn[11], rvfi_insn[5], rvfi_insn[4], rvfi_insn[3], 1'b0});
-  wire [2:0] insn_funct3 = rvfi_insn[15:13];
-  wire [1:0] insn_opcode = rvfi_insn[1:0];
-
-  wire misa_ok = 1;
-
-  // C_J instruction
-  wire [32-1:0] next_pc = rvfi_pc_rdata + insn_imm;
-  assign spec_valid = rvfi_valid && !insn_padding && insn_funct3 == 3'b 101 && insn_opcode == 2'b 01;
-  assign spec_pc_wdata = next_pc;
-
-  // default assignments
-  assign spec_rs1_addr = 0;
-  assign spec_rs2_addr = 0;
-  assign spec_rd_addr = 0;
-  assign spec_rd_wdata = 0;
-  assign spec_trap = !misa_ok;
-  assign spec_mem_addr = 0;
-  assign spec_mem_rmask = 0;
-  assign spec_mem_wmask = 0;
-  assign spec_mem_wdata = 0;
-endmodule
-
-// DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
-
-module riscv_formal_monitor_rv32imc_insn_c_jal (
-  input                                 rvfi_valid,
-  input  [32   - 1 : 0] rvfi_insn,
-  input  [32   - 1 : 0] rvfi_pc_rdata,
-  input  [32   - 1 : 0] rvfi_rs1_rdata,
-  input  [32   - 1 : 0] rvfi_rs2_rdata,
-  input  [32   - 1 : 0] rvfi_mem_rdata,
-
-  output                                spec_valid,
-  output                                spec_trap,
-  output [                       4 : 0] spec_rs1_addr,
-  output [                       4 : 0] spec_rs2_addr,
-  output [                       4 : 0] spec_rd_addr,
-  output [32   - 1 : 0] spec_rd_wdata,
-  output [32   - 1 : 0] spec_pc_wdata,
-  output [32   - 1 : 0] spec_mem_addr,
-  output [32/8 - 1 : 0] spec_mem_rmask,
-  output [32/8 - 1 : 0] spec_mem_wmask,
-  output [32   - 1 : 0] spec_mem_wdata
-);
-
-  // CJ-type instruction format
-  wire [32-1:0] insn_padding = rvfi_insn >> 16;
-  wire [32-1:0] insn_imm = $signed({rvfi_insn[12], rvfi_insn[8], rvfi_insn[10], rvfi_insn[9],
-      rvfi_insn[6], rvfi_insn[7], rvfi_insn[2], rvfi_insn[11], rvfi_insn[5], rvfi_insn[4], rvfi_insn[3], 1'b0});
-  wire [2:0] insn_funct3 = rvfi_insn[15:13];
-  wire [1:0] insn_opcode = rvfi_insn[1:0];
-
-  wire misa_ok = 1;
-
-  // C_JAL instruction
-  wire [32-1:0] next_pc = rvfi_pc_rdata + insn_imm;
-  assign spec_valid = rvfi_valid && !insn_padding && insn_funct3 == 3'b 001 && insn_opcode == 2'b 01;
-  assign spec_rd_addr = 5'd 1;
-  assign spec_rd_wdata = rvfi_pc_rdata + 2;
-  assign spec_pc_wdata = next_pc;
-
-  // default assignments
-  assign spec_rs1_addr = 0;
-  assign spec_rs2_addr = 0;
-  assign spec_trap = !misa_ok;
-  assign spec_mem_addr = 0;
-  assign spec_mem_rmask = 0;
-  assign spec_mem_wmask = 0;
-  assign spec_mem_wdata = 0;
-endmodule
-
-// DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
-
-module riscv_formal_monitor_rv32imc_insn_c_jalr (
-  input                                 rvfi_valid,
-  input  [32   - 1 : 0] rvfi_insn,
-  input  [32   - 1 : 0] rvfi_pc_rdata,
-  input  [32   - 1 : 0] rvfi_rs1_rdata,
-  input  [32   - 1 : 0] rvfi_rs2_rdata,
-  input  [32   - 1 : 0] rvfi_mem_rdata,
-
-  output                                spec_valid,
-  output                                spec_trap,
-  output [                       4 : 0] spec_rs1_addr,
-  output [                       4 : 0] spec_rs2_addr,
-  output [                       4 : 0] spec_rd_addr,
-  output [32   - 1 : 0] spec_rd_wdata,
-  output [32   - 1 : 0] spec_pc_wdata,
-  output [32   - 1 : 0] spec_mem_addr,
-  output [32/8 - 1 : 0] spec_mem_rmask,
-  output [32/8 - 1 : 0] spec_mem_wmask,
-  output [32   - 1 : 0] spec_mem_wdata
-);
-
-  // CI-type instruction format
-  wire [32-1:0] insn_padding = rvfi_insn >> 16;
-  wire [3:0] insn_funct4 = rvfi_insn[15:12];
-  wire [4:0] insn_rs1_rd = rvfi_insn[11:7];
-  wire [4:0] insn_rs2 = rvfi_insn[6:2];
-  wire [1:0] insn_opcode = rvfi_insn[1:0];
-
-  wire misa_ok = 1;
-
-  // C_JALR instruction
-  wire [32-1:0] next_pc = rvfi_rs1_rdata & ~1;
-  assign spec_valid = rvfi_valid && !insn_padding && insn_funct4 == 4'b 1001 && insn_rs1_rd && !insn_rs2 && insn_opcode == 2'b 10;
-  assign spec_rs1_addr = insn_rs1_rd;
-  assign spec_rd_addr = 5'd 1;
-  assign spec_rd_wdata = rvfi_pc_rdata + 2;
-  assign spec_pc_wdata = next_pc;
-  assign spec_trap = (next_pc[0] != 0) || !misa_ok;
-
-  // default assignments
-  assign spec_rs2_addr = 0;
-  assign spec_mem_addr = 0;
-  assign spec_mem_rmask = 0;
-  assign spec_mem_wmask = 0;
-  assign spec_mem_wdata = 0;
-endmodule
-
-// DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
-
-module riscv_formal_monitor_rv32imc_insn_c_jr (
-  input                                 rvfi_valid,
-  input  [32   - 1 : 0] rvfi_insn,
-  input  [32   - 1 : 0] rvfi_pc_rdata,
-  input  [32   - 1 : 0] rvfi_rs1_rdata,
-  input  [32   - 1 : 0] rvfi_rs2_rdata,
-  input  [32   - 1 : 0] rvfi_mem_rdata,
-
-  output                                spec_valid,
-  output                                spec_trap,
-  output [                       4 : 0] spec_rs1_addr,
-  output [                       4 : 0] spec_rs2_addr,
-  output [                       4 : 0] spec_rd_addr,
-  output [32   - 1 : 0] spec_rd_wdata,
-  output [32   - 1 : 0] spec_pc_wdata,
-  output [32   - 1 : 0] spec_mem_addr,
-  output [32/8 - 1 : 0] spec_mem_rmask,
-  output [32/8 - 1 : 0] spec_mem_wmask,
-  output [32   - 1 : 0] spec_mem_wdata
-);
-
-  // CI-type instruction format
-  wire [32-1:0] insn_padding = rvfi_insn >> 16;
-  wire [3:0] insn_funct4 = rvfi_insn[15:12];
-  wire [4:0] insn_rs1_rd = rvfi_insn[11:7];
-  wire [4:0] insn_rs2 = rvfi_insn[6:2];
-  wire [1:0] insn_opcode = rvfi_insn[1:0];
-
-  wire misa_ok = 1;
-
-  // C_JR instruction
-  wire [32-1:0] next_pc = rvfi_rs1_rdata & ~1;
-  assign spec_valid = rvfi_valid && !insn_padding && insn_funct4 == 4'b 1000 && insn_rs1_rd && !insn_rs2 && insn_opcode == 2'b 10;
-  assign spec_rs1_addr = insn_rs1_rd;
-  assign spec_pc_wdata = next_pc;
-  assign spec_trap = (next_pc[0] != 0) || !misa_ok;
-
-  // default assignments
-  assign spec_rs2_addr = 0;
-  assign spec_rd_addr = 0;
-  assign spec_rd_wdata = 0;
-  assign spec_mem_addr = 0;
-  assign spec_mem_rmask = 0;
-  assign spec_mem_wmask = 0;
-  assign spec_mem_wdata = 0;
-endmodule
-
-// DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
-
-module riscv_formal_monitor_rv32imc_insn_c_li (
-  input                                 rvfi_valid,
-  input  [32   - 1 : 0] rvfi_insn,
-  input  [32   - 1 : 0] rvfi_pc_rdata,
-  input  [32   - 1 : 0] rvfi_rs1_rdata,
-  input  [32   - 1 : 0] rvfi_rs2_rdata,
-  input  [32   - 1 : 0] rvfi_mem_rdata,
-
-  output                                spec_valid,
-  output                                spec_trap,
-  output [                       4 : 0] spec_rs1_addr,
-  output [                       4 : 0] spec_rs2_addr,
-  output [                       4 : 0] spec_rd_addr,
-  output [32   - 1 : 0] spec_rd_wdata,
-  output [32   - 1 : 0] spec_pc_wdata,
-  output [32   - 1 : 0] spec_mem_addr,
-  output [32/8 - 1 : 0] spec_mem_rmask,
-  output [32/8 - 1 : 0] spec_mem_wmask,
-  output [32   - 1 : 0] spec_mem_wdata
-);
-
-  // CI-type instruction format
-  wire [32-1:0] insn_padding = rvfi_insn >> 16;
-  wire [32-1:0] insn_imm = $signed({rvfi_insn[12], rvfi_insn[6:2]});
-  wire [2:0] insn_funct3 = rvfi_insn[15:13];
-  wire [4:0] insn_rs1_rd = rvfi_insn[11:7];
-  wire [1:0] insn_opcode = rvfi_insn[1:0];
-
-  wire misa_ok = 1;
-
-  // C_LI instruction
-  wire [32-1:0] result = insn_imm;
-  assign spec_valid = rvfi_valid && !insn_padding && insn_funct3 == 3'b 010 && insn_opcode == 2'b 01;
-  assign spec_rd_addr = insn_rs1_rd;
-  assign spec_rd_wdata = spec_rd_addr ? result : 0;
-  assign spec_pc_wdata = rvfi_pc_rdata + 2;
-
-  // default assignments
-  assign spec_rs1_addr = 0;
-  assign spec_rs2_addr = 0;
-  assign spec_trap = !misa_ok;
-  assign spec_mem_addr = 0;
-  assign spec_mem_rmask = 0;
-  assign spec_mem_wmask = 0;
-  assign spec_mem_wdata = 0;
-endmodule
-
-// DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
-
-module riscv_formal_monitor_rv32imc_insn_c_lui (
-  input                                 rvfi_valid,
-  input  [32   - 1 : 0] rvfi_insn,
-  input  [32   - 1 : 0] rvfi_pc_rdata,
-  input  [32   - 1 : 0] rvfi_rs1_rdata,
-  input  [32   - 1 : 0] rvfi_rs2_rdata,
-  input  [32   - 1 : 0] rvfi_mem_rdata,
-
-  output                                spec_valid,
-  output                                spec_trap,
-  output [                       4 : 0] spec_rs1_addr,
-  output [                       4 : 0] spec_rs2_addr,
-  output [                       4 : 0] spec_rd_addr,
-  output [32   - 1 : 0] spec_rd_wdata,
-  output [32   - 1 : 0] spec_pc_wdata,
-  output [32   - 1 : 0] spec_mem_addr,
-  output [32/8 - 1 : 0] spec_mem_rmask,
-  output [32/8 - 1 : 0] spec_mem_wmask,
-  output [32   - 1 : 0] spec_mem_wdata
-);
-
-  // CI-type instruction format (LUI variation)
-  wire [32-1:0] insn_padding = rvfi_insn >> 16;
-  wire [32-1:0] insn_imm = $signed({rvfi_insn[12], rvfi_insn[6:2], 12'b0});
-  wire [2:0] insn_funct3 = rvfi_insn[15:13];
-  wire [4:0] insn_rs1_rd = rvfi_insn[11:7];
-  wire [1:0] insn_opcode = rvfi_insn[1:0];
-
-  wire misa_ok = 1;
-
-  // C_LUI instruction
-  wire [32-1:0] result = insn_imm;
-  assign spec_valid = rvfi_valid && !insn_padding && insn_funct3 == 3'b 011 && insn_opcode == 2'b 01 && insn_rs1_rd != 5'd 2 && insn_imm;
-  assign spec_rd_addr = insn_rs1_rd;
-  assign spec_rd_wdata = spec_rd_addr ? result : 0;
-  assign spec_pc_wdata = rvfi_pc_rdata + 2;
-
-  // default assignments
-  assign spec_rs1_addr = 0;
-  assign spec_rs2_addr = 0;
-  assign spec_trap = !misa_ok;
-  assign spec_mem_addr = 0;
-  assign spec_mem_rmask = 0;
-  assign spec_mem_wmask = 0;
-  assign spec_mem_wdata = 0;
-endmodule
-
-// DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
-
-module riscv_formal_monitor_rv32imc_insn_c_lw (
-  input                                 rvfi_valid,
-  input  [32   - 1 : 0] rvfi_insn,
-  input  [32   - 1 : 0] rvfi_pc_rdata,
-  input  [32   - 1 : 0] rvfi_rs1_rdata,
-  input  [32   - 1 : 0] rvfi_rs2_rdata,
-  input  [32   - 1 : 0] rvfi_mem_rdata,
-
-  output                                spec_valid,
-  output                                spec_trap,
-  output [                       4 : 0] spec_rs1_addr,
-  output [                       4 : 0] spec_rs2_addr,
-  output [                       4 : 0] spec_rd_addr,
-  output [32   - 1 : 0] spec_rd_wdata,
-  output [32   - 1 : 0] spec_pc_wdata,
-  output [32   - 1 : 0] spec_mem_addr,
-  output [32/8 - 1 : 0] spec_mem_rmask,
-  output [32/8 - 1 : 0] spec_mem_wmask,
-  output [32   - 1 : 0] spec_mem_wdata
-);
-
-  // CL-type instruction format (32 bit version)
-  wire [32-1:0] insn_padding = rvfi_insn >> 16;
-  wire [32-1:0] insn_imm = {rvfi_insn[5], rvfi_insn[12:10], rvfi_insn[6], 2'b00};
-  wire [2:0] insn_funct3 = rvfi_insn[15:13];
-  wire [4:0] insn_rs1 = {1'b1, rvfi_insn[9:7]};
-  wire [4:0] insn_rd = {1'b1, rvfi_insn[4:2]};
-  wire [1:0] insn_opcode = rvfi_insn[1:0];
-
-  wire misa_ok = 1;
-
-  // C_LW instruction
-  wire [32-1:0] addr = rvfi_rs1_rdata + insn_imm;
-  wire [31:0] result = rvfi_mem_rdata >> (8*(addr-spec_mem_addr));
-  assign spec_valid = rvfi_valid && !insn_padding && insn_funct3 == 3'b 010 && insn_opcode == 2'b 00;
-  assign spec_rs1_addr = insn_rs1;
-  assign spec_rd_addr = insn_rd;
-  assign spec_mem_addr = addr & ~(32/8-1);
-  assign spec_mem_rmask = ((1 << 4)-1) << (addr-spec_mem_addr);
-  assign spec_rd_wdata = spec_rd_addr ? $signed(result) : 0;
-  assign spec_pc_wdata = rvfi_pc_rdata + 2;
-  assign spec_trap = ((addr & (4-1)) != 0) || !misa_ok;
-
-  // default assignments
-  assign spec_rs2_addr = 0;
-  assign spec_mem_wmask = 0;
-  assign spec_mem_wdata = 0;
-endmodule
-
-// DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
-
-module riscv_formal_monitor_rv32imc_insn_c_lwsp (
-  input                                 rvfi_valid,
-  input  [32   - 1 : 0] rvfi_insn,
-  input  [32   - 1 : 0] rvfi_pc_rdata,
-  input  [32   - 1 : 0] rvfi_rs1_rdata,
-  input  [32   - 1 : 0] rvfi_rs2_rdata,
-  input  [32   - 1 : 0] rvfi_mem_rdata,
-
-  output                                spec_valid,
-  output                                spec_trap,
-  output [                       4 : 0] spec_rs1_addr,
-  output [                       4 : 0] spec_rs2_addr,
-  output [                       4 : 0] spec_rd_addr,
-  output [32   - 1 : 0] spec_rd_wdata,
-  output [32   - 1 : 0] spec_pc_wdata,
-  output [32   - 1 : 0] spec_mem_addr,
-  output [32/8 - 1 : 0] spec_mem_rmask,
-  output [32/8 - 1 : 0] spec_mem_wmask,
-  output [32   - 1 : 0] spec_mem_wdata
-);
-
-  // CI-type instruction format (LSP variation, 32 bit version)
-  wire [32-1:0] insn_padding = rvfi_insn >> 16;
-  wire [32-1:0] insn_imm = {rvfi_insn[3:2], rvfi_insn[12], rvfi_insn[6:4], 2'b00};
-  wire [2:0] insn_funct3 = rvfi_insn[15:13];
-  wire [4:0] insn_rd = rvfi_insn[11:7];
-  wire [1:0] insn_opcode = rvfi_insn[1:0];
-
-  wire misa_ok = 1;
-
-  // C_LWSP instruction
-  wire [32-1:0] addr = rvfi_rs1_rdata + insn_imm;
-  wire [31:0] result = rvfi_mem_rdata >> (8*(addr-spec_mem_addr));
-  assign spec_valid = rvfi_valid && !insn_padding && insn_funct3 == 3'b 010 && insn_opcode == 2'b 10 && insn_rd;
-  assign spec_rs1_addr = 2;
-  assign spec_rd_addr = insn_rd;
-  assign spec_mem_addr = addr & ~(32/8-1);
-  assign spec_mem_rmask = ((1 << 4)-1) << (addr-spec_mem_addr);
-  assign spec_rd_wdata = spec_rd_addr ? $signed(result) : 0;
-  assign spec_pc_wdata = rvfi_pc_rdata + 2;
-  assign spec_trap = ((addr & (4-1)) != 0) || !misa_ok;
-
-  // default assignments
-  assign spec_rs2_addr = 0;
-  assign spec_mem_wmask = 0;
-  assign spec_mem_wdata = 0;
-endmodule
-
-// DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
-
-module riscv_formal_monitor_rv32imc_insn_c_mv (
-  input                                 rvfi_valid,
-  input  [32   - 1 : 0] rvfi_insn,
-  input  [32   - 1 : 0] rvfi_pc_rdata,
-  input  [32   - 1 : 0] rvfi_rs1_rdata,
-  input  [32   - 1 : 0] rvfi_rs2_rdata,
-  input  [32   - 1 : 0] rvfi_mem_rdata,
-
-  output                                spec_valid,
-  output                                spec_trap,
-  output [                       4 : 0] spec_rs1_addr,
-  output [                       4 : 0] spec_rs2_addr,
-  output [                       4 : 0] spec_rd_addr,
-  output [32   - 1 : 0] spec_rd_wdata,
-  output [32   - 1 : 0] spec_pc_wdata,
-  output [32   - 1 : 0] spec_mem_addr,
-  output [32/8 - 1 : 0] spec_mem_rmask,
-  output [32/8 - 1 : 0] spec_mem_wmask,
-  output [32   - 1 : 0] spec_mem_wdata
-);
-
-  // CI-type instruction format
-  wire [32-1:0] insn_padding = rvfi_insn >> 16;
-  wire [3:0] insn_funct4 = rvfi_insn[15:12];
-  wire [4:0] insn_rs1_rd = rvfi_insn[11:7];
-  wire [4:0] insn_rs2 = rvfi_insn[6:2];
-  wire [1:0] insn_opcode = rvfi_insn[1:0];
-
-  wire misa_ok = 1;
-
-  // C_MV instruction
-  wire [32-1:0] result = rvfi_rs2_rdata;
-  assign spec_valid = rvfi_valid && !insn_padding && insn_funct4 == 4'b 1000 && insn_rs2 && insn_opcode == 2'b 10;
-  assign spec_rs2_addr = insn_rs2;
-  assign spec_rd_addr = insn_rs1_rd;
-  assign spec_rd_wdata = spec_rd_addr ? result : 0;
-  assign spec_pc_wdata = rvfi_pc_rdata + 2;
-
-  // default assignments
-  assign spec_rs1_addr = 0;
-  assign spec_trap = !misa_ok;
-  assign spec_mem_addr = 0;
-  assign spec_mem_rmask = 0;
-  assign spec_mem_wmask = 0;
-  assign spec_mem_wdata = 0;
-endmodule
-
-// DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
-
-module riscv_formal_monitor_rv32imc_insn_c_or (
-  input                                 rvfi_valid,
-  input  [32   - 1 : 0] rvfi_insn,
-  input  [32   - 1 : 0] rvfi_pc_rdata,
-  input  [32   - 1 : 0] rvfi_rs1_rdata,
-  input  [32   - 1 : 0] rvfi_rs2_rdata,
-  input  [32   - 1 : 0] rvfi_mem_rdata,
-
-  output                                spec_valid,
-  output                                spec_trap,
-  output [                       4 : 0] spec_rs1_addr,
-  output [                       4 : 0] spec_rs2_addr,
-  output [                       4 : 0] spec_rd_addr,
-  output [32   - 1 : 0] spec_rd_wdata,
-  output [32   - 1 : 0] spec_pc_wdata,
-  output [32   - 1 : 0] spec_mem_addr,
-  output [32/8 - 1 : 0] spec_mem_rmask,
-  output [32/8 - 1 : 0] spec_mem_wmask,
-  output [32   - 1 : 0] spec_mem_wdata
-);
-
-  // CS-type instruction format (ALU version)
-  wire [32-1:0] insn_padding = rvfi_insn >> 16;
-  wire [5:0] insn_funct6 = rvfi_insn[15:10];
-  wire [1:0] insn_funct2 = rvfi_insn[6:5];
-  wire [4:0] insn_rs1_rd = {1'b1, rvfi_insn[9:7]};
-  wire [4:0] insn_rs2 = {1'b1, rvfi_insn[4:2]};
-  wire [1:0] insn_opcode = rvfi_insn[1:0];
-
-  wire misa_ok = 1;
-
-  // C_OR instruction
-  wire [32-1:0] result = rvfi_rs1_rdata | rvfi_rs2_rdata;
-  assign spec_valid = rvfi_valid && !insn_padding && insn_funct6 == 6'b 100011 && insn_funct2 == 2'b 10 && insn_opcode == 2'b 01;
-  assign spec_rs1_addr = insn_rs1_rd;
-  assign spec_rs2_addr = insn_rs2;
-  assign spec_rd_addr = insn_rs1_rd;
-  assign spec_rd_wdata = spec_rd_addr ? result : 0;
-  assign spec_pc_wdata = rvfi_pc_rdata + 2;
-
-  // default assignments
-  assign spec_trap = !misa_ok;
-  assign spec_mem_addr = 0;
-  assign spec_mem_rmask = 0;
-  assign spec_mem_wmask = 0;
-  assign spec_mem_wdata = 0;
-endmodule
-
-// DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
-
-module riscv_formal_monitor_rv32imc_insn_c_slli (
-  input                                 rvfi_valid,
-  input  [32   - 1 : 0] rvfi_insn,
-  input  [32   - 1 : 0] rvfi_pc_rdata,
-  input  [32   - 1 : 0] rvfi_rs1_rdata,
-  input  [32   - 1 : 0] rvfi_rs2_rdata,
-  input  [32   - 1 : 0] rvfi_mem_rdata,
-
-  output                                spec_valid,
-  output                                spec_trap,
-  output [                       4 : 0] spec_rs1_addr,
-  output [                       4 : 0] spec_rs2_addr,
-  output [                       4 : 0] spec_rd_addr,
-  output [32   - 1 : 0] spec_rd_wdata,
-  output [32   - 1 : 0] spec_pc_wdata,
-  output [32   - 1 : 0] spec_mem_addr,
-  output [32/8 - 1 : 0] spec_mem_rmask,
-  output [32/8 - 1 : 0] spec_mem_wmask,
-  output [32   - 1 : 0] spec_mem_wdata
-);
-
-  // CI-type instruction format (SLI variation)
-  wire [32-1:0] insn_padding = rvfi_insn >> 16;
-  wire [5:0] insn_shamt = {rvfi_insn[12], rvfi_insn[6:2]};
-  wire [2:0] insn_funct3 = rvfi_insn[15:13];
-  wire [4:0] insn_rs1_rd = rvfi_insn[11:7];
-  wire [1:0] insn_opcode = rvfi_insn[1:0];
-
-  wire misa_ok = 1;
-
-  // C_SLLI instruction
-  wire [32-1:0] result = rvfi_rs1_rdata << insn_shamt;
-  assign spec_valid = rvfi_valid && !insn_padding && insn_funct3 == 3'b 000 && insn_opcode == 2'b 10 && (!insn_shamt[5] || 32 == 64);
-  assign spec_rs1_addr = insn_rs1_rd;
-  assign spec_rd_addr = insn_rs1_rd;
-  assign spec_rd_wdata = spec_rd_addr ? result : 0;
-  assign spec_pc_wdata = rvfi_pc_rdata + 2;
-
-  // default assignments
-  assign spec_rs2_addr = 0;
-  assign spec_trap = !misa_ok;
-  assign spec_mem_addr = 0;
-  assign spec_mem_rmask = 0;
-  assign spec_mem_wmask = 0;
-  assign spec_mem_wdata = 0;
-endmodule
-
-// DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
-
-module riscv_formal_monitor_rv32imc_insn_c_srai (
-  input                                 rvfi_valid,
-  input  [32   - 1 : 0] rvfi_insn,
-  input  [32   - 1 : 0] rvfi_pc_rdata,
-  input  [32   - 1 : 0] rvfi_rs1_rdata,
-  input  [32   - 1 : 0] rvfi_rs2_rdata,
-  input  [32   - 1 : 0] rvfi_mem_rdata,
-
-  output                                spec_valid,
-  output                                spec_trap,
-  output [                       4 : 0] spec_rs1_addr,
-  output [                       4 : 0] spec_rs2_addr,
-  output [                       4 : 0] spec_rd_addr,
-  output [32   - 1 : 0] spec_rd_wdata,
-  output [32   - 1 : 0] spec_pc_wdata,
-  output [32   - 1 : 0] spec_mem_addr,
-  output [32/8 - 1 : 0] spec_mem_rmask,
-  output [32/8 - 1 : 0] spec_mem_wmask,
-  output [32   - 1 : 0] spec_mem_wdata
-);
-
-  // CI-type instruction format (SRI variation)
-  wire [32-1:0] insn_padding = rvfi_insn >> 16;
-  wire [5:0] insn_shamt = {rvfi_insn[12], rvfi_insn[6:2]};
-  wire [2:0] insn_funct3 = rvfi_insn[15:13];
-  wire [1:0] insn_funct2 = rvfi_insn[11:10];
-  wire [4:0] insn_rs1_rd = {1'b1, rvfi_insn[9:7]};
-  wire [1:0] insn_opcode = rvfi_insn[1:0];
-
-  wire misa_ok = 1;
-
-  // C_SRAI instruction
-  wire [32-1:0] result = $signed(rvfi_rs1_rdata) >>> insn_shamt;
-  assign spec_valid = rvfi_valid && !insn_padding && insn_funct3 == 3'b 100 && insn_funct2 == 2'b 01 && insn_opcode == 2'b 01 && (!insn_shamt[5] || 32 == 64);
-  assign spec_rs1_addr = insn_rs1_rd;
-  assign spec_rd_addr = insn_rs1_rd;
-  assign spec_rd_wdata = spec_rd_addr ? result : 0;
-  assign spec_pc_wdata = rvfi_pc_rdata + 2;
-
-  // default assignments
-  assign spec_rs2_addr = 0;
-  assign spec_trap = !misa_ok;
-  assign spec_mem_addr = 0;
-  assign spec_mem_rmask = 0;
-  assign spec_mem_wmask = 0;
-  assign spec_mem_wdata = 0;
-endmodule
-
-// DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
-
-module riscv_formal_monitor_rv32imc_insn_c_srli (
-  input                                 rvfi_valid,
-  input  [32   - 1 : 0] rvfi_insn,
-  input  [32   - 1 : 0] rvfi_pc_rdata,
-  input  [32   - 1 : 0] rvfi_rs1_rdata,
-  input  [32   - 1 : 0] rvfi_rs2_rdata,
-  input  [32   - 1 : 0] rvfi_mem_rdata,
-
-  output                                spec_valid,
-  output                                spec_trap,
-  output [                       4 : 0] spec_rs1_addr,
-  output [                       4 : 0] spec_rs2_addr,
-  output [                       4 : 0] spec_rd_addr,
-  output [32   - 1 : 0] spec_rd_wdata,
-  output [32   - 1 : 0] spec_pc_wdata,
-  output [32   - 1 : 0] spec_mem_addr,
-  output [32/8 - 1 : 0] spec_mem_rmask,
-  output [32/8 - 1 : 0] spec_mem_wmask,
-  output [32   - 1 : 0] spec_mem_wdata
-);
-
-  // CI-type instruction format (SRI variation)
-  wire [32-1:0] insn_padding = rvfi_insn >> 16;
-  wire [5:0] insn_shamt = {rvfi_insn[12], rvfi_insn[6:2]};
-  wire [2:0] insn_funct3 = rvfi_insn[15:13];
-  wire [1:0] insn_funct2 = rvfi_insn[11:10];
-  wire [4:0] insn_rs1_rd = {1'b1, rvfi_insn[9:7]};
-  wire [1:0] insn_opcode = rvfi_insn[1:0];
-
-  wire misa_ok = 1;
-
-  // C_SRLI instruction
-  wire [32-1:0] result = rvfi_rs1_rdata >> insn_shamt;
-  assign spec_valid = rvfi_valid && !insn_padding && insn_funct3 == 3'b 100 && insn_funct2 == 2'b 00 && insn_opcode == 2'b 01 && (!insn_shamt[5] || 32 == 64);
-  assign spec_rs1_addr = insn_rs1_rd;
-  assign spec_rd_addr = insn_rs1_rd;
-  assign spec_rd_wdata = spec_rd_addr ? result : 0;
-  assign spec_pc_wdata = rvfi_pc_rdata + 2;
-
-  // default assignments
-  assign spec_rs2_addr = 0;
-  assign spec_trap = !misa_ok;
-  assign spec_mem_addr = 0;
-  assign spec_mem_rmask = 0;
-  assign spec_mem_wmask = 0;
-  assign spec_mem_wdata = 0;
-endmodule
-
-// DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
-
-module riscv_formal_monitor_rv32imc_insn_c_sub (
-  input                                 rvfi_valid,
-  input  [32   - 1 : 0] rvfi_insn,
-  input  [32   - 1 : 0] rvfi_pc_rdata,
-  input  [32   - 1 : 0] rvfi_rs1_rdata,
-  input  [32   - 1 : 0] rvfi_rs2_rdata,
-  input  [32   - 1 : 0] rvfi_mem_rdata,
-
-  output                                spec_valid,
-  output                                spec_trap,
-  output [                       4 : 0] spec_rs1_addr,
-  output [                       4 : 0] spec_rs2_addr,
-  output [                       4 : 0] spec_rd_addr,
-  output [32   - 1 : 0] spec_rd_wdata,
-  output [32   - 1 : 0] spec_pc_wdata,
-  output [32   - 1 : 0] spec_mem_addr,
-  output [32/8 - 1 : 0] spec_mem_rmask,
-  output [32/8 - 1 : 0] spec_mem_wmask,
-  output [32   - 1 : 0] spec_mem_wdata
-);
-
-  // CS-type instruction format (ALU version)
-  wire [32-1:0] insn_padding = rvfi_insn >> 16;
-  wire [5:0] insn_funct6 = rvfi_insn[15:10];
-  wire [1:0] insn_funct2 = rvfi_insn[6:5];
-  wire [4:0] insn_rs1_rd = {1'b1, rvfi_insn[9:7]};
-  wire [4:0] insn_rs2 = {1'b1, rvfi_insn[4:2]};
-  wire [1:0] insn_opcode = rvfi_insn[1:0];
-
-  wire misa_ok = 1;
-
-  // C_SUB instruction
-  wire [32-1:0] result = rvfi_rs1_rdata - rvfi_rs2_rdata;
-  assign spec_valid = rvfi_valid && !insn_padding && insn_funct6 == 6'b 100011 && insn_funct2 == 2'b 00 && insn_opcode == 2'b 01;
-  assign spec_rs1_addr = insn_rs1_rd;
-  assign spec_rs2_addr = insn_rs2;
-  assign spec_rd_addr = insn_rs1_rd;
-  assign spec_rd_wdata = spec_rd_addr ? result : 0;
-  assign spec_pc_wdata = rvfi_pc_rdata + 2;
-
-  // default assignments
-  assign spec_trap = !misa_ok;
-  assign spec_mem_addr = 0;
-  assign spec_mem_rmask = 0;
-  assign spec_mem_wmask = 0;
-  assign spec_mem_wdata = 0;
-endmodule
-
-// DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
-
-module riscv_formal_monitor_rv32imc_insn_c_sw (
-  input                                 rvfi_valid,
-  input  [32   - 1 : 0] rvfi_insn,
-  input  [32   - 1 : 0] rvfi_pc_rdata,
-  input  [32   - 1 : 0] rvfi_rs1_rdata,
-  input  [32   - 1 : 0] rvfi_rs2_rdata,
-  input  [32   - 1 : 0] rvfi_mem_rdata,
-
-  output                                spec_valid,
-  output                                spec_trap,
-  output [                       4 : 0] spec_rs1_addr,
-  output [                       4 : 0] spec_rs2_addr,
-  output [                       4 : 0] spec_rd_addr,
-  output [32   - 1 : 0] spec_rd_wdata,
-  output [32   - 1 : 0] spec_pc_wdata,
-  output [32   - 1 : 0] spec_mem_addr,
-  output [32/8 - 1 : 0] spec_mem_rmask,
-  output [32/8 - 1 : 0] spec_mem_wmask,
-  output [32   - 1 : 0] spec_mem_wdata
-);
-
-  // CS-type instruction format (32 bit version)
-  wire [32-1:0] insn_padding = rvfi_insn >> 16;
-  wire [32-1:0] insn_imm = {rvfi_insn[5], rvfi_insn[12:10], rvfi_insn[6], 2'b00};
-  wire [2:0] insn_funct3 = rvfi_insn[15:13];
-  wire [4:0] insn_rs1 = {1'b1, rvfi_insn[9:7]};
-  wire [4:0] insn_rs2 = {1'b1, rvfi_insn[4:2]};
-  wire [1:0] insn_opcode = rvfi_insn[1:0];
-
-  wire misa_ok = 1;
-
-  // C_SW instruction
-  wire [32-1:0] addr = rvfi_rs1_rdata + insn_imm;
-  assign spec_valid = rvfi_valid && !insn_padding && insn_funct3 == 3'b 110 && insn_opcode == 2'b 00;
-  assign spec_rs1_addr = insn_rs1;
-  assign spec_rs2_addr = insn_rs2;
-  assign spec_mem_addr = addr & ~(32/8-1);
-  assign spec_mem_wmask = ((1 << 4)-1) << (addr-spec_mem_addr);
-  assign spec_mem_wdata = rvfi_rs2_rdata << (8*(addr-spec_mem_addr));
-  assign spec_pc_wdata = rvfi_pc_rdata + 2;
-  assign spec_trap = ((addr & (4-1)) != 0) || !misa_ok;
-
-  // default assignments
-  assign spec_rd_addr = 0;
-  assign spec_rd_wdata = 0;
-  assign spec_mem_rmask = 0;
-endmodule
-
-// DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
-
-module riscv_formal_monitor_rv32imc_insn_c_swsp (
-  input                                 rvfi_valid,
-  input  [32   - 1 : 0] rvfi_insn,
-  input  [32   - 1 : 0] rvfi_pc_rdata,
-  input  [32   - 1 : 0] rvfi_rs1_rdata,
-  input  [32   - 1 : 0] rvfi_rs2_rdata,
-  input  [32   - 1 : 0] rvfi_mem_rdata,
-
-  output                                spec_valid,
-  output                                spec_trap,
-  output [                       4 : 0] spec_rs1_addr,
-  output [                       4 : 0] spec_rs2_addr,
-  output [                       4 : 0] spec_rd_addr,
-  output [32   - 1 : 0] spec_rd_wdata,
-  output [32   - 1 : 0] spec_pc_wdata,
-  output [32   - 1 : 0] spec_mem_addr,
-  output [32/8 - 1 : 0] spec_mem_rmask,
-  output [32/8 - 1 : 0] spec_mem_wmask,
-  output [32   - 1 : 0] spec_mem_wdata
-);
-
-  // CSS-type instruction format (32 bit version)
-  wire [32-1:0] insn_padding = rvfi_insn >> 16;
-  wire [32-1:0] insn_imm = {rvfi_insn[8:7], rvfi_insn[12:9], 2'b00};
-  wire [2:0] insn_funct3 = rvfi_insn[15:13];
-  wire [4:0] insn_rs2 = rvfi_insn[6:2];
-  wire [1:0] insn_opcode = rvfi_insn[1:0];
-
-  wire misa_ok = 1;
-
-  // C_SWSP instruction
-  wire [32-1:0] addr = rvfi_rs1_rdata + insn_imm;
-  assign spec_valid = rvfi_valid && !insn_padding && insn_funct3 == 3'b 110 && insn_opcode == 2'b 10;
-  assign spec_rs1_addr = 2;
-  assign spec_rs2_addr = insn_rs2;
-  assign spec_mem_addr = addr & ~(32/8-1);
-  assign spec_mem_wmask = ((1 << 4)-1) << (addr-spec_mem_addr);
-  assign spec_mem_wdata = rvfi_rs2_rdata << (8*(addr-spec_mem_addr));
-  assign spec_pc_wdata = rvfi_pc_rdata + 2;
-  assign spec_trap = ((addr & (4-1)) != 0) || !misa_ok;
-
-  // default assignments
-  assign spec_rd_addr = 0;
-  assign spec_rd_wdata = 0;
-  assign spec_mem_rmask = 0;
-endmodule
-
-// DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
-
-module riscv_formal_monitor_rv32imc_insn_c_xor (
-  input                                 rvfi_valid,
-  input  [32   - 1 : 0] rvfi_insn,
-  input  [32   - 1 : 0] rvfi_pc_rdata,
-  input  [32   - 1 : 0] rvfi_rs1_rdata,
-  input  [32   - 1 : 0] rvfi_rs2_rdata,
-  input  [32   - 1 : 0] rvfi_mem_rdata,
-
-  output                                spec_valid,
-  output                                spec_trap,
-  output [                       4 : 0] spec_rs1_addr,
-  output [                       4 : 0] spec_rs2_addr,
-  output [                       4 : 0] spec_rd_addr,
-  output [32   - 1 : 0] spec_rd_wdata,
-  output [32   - 1 : 0] spec_pc_wdata,
-  output [32   - 1 : 0] spec_mem_addr,
-  output [32/8 - 1 : 0] spec_mem_rmask,
-  output [32/8 - 1 : 0] spec_mem_wmask,
-  output [32   - 1 : 0] spec_mem_wdata
-);
-
-  // CS-type instruction format (ALU version)
-  wire [32-1:0] insn_padding = rvfi_insn >> 16;
-  wire [5:0] insn_funct6 = rvfi_insn[15:10];
-  wire [1:0] insn_funct2 = rvfi_insn[6:5];
-  wire [4:0] insn_rs1_rd = {1'b1, rvfi_insn[9:7]};
-  wire [4:0] insn_rs2 = {1'b1, rvfi_insn[4:2]};
-  wire [1:0] insn_opcode = rvfi_insn[1:0];
-
-  wire misa_ok = 1;
-
-  // C_XOR instruction
-  wire [32-1:0] result = rvfi_rs1_rdata ^ rvfi_rs2_rdata;
-  assign spec_valid = rvfi_valid && !insn_padding && insn_funct6 == 6'b 100011 && insn_funct2 == 2'b 01 && insn_opcode == 2'b 01;
-  assign spec_rs1_addr = insn_rs1_rd;
-  assign spec_rs2_addr = insn_rs2;
-  assign spec_rd_addr = insn_rs1_rd;
-  assign spec_rd_wdata = spec_rd_addr ? result : 0;
-  assign spec_pc_wdata = rvfi_pc_rdata + 2;
-
-  // default assignments
-  assign spec_trap = !misa_ok;
-  assign spec_mem_addr = 0;
-  assign spec_mem_rmask = 0;
-  assign spec_mem_wmask = 0;
-  assign spec_mem_wdata = 0;
-endmodule
-
-// DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
-
-module riscv_formal_monitor_rv32imc_insn_div (
-  input                                 rvfi_valid,
-  input  [32   - 1 : 0] rvfi_insn,
-  input  [32   - 1 : 0] rvfi_pc_rdata,
-  input  [32   - 1 : 0] rvfi_rs1_rdata,
-  input  [32   - 1 : 0] rvfi_rs2_rdata,
-  input  [32   - 1 : 0] rvfi_mem_rdata,
-
-  output                                spec_valid,
-  output                                spec_trap,
-  output [                       4 : 0] spec_rs1_addr,
-  output [                       4 : 0] spec_rs2_addr,
-  output [                       4 : 0] spec_rd_addr,
-  output [32   - 1 : 0] spec_rd_wdata,
-  output [32   - 1 : 0] spec_pc_wdata,
-  output [32   - 1 : 0] spec_mem_addr,
-  output [32/8 - 1 : 0] spec_mem_rmask,
-  output [32/8 - 1 : 0] spec_mem_wmask,
-  output [32   - 1 : 0] spec_mem_wdata
-
-);
-// ECE411-sp22 course staff modified rvfi monitor; signed division
-  wire [31:0] signed_rs1_rdata;
-  wire [31:0] signed_rs2_rdata;
-  wire [31:0] div_result;
-  assign signed_rs1_rdata = rvfi_rs1_rdata;
-  assign signed_rs2_rdata = rvfi_rs2_rdata;
-  assign div_result = $signed(signed_rs1_rdata) / $signed(signed_rs2_rdata);
 
   // R-type instruction format
   wire [32-1:0] insn_padding = rvfi_insn >> 32;
@@ -5320,7 +4091,7 @@ module riscv_formal_monitor_rv32imc_insn_div (
   // DIV instruction
   wire [32-1:0] result = rvfi_rs2_rdata == 32'b0 ? {32{1'b1}} :
                                          rvfi_rs1_rdata == {1'b1, {32-1{1'b0}}} && rvfi_rs2_rdata == {32{1'b1}} ? {1'b1, {32-1{1'b0}}} :
-                                         div_result;
+                                         $signed(rvfi_rs1_rdata) / $signed(rvfi_rs2_rdata);
   assign spec_valid = rvfi_valid && !insn_padding && insn_funct7 == 7'b 0000001 && insn_funct3 == 3'b 100 && insn_opcode == 7'b 0110011;
   assign spec_rs1_addr = insn_rs1;
   assign spec_rs2_addr = insn_rs2;
@@ -5338,7 +4109,7 @@ endmodule
 
 // DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
 
-module riscv_formal_monitor_rv32imc_insn_divu (
+module riscv_formal_monitor_rv32im_insn_divu (
   input                                 rvfi_valid,
   input  [32   - 1 : 0] rvfi_insn,
   input  [32   - 1 : 0] rvfi_pc_rdata,
@@ -5390,7 +4161,7 @@ endmodule
 
 // DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
 
-module riscv_formal_monitor_rv32imc_insn_jal (
+module riscv_formal_monitor_rv32im_insn_jal (
   input                                 rvfi_valid,
   input  [32   - 1 : 0] rvfi_insn,
   input  [32   - 1 : 0] rvfi_pc_rdata,
@@ -5418,7 +4189,7 @@ module riscv_formal_monitor_rv32imc_insn_jal (
   wire [6:0] insn_opcode = rvfi_insn[6:0];
 
   wire misa_ok = 1;
-  wire ialign16 = 1;
+  wire ialign16 = 0;
 
   // JAL instruction
   wire [32-1:0] next_pc = rvfi_pc_rdata + insn_imm;
@@ -5439,7 +4210,7 @@ endmodule
 
 // DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
 
-module riscv_formal_monitor_rv32imc_insn_jalr (
+module riscv_formal_monitor_rv32im_insn_jalr (
   input                                 rvfi_valid,
   input  [32   - 1 : 0] rvfi_insn,
   input  [32   - 1 : 0] rvfi_pc_rdata,
@@ -5469,7 +4240,7 @@ module riscv_formal_monitor_rv32imc_insn_jalr (
   wire [6:0] insn_opcode = rvfi_insn[ 6: 0];
 
   wire misa_ok = 1;
-  wire ialign16 = 1;
+  wire ialign16 = 0;
 
   // JALR instruction
   wire [32-1:0] next_pc = (rvfi_rs1_rdata + insn_imm) & ~1;
@@ -5490,7 +4261,7 @@ endmodule
 
 // DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
 
-module riscv_formal_monitor_rv32imc_insn_lb (
+module riscv_formal_monitor_rv32im_insn_lb (
   input                                 rvfi_valid,
   input  [32   - 1 : 0] rvfi_insn,
   input  [32   - 1 : 0] rvfi_pc_rdata,
@@ -5541,7 +4312,7 @@ endmodule
 
 // DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
 
-module riscv_formal_monitor_rv32imc_insn_lbu (
+module riscv_formal_monitor_rv32im_insn_lbu (
   input                                 rvfi_valid,
   input  [32   - 1 : 0] rvfi_insn,
   input  [32   - 1 : 0] rvfi_pc_rdata,
@@ -5592,7 +4363,7 @@ endmodule
 
 // DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
 
-module riscv_formal_monitor_rv32imc_insn_lh (
+module riscv_formal_monitor_rv32im_insn_lh (
   input                                 rvfi_valid,
   input  [32   - 1 : 0] rvfi_insn,
   input  [32   - 1 : 0] rvfi_pc_rdata,
@@ -5643,7 +4414,7 @@ endmodule
 
 // DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
 
-module riscv_formal_monitor_rv32imc_insn_lhu (
+module riscv_formal_monitor_rv32im_insn_lhu (
   input                                 rvfi_valid,
   input  [32   - 1 : 0] rvfi_insn,
   input  [32   - 1 : 0] rvfi_pc_rdata,
@@ -5694,7 +4465,7 @@ endmodule
 
 // DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
 
-module riscv_formal_monitor_rv32imc_insn_lui (
+module riscv_formal_monitor_rv32im_insn_lui (
   input                                 rvfi_valid,
   input  [32   - 1 : 0] rvfi_insn,
   input  [32   - 1 : 0] rvfi_pc_rdata,
@@ -5741,7 +4512,7 @@ endmodule
 
 // DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
 
-module riscv_formal_monitor_rv32imc_insn_lw (
+module riscv_formal_monitor_rv32im_insn_lw (
   input                                 rvfi_valid,
   input  [32   - 1 : 0] rvfi_insn,
   input  [32   - 1 : 0] rvfi_pc_rdata,
@@ -5792,7 +4563,7 @@ endmodule
 
 // DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
 
-module riscv_formal_monitor_rv32imc_insn_mul (
+module riscv_formal_monitor_rv32im_insn_mul (
   input                                 rvfi_valid,
   input  [32   - 1 : 0] rvfi_insn,
   input  [32   - 1 : 0] rvfi_pc_rdata,
@@ -5843,7 +4614,7 @@ endmodule
 
 // DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
 
-module riscv_formal_monitor_rv32imc_insn_mulh (
+module riscv_formal_monitor_rv32im_insn_mulh (
   input                                 rvfi_valid,
   input  [32   - 1 : 0] rvfi_insn,
   input  [32   - 1 : 0] rvfi_pc_rdata,
@@ -5895,7 +4666,7 @@ endmodule
 
 // DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
 
-module riscv_formal_monitor_rv32imc_insn_mulhsu (
+module riscv_formal_monitor_rv32im_insn_mulhsu (
   input                                 rvfi_valid,
   input  [32   - 1 : 0] rvfi_insn,
   input  [32   - 1 : 0] rvfi_pc_rdata,
@@ -5947,7 +4718,7 @@ endmodule
 
 // DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
 
-module riscv_formal_monitor_rv32imc_insn_mulhu (
+module riscv_formal_monitor_rv32im_insn_mulhu (
   input                                 rvfi_valid,
   input  [32   - 1 : 0] rvfi_insn,
   input  [32   - 1 : 0] rvfi_pc_rdata,
@@ -5998,7 +4769,7 @@ endmodule
 
 // DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
 
-module riscv_formal_monitor_rv32imc_insn_or (
+module riscv_formal_monitor_rv32im_insn_or (
   input                                 rvfi_valid,
   input  [32   - 1 : 0] rvfi_insn,
   input  [32   - 1 : 0] rvfi_pc_rdata,
@@ -6049,7 +4820,7 @@ endmodule
 
 // DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
 
-module riscv_formal_monitor_rv32imc_insn_ori (
+module riscv_formal_monitor_rv32im_insn_ori (
   input                                 rvfi_valid,
   input  [32   - 1 : 0] rvfi_insn,
   input  [32   - 1 : 0] rvfi_pc_rdata,
@@ -6099,7 +4870,7 @@ endmodule
 
 // DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
 
-module riscv_formal_monitor_rv32imc_insn_rem (
+module riscv_formal_monitor_rv32im_insn_rem (
   input                                 rvfi_valid,
   input  [32   - 1 : 0] rvfi_insn,
   input  [32   - 1 : 0] rvfi_pc_rdata,
@@ -6119,13 +4890,6 @@ module riscv_formal_monitor_rv32imc_insn_rem (
   output [32/8 - 1 : 0] spec_mem_wmask,
   output [32   - 1 : 0] spec_mem_wdata
 );
-// ECE411-sp22 course staff modified rvfi monitor; signed remainder
-  wire [31:0] signed_rs1_rdata;
-  wire [31:0] signed_rs2_rdata;
-  wire [31:0] rem_result;
-  assign signed_rs1_rdata = rvfi_rs1_rdata;
-  assign signed_rs2_rdata = rvfi_rs2_rdata;
-  assign rem_result = $signed(signed_rs1_rdata) % $signed(signed_rs2_rdata);
 
   // R-type instruction format
   wire [32-1:0] insn_padding = rvfi_insn >> 32;
@@ -6141,7 +4905,7 @@ module riscv_formal_monitor_rv32imc_insn_rem (
   // REM instruction
   wire [32-1:0] result = rvfi_rs2_rdata == 32'b0 ? rvfi_rs1_rdata :
                                          rvfi_rs1_rdata == {1'b1, {32-1{1'b0}}} && rvfi_rs2_rdata == {32{1'b1}} ? {32{1'b0}} :
-                                         rem_result;
+                                         $signed(rvfi_rs1_rdata) % $signed(rvfi_rs2_rdata);
   assign spec_valid = rvfi_valid && !insn_padding && insn_funct7 == 7'b 0000001 && insn_funct3 == 3'b 110 && insn_opcode == 7'b 0110011;
   assign spec_rs1_addr = insn_rs1;
   assign spec_rs2_addr = insn_rs2;
@@ -6159,7 +4923,7 @@ endmodule
 
 // DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
 
-module riscv_formal_monitor_rv32imc_insn_remu (
+module riscv_formal_monitor_rv32im_insn_remu (
   input                                 rvfi_valid,
   input  [32   - 1 : 0] rvfi_insn,
   input  [32   - 1 : 0] rvfi_pc_rdata,
@@ -6211,7 +4975,7 @@ endmodule
 
 // DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
 
-module riscv_formal_monitor_rv32imc_insn_sb (
+module riscv_formal_monitor_rv32im_insn_sb (
   input                                 rvfi_valid,
   input  [32   - 1 : 0] rvfi_insn,
   input  [32   - 1 : 0] rvfi_pc_rdata,
@@ -6261,7 +5025,7 @@ endmodule
 
 // DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
 
-module riscv_formal_monitor_rv32imc_insn_sh (
+module riscv_formal_monitor_rv32im_insn_sh (
   input                                 rvfi_valid,
   input  [32   - 1 : 0] rvfi_insn,
   input  [32   - 1 : 0] rvfi_pc_rdata,
@@ -6311,7 +5075,7 @@ endmodule
 
 // DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
 
-module riscv_formal_monitor_rv32imc_insn_sll (
+module riscv_formal_monitor_rv32im_insn_sll (
   input                                 rvfi_valid,
   input  [32   - 1 : 0] rvfi_insn,
   input  [32   - 1 : 0] rvfi_pc_rdata,
@@ -6363,7 +5127,7 @@ endmodule
 
 // DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
 
-module riscv_formal_monitor_rv32imc_insn_slli (
+module riscv_formal_monitor_rv32im_insn_slli (
   input                                 rvfi_valid,
   input  [32   - 1 : 0] rvfi_insn,
   input  [32   - 1 : 0] rvfi_pc_rdata,
@@ -6414,7 +5178,7 @@ endmodule
 
 // DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
 
-module riscv_formal_monitor_rv32imc_insn_slt (
+module riscv_formal_monitor_rv32im_insn_slt (
   input                                 rvfi_valid,
   input  [32   - 1 : 0] rvfi_insn,
   input  [32   - 1 : 0] rvfi_pc_rdata,
@@ -6465,7 +5229,7 @@ endmodule
 
 // DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
 
-module riscv_formal_monitor_rv32imc_insn_slti (
+module riscv_formal_monitor_rv32im_insn_slti (
   input                                 rvfi_valid,
   input  [32   - 1 : 0] rvfi_insn,
   input  [32   - 1 : 0] rvfi_pc_rdata,
@@ -6515,7 +5279,7 @@ endmodule
 
 // DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
 
-module riscv_formal_monitor_rv32imc_insn_sltiu (
+module riscv_formal_monitor_rv32im_insn_sltiu (
   input                                 rvfi_valid,
   input  [32   - 1 : 0] rvfi_insn,
   input  [32   - 1 : 0] rvfi_pc_rdata,
@@ -6565,7 +5329,7 @@ endmodule
 
 // DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
 
-module riscv_formal_monitor_rv32imc_insn_sltu (
+module riscv_formal_monitor_rv32im_insn_sltu (
   input                                 rvfi_valid,
   input  [32   - 1 : 0] rvfi_insn,
   input  [32   - 1 : 0] rvfi_pc_rdata,
@@ -6616,7 +5380,7 @@ endmodule
 
 // DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
 
-module riscv_formal_monitor_rv32imc_insn_sra (
+module riscv_formal_monitor_rv32im_insn_sra (
   input                                 rvfi_valid,
   input  [32   - 1 : 0] rvfi_insn,
   input  [32   - 1 : 0] rvfi_pc_rdata,
@@ -6668,7 +5432,7 @@ endmodule
 
 // DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
 
-module riscv_formal_monitor_rv32imc_insn_srai (
+module riscv_formal_monitor_rv32im_insn_srai (
   input                                 rvfi_valid,
   input  [32   - 1 : 0] rvfi_insn,
   input  [32   - 1 : 0] rvfi_pc_rdata,
@@ -6719,7 +5483,7 @@ endmodule
 
 // DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
 
-module riscv_formal_monitor_rv32imc_insn_srl (
+module riscv_formal_monitor_rv32im_insn_srl (
   input                                 rvfi_valid,
   input  [32   - 1 : 0] rvfi_insn,
   input  [32   - 1 : 0] rvfi_pc_rdata,
@@ -6771,7 +5535,7 @@ endmodule
 
 // DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
 
-module riscv_formal_monitor_rv32imc_insn_srli (
+module riscv_formal_monitor_rv32im_insn_srli (
   input                                 rvfi_valid,
   input  [32   - 1 : 0] rvfi_insn,
   input  [32   - 1 : 0] rvfi_pc_rdata,
@@ -6822,7 +5586,7 @@ endmodule
 
 // DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
 
-module riscv_formal_monitor_rv32imc_insn_sub (
+module riscv_formal_monitor_rv32im_insn_sub (
   input                                 rvfi_valid,
   input  [32   - 1 : 0] rvfi_insn,
   input  [32   - 1 : 0] rvfi_pc_rdata,
@@ -6873,7 +5637,7 @@ endmodule
 
 // DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
 
-module riscv_formal_monitor_rv32imc_insn_sw (
+module riscv_formal_monitor_rv32im_insn_sw (
   input                                 rvfi_valid,
   input  [32   - 1 : 0] rvfi_insn,
   input  [32   - 1 : 0] rvfi_pc_rdata,
@@ -6923,7 +5687,7 @@ endmodule
 
 // DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
 
-module riscv_formal_monitor_rv32imc_insn_xor (
+module riscv_formal_monitor_rv32im_insn_xor (
   input                                 rvfi_valid,
   input  [32   - 1 : 0] rvfi_insn,
   input  [32   - 1 : 0] rvfi_pc_rdata,
@@ -6974,7 +5738,7 @@ endmodule
 
 // DO NOT EDIT -- auto-generated from riscv-formal/insns/generate.py
 
-module riscv_formal_monitor_rv32imc_insn_xori (
+module riscv_formal_monitor_rv32im_insn_xori (
   input                                 rvfi_valid,
   input  [32   - 1 : 0] rvfi_insn,
   input  [32   - 1 : 0] rvfi_pc_rdata,
