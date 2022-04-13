@@ -26,8 +26,6 @@ module one_hz_cpu (
     //-- fetch0 --//
     rv32i_word pc_f0;
 
-    logic taken_f0;
-
 
     //-- fetch1 --//
     rv32i_word pc_f1;
@@ -75,9 +73,9 @@ module one_hz_cpu (
     brfnt::br_func_t brfn_is;
     rv32i_word bru_cmp1_is;
     rv32i_word bru_cmp2_is;
+    rv32i_word bru_base_is;
     rv32i_word bru_ofst_is;
     rv32i_word bru_add1_is;
-    rv32i_word bru_add2_is;
 
 
     //-- execute --//
@@ -108,9 +106,9 @@ module one_hz_cpu (
     brfnt::br_func_t brfn_ex;
     rv32i_word bru_cmp1_ex;
     rv32i_word bru_cmp2_ex;
+    rv32i_word bru_base_ex;
     rv32i_word bru_ofst_ex;
     rv32i_word bru_add1_ex;
-    rv32i_word bru_add2_ex;
     logic bru_taken_ex;
 
     logic bru_redir;
@@ -149,22 +147,38 @@ module one_hz_cpu (
     // decoded jal
     // branch unit resolution
     always_comb begin
-        unique casez ({bru_redir, dec_redir, &bht_resp_dc, btb_resp_f1.valid, btb_resp_f1.is_ret, btb_resp_f1.is_jmp, &bht_resp_f1})
+        unique casez ({bru_redir, dec_redir, btb_resp_f1.valid, btb_resp_f1.is_ret, btb_resp_f1.is_jmp, &bht_resp_f1})
             // TODO: for branch resolution redirect, 
-            // kill everything not in a functional unit
-            7'b1?????? : {pc_f0, taken_f0} = {bru_target, 1'b0};
+            // kill everything not in execute or writeback
+            6'b1????? : {pc_f0, taken_f1} = {bru_target, 1'b0};
             // TODO: for decode redirect 
             // need to kill anything in fetch1
-            // need to put taken tag in correct uopc
-            7'b01????? : {pc_f0, taken_f0} = {dec_target, 1'b1};
-            7'b001???? : {pc_f0, taken_f0} = {dec_target, 1'b1};
-            7'b00011?? : {pc_f0, taken_f0} = {ras_target, 1'b1};
-            7'b000101? : {pc_f0, taken_f0} = {btb_target, 1'b1};
-            7'b0001001 : {pc_f0, taken_f0} = {btb_target, 1'b1};
-            default    : {pc_f0, taken_f0} = {nxl_target, 1'b0};
+            6'b01???? : {pc_f0, taken_f1} = {dec_target, 1'b0};
+            6'b0011?? : {pc_f0, taken_f1} = {ras_target, 1'b1};
+            6'b00101? : {pc_f0, taken_f1} = {btb_target, 1'b1};
+            6'b001001 : {pc_f0, taken_f1} = {btb_target, 1'b1};
+            default   : {pc_f0, taken_f1} = {nxl_target, 1'b0};
         endcase
     end
 
+    dummyBTB btb (
+        .clk,
+        .rst,
+        .new_pc(),
+        .new_target(),
+        .new_type(),
+        .load(1'b0),
+        .pc(pc_f0),
+        .target(btb_target),
+        .resp(btb_resp_f1)
+    );
+
+    dummyBHT bht (
+        .clk,
+        .rst,
+        .pc(pc_f0),
+        .pred(bht_resp_f1)
+    );
     
 
     //-- fetch0 -> fetch1 --//
@@ -180,19 +194,6 @@ module one_hz_cpu (
         .dout(pc_f1)
     );
 
-    // think taken_f0 should go directly to decode
-    /*
-    rg #(
-        .size(1)
-    )
-    fetch1_taken_reg (
-        .clk,
-        .rst,
-        .ld(~stall),
-        .din(taken_f0),
-        .dout(taken_f1)
-    );
-    */
 
     //-- fetch1 --//
 
@@ -208,9 +209,6 @@ module one_hz_cpu (
     );
 
     always_ff @(posedge clk) begin
-        bht_resp_f1 <= 2'b01;
-        btb_resp_f1 <= '{1'b0, 1'b0, 1'b0, 1'b0};
-        btb_target <= '0; // TODO: output from BTB
         ras_target <= '0; // TODO: output from RAS
     end
 
@@ -239,7 +237,7 @@ module one_hz_cpu (
         .clk,
         .rst,
         .ld(~stall),
-        .din(taken_f0),
+        .din(taken_f1),
         .dout(taken_dc)
     );
 
@@ -271,7 +269,6 @@ module one_hz_cpu (
     DecodeControl dc0();
 
     assign dc0.instr = instr_dc;
-    assign dc0.taken = taken_dc;
     // TODO: implement SFO
     assign dc0.under_shadow = 1'b0;
 
@@ -286,8 +283,17 @@ module one_hz_cpu (
 
     assign dec_target = dc0.bctrl.is_jal ? dc0.jtarget : dc0.btarget;
     logic dec_says_take;
-    assign dec_says_take = dc0.bctrl.is_jal;
+    // decode says take if:
+    // instruction is a jal
+    // the bht says strongly taken
+    // instruction is a branch, the bht doesn't say strongly not taken,
+    // and the immediate sign is negative (loops)
+    // that loop check isn't amazing for fmax
+    assign dec_says_take = dc0.bctrl.is_jal
+                         | &bht_resp_dc
+                         | (dc0.bctrl.is_br & |bht_resp_dc & instr_dc[31]);
     assign dec_redir = dec_says_take & ~taken_dc;
+    assign dc0.taken = dec_says_take;
 
 
     assign ctrl_sigs_dc = '{
@@ -427,11 +433,11 @@ module one_hz_cpu (
     assign lsu_has_rd_is = ctrl_sigs_is.exu_type == exut::mem && ctrl_sigs_is.has_rd;
 
     // bru setup
+    logic is_jalr_is;
+    assign is_jalr_is = ctrl_sigs_is.uopcode == uopc::jalr;
+
     logic is_auipc;
     assign is_auipc = ctrl_sigs_is.uopcode == uopc::auipc;
-    logic is_br;
-    // Assuming only branches will have b type imm
-    assign is_br = ctrl_sigs_is.imm_type == immt::b;
 
     bru_decode bru_dec0 (
         .uopcode(ctrl_sigs_is.uopcode),
@@ -439,9 +445,9 @@ module one_hz_cpu (
     );
     assign bru_cmp1_is = rs1_out;
     assign bru_cmp2_is = rs2_out;
-    assign bru_ofst_is = is_auipc | is_br ? imm_out : 4;
-    assign bru_add1_is = rs1_out;
-    assign bru_add2_is = imm_out;
+    assign bru_base_is = is_jalr_is ? rs1_out : pc_is;
+    assign bru_ofst_is = imm_out;
+    assign bru_add1_is = is_auipc ? imm_out : 4;
 
     logic bru_has_rd_is;
     assign bru_has_rd_is = ctrl_sigs_is.exu_type == exut::jmp && ctrl_sigs_is.has_rd;
@@ -566,6 +572,7 @@ module one_hz_cpu (
     logic [$bits(mem_ctrl_sigs_t)-1:0] lsu_ctrl_bits_ex;
     rg #(
         .size($bits(mem_ctrl_sigs_t))
+        // assuming reset value is zero, which causes "nm" mem op
     )
     agu_mem_ctrl_reg (
         .clk,
@@ -655,6 +662,7 @@ module one_hz_cpu (
     );
     rg #(
         .size($bits(mem_ctrl_sigs_t))
+        // assuming reset value is zero, which causes "nm" mem op
     )
     mem_mem_ctrl_reg (
         .clk,
@@ -784,7 +792,9 @@ module one_hz_cpu (
     );
     logic [$bits(brfnt::br_func_t)-1:0] brfn_bits_ex;
     rg #(
-        .size($bits(brfnt::br_func_t))
+        .size($bits(brfnt::br_func_t)),
+        // should correspond to "none" brfn
+        .rst_val(3'b111)
     )
     bru_fn_reg (
         .clk,
@@ -808,6 +818,13 @@ module one_hz_cpu (
         .din(bru_cmp2_is),
         .dout(bru_cmp2_ex)
     );
+    rg bru_base_reg (
+        .clk,
+        .rst,
+        .ld(1'b1),
+        .din(bru_base_is),
+        .dout(bru_base_ex)
+    );
     rg bru_ofst_reg (
         .clk,
         .rst,
@@ -821,13 +838,6 @@ module one_hz_cpu (
         .ld(1'b1),
         .din(bru_add1_is),
         .dout(bru_add1_ex)
-    );
-    rg bru_add2_reg (
-        .clk,
-        .rst,
-        .ld(1'b1),
-        .din(bru_add2_is),
-        .dout(bru_add2_ex)
     );
     rg #(
         .size(1)
@@ -850,14 +860,12 @@ module one_hz_cpu (
     assign lt  = $signed(bru_cmp1_ex) <  $signed(bru_cmp2_ex);
     assign ltu = bru_cmp1_ex <  bru_cmp2_ex;
 
-    assign bru_res_ex = pc_br + bru_ofst_ex;
-    rv32i_word jalr_target;
-    assign jalr_target = bru_add1_ex + bru_add2_ex;
+    assign bru_res_ex = pc_br + bru_add1_ex;
 
-    logic is_jalr;
-    assign is_jalr = brfn_ex == brfnt::jalr;
-
-    assign bru_target = is_jalr ? jalr_target : bru_res_ex;
+    rv32i_word bru_jmp_target;
+    rv32i_word bru_no_jmp_target;
+    assign bru_jmp_target = bru_base_ex + bru_ofst_ex;
+    assign bru_no_jmp_target = pc_br + 4;
 
     logic bru_says_take;
 
@@ -874,7 +882,8 @@ module one_hz_cpu (
         endcase
     end
 
-    assign bru_redir = bru_says_take & ~bru_taken_ex;
+    assign bru_redir = bru_says_take ^ bru_taken_ex;
+    assign bru_target = bru_says_take ? bru_jmp_target : bru_no_jmp_target;
 
 
 
@@ -968,8 +977,6 @@ module instr_queue (
 endmodule : instr_queue
 
 
-
-
 module scoreboard (
     input exut::exe_unit_type_t exu_type,
     input logic has_rd,
@@ -984,6 +991,70 @@ module scoreboard (
     assign ready = 1'b1;
 
 endmodule : scoreboard
+
+
+module dummyBTB (
+    input clk,
+    input rst,
+
+    input   logic [31:0]   new_pc,
+    input   logic [31:0]   new_target,
+    input   btb_resp_t     new_type,
+    input   logic          load,
+
+    input   logic [31:0]   pc,
+
+    output  logic [31:0]   target,
+    output  btb_resp_t     resp
+);
+
+    logic [31:0] pc_out;
+    rg pc_reg (
+        .clk,
+        .rst,
+        .ld(1'b1),
+        .din(pc),
+        .dout(pc_out)
+    );
+    always_comb begin
+        if (pc_out == 32'hb0) begin
+            resp = '{1'b1, 1'b0, 1'b0, 1'b0};
+            target = 32'hd0;
+        end
+        else begin
+            resp = '{1'b0, 1'b0, 1'b0, 1'b0};
+            target = 32'hX;
+        end
+    end
+
+
+endmodule : dummyBTB
+
+
+module dummyBHT (
+    input clk,
+    input rst,
+
+    input   logic [31:0]   pc,
+    output  logic [1:0]    pred
+);
+
+    logic [31:0] pc_out;
+    rg pc_reg (
+        .clk,
+        .rst,
+        .ld(1'b1),
+        .din(pc),
+        .dout(pc_out)
+    );
+    always_comb begin
+        if (pc_out == 32'hb0)
+            pred = 2'b11;
+        else
+            pred = 2'b01;
+    end
+
+endmodule : dummyBHT
 
 
 module rg #(
@@ -1005,39 +1076,3 @@ module rg #(
 
 endmodule : rg
 
-
-module dummyBTB (
-    input clk,
-    input rst,
-
-    input   logic [28:0]   new_PC,
-    input   logic [29:0]   new_target,
-    input   logic [1:0]    new_btype,
-    input   logic          load,
-
-    input   logic [28:0]   fetch_PC,
-
-    output  logic [29:0]   target,
-    output  logic [1:0]    btype, // TODO: make enum
-    output  logic          hit
-);
-
-    assign hit = 1'b0;
-
-
-endmodule : dummyBTB
-
-module dummyBHT (
-    input clk,
-    input rst,
-
-    input   logic [31:0]   pc,
-    output  logic should_take,
-    output  logic confidence
-);
-
-    assign should_take = 1'b0;
-    assign confidence = 1'b0;
-
-
-endmodule : dummyBHT
