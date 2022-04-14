@@ -8,6 +8,7 @@ module regfile #(
 )
 (
     input clk,
+    input rst,
 
     // TODO: figure out priority stuff again
     //input logic [swl-1:0] prefer_a,
@@ -28,14 +29,21 @@ module regfile #(
     genvar rp;
     generate
         for (rp = 0; rp < nrp; rp++) begin : reads
-            assign out[rp] = src[rp] != 0 ? data[src[rp]] : '0;
+            assign out[rp] = data[src[rp]];
         end
     endgenerate
 
     always_ff @(posedge clk) begin
-        for (int i = 0; i < nwp; i++) begin
-            if (ld[i]) begin
-                data[dest[i]] <= in[i];
+        if (rst) begin
+            for (int i = 0; i < num_regs; i++) begin
+                data[i] <= '0;
+            end
+        end else begin
+            for (int i = 0; i < nwp; i++) begin
+                // could do this a bit more elegantly
+                if (ld[i] & (dest[i] != {s_index{1'b0}})) begin
+                    data[dest[i]] <= in[i];
+                end
             end
         end
     end

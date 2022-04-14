@@ -142,6 +142,7 @@ module one_hz_cpu (
 
     //-- fetch0 --//
     assign inst_read = 1'b1;//~stall;
+    assign pc = pc_f0;
 
     // TODO: decide based on:
     // BHT entry (4 state)
@@ -149,15 +150,25 @@ module one_hz_cpu (
     // decoded jal
     // branch unit resolution
     always_comb begin
-        unique casez ({bru_redir, dec_redir, btb_resp_f1.valid, btb_resp_f1.is_ret, btb_resp_f1.is_jmp, &bht_resp_f1})
-            // TODO: for branch resolution redirect, 
-            // kill everything not in execute or writeback
-            6'b1????? : {pc_f0, taken_f1} = {bru_target, 1'b0};
-            6'b01???? : {pc_f0, taken_f1} = {dec_target, 1'b0};
-            6'b0011?? : {pc_f0, taken_f1} = {ras_target, 1'b1};
-            6'b00101? : {pc_f0, taken_f1} = {btb_target, 1'b1};
-            6'b001001 : {pc_f0, taken_f1} = {btb_target, 1'b1};
-            default   : {pc_f0, taken_f1} = {nxl_target, 1'b0};
+        unique casez ({
+            inst_resp,
+            bru_redir, 
+            dec_redir, 
+            btb_resp_f1.valid, 
+            btb_resp_f1.is_ret, 
+            btb_resp_f1.is_jmp, 
+            &bht_resp_f1
+        })
+            // FIXME: currently, the cache is sensitive to changing
+            // addresses, so we prioritize stalling to wait for 
+            // the fetch over changing pc to respond to a prediction
+            7'b0?????? : {pc_f0, taken_f1} = {pc_f1,      1'b0};
+            7'b11????? : {pc_f0, taken_f1} = {bru_target, 1'b0};
+            7'b101???? : {pc_f0, taken_f1} = {dec_target, 1'b0};
+            7'b10011?? : {pc_f0, taken_f1} = {ras_target, 1'b1};
+            7'b100101? : {pc_f0, taken_f1} = {btb_target, 1'b1};
+            7'b1001001 : {pc_f0, taken_f1} = {btb_target, 1'b1};
+            default    : {pc_f0, taken_f1} = {nxl_target, 1'b0};
         endcase
     end
 
@@ -184,7 +195,7 @@ module one_hz_cpu (
     //-- fetch0 -> fetch1 --//
 
     rg #(
-        .rst_val('X)
+        .rst_val(32'h00000060)
     )
     fetch1_pc_reg (
         .clk,
@@ -212,10 +223,8 @@ module one_hz_cpu (
         ras_target <= '0; // TODO: output from RAS
     end
 
-    // dummy 2 cycle pipelined icache
-    assign pc = pc_f1;
     // fetch1 instruction becomes a nop if there was a decode redirect
-    assign instr_f1 = dec_redir ? 32'h00000013 : inst_rdata;
+    assign instr_f1 = dec_redir | ~inst_resp ? 32'h00000013 : inst_rdata;
 
 
     //-- fetch1 -> decode --//
@@ -402,6 +411,7 @@ module one_hz_cpu (
 
     regfile rf (
         .clk,
+        .rst,
         .ld({alu_has_rd_wb, lsu_has_rd_wb, bru_has_rd_wb}),
         .dest('{alu_rd_wb, lsu_rd_wb, bru_rd_wb}),
         .in('{alu_res_wb, lsu_res_wb, bru_res_wb}),
@@ -662,13 +672,18 @@ module one_hz_cpu (
     rv32i_word mem_addr_ex;
     logic [3:0] mem_mbe_ex;
 
+    logic mem_busy;
+    assign mem_busy = |mem_ctrl_ex.memfn;
+    logic mem_stall;
+    assign mem_stall = mem_busy & ~data_resp;
+
     rg #(
         .size(1)
     )
     mem_has_rd_reg (
         .clk,
         .rst,
-        .ld(1'b1),
+        .ld(~mem_stall),
         .din(agu_has_rd_ex),
         .dout(mem_has_rd_ex)
     );
@@ -678,7 +693,7 @@ module one_hz_cpu (
     mem_rd_reg (
         .clk,
         .rst,
-        .ld(1'b1),
+        .ld(~mem_stall),
         .din(agu_rd_ex),
         .dout(mem_rd_ex)
     );
@@ -689,21 +704,21 @@ module one_hz_cpu (
     mem_mem_ctrl_reg (
         .clk,
         .rst,
-        .ld(1'b1),
+        .ld(~mem_stall),
         .din(agu_ctrl_ex),
         .dout(mem_ctrl_ex)
     );
     rg mem_mem_val_reg (
         .clk,
         .rst,
-        .ld(1'b1),
+        .ld(~mem_stall),
         .din(agu_valu_ex),
         .dout(mem_valu_ex)
     );
     rg mem_mem_addr_reg (
         .clk,
         .rst,
-        .ld(1'b1),
+        .ld(~mem_stall),
         .din(agu_addr_ex),
         .dout(mem_addr_ex)
     );
@@ -713,7 +728,7 @@ module one_hz_cpu (
     mem_mbe_reg (
         .clk,
         .rst,
-        .ld(1'b1),
+        .ld(~mem_stall),
         .din(agu_mbe_ex),
         .dout(mem_mbe_ex)
     );
@@ -726,6 +741,7 @@ module one_hz_cpu (
     assign data_wdata = mem_valu_ex;
     assign data_read = mem_ctrl_ex.memfn[1];
     assign data_write = mem_ctrl_ex.memfn[0];
+
 
     // TODO: modulize
     always_comb begin
@@ -752,7 +768,7 @@ module one_hz_cpu (
     wb_lsu_has_rd_reg (
         .clk,
         .rst,
-        .ld(1'b1),
+        .ld(~mem_stall),
         .din(mem_has_rd_ex),
         .dout(lsu_has_rd_wb)
     );
@@ -762,14 +778,14 @@ module one_hz_cpu (
     wb_lsu_rd_reg (
         .clk,
         .rst,
-        .ld(1'b1),
+        .ld(~mem_stall),
         .din(mem_rd_ex),
         .dout(lsu_rd_wb)
     );
     rg wb_lsu_res_reg (
         .clk,
         .rst,
-        .ld(1'b1),
+        .ld(~mem_stall),
         .din(lsu_res_ex),
         .dout(lsu_res_wb)
     );
@@ -1034,7 +1050,7 @@ module scoreboard #(
     genvar rp;
     generate
         for (rp = 0; rp < nrp; rp++) begin : reads
-            assign ready[rp] = ~((reg_states[ rd[rp]] & has_rd)
+            assign ready[rp] = ~((reg_states[rd[rp]] & has_rd)
                              | (reg_states[rs1[rp]] & has_rs1)
                              | (reg_states[rs2[rp]] & has_rs2));
 

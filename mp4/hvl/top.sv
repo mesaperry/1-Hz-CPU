@@ -113,7 +113,7 @@ mp4 dut(
     .pmem_wdata     (itf.mem_wdata ),
     .pmem_read      (itf.mem_read  ),
     .pmem_write     (itf.mem_write ),
-    .mem_resp       (itf.mem_resp )
+    .pmem_resp      (itf.mem_resp )
 );
 
 /***************************** End Instantiation *****************************/

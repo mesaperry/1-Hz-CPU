@@ -74,6 +74,9 @@ set_global_assignment -name POWER_DEFAULT_INPUT_IO_TOGGLE_RATE "12.5 %"
 set_global_assignment -name POWER_INPUT_FILE_NAME simulation/modelsim/power_vcd.vcd -section_id power_vcd.vcd
 set_instance_assignment -name POWER_READ_INPUT_FILE power_vcd.vcd -to mp4
 set_global_assignment -name FLOW_ENABLE_POWER_ANALYZER OFF
+set_global_assignment -name SYSTEMVERILOG_FILE hdl/cache/cacheline_adaptor.sv
+set_global_assignment -name SYSTEMVERILOG_FILE hdl/cache/inst_cache.sv
+set_global_assignment -name SYSTEMVERILOG_FILE hdl/cache/arbiter.sv
 set_global_assignment -name SYSTEMVERILOG_FILE hdl/ctrl_word.sv
 set_global_assignment -name SDC_FILE mp4.out.sdc
 set_global_assignment -name SYSTEMVERILOG_FILE hdl/rv32i_mux_types.sv
@@ -88,5 +91,6 @@ set_global_assignment -name SYSTEMVERILOG_FILE hdl/decode/decode.sv
 set_global_assignment -name SYSTEMVERILOG_FILE hdl/branch_target_buffer/branch_target_buffer.sv
 set_global_assignment -name QIP_FILE fifo50x8.qip
 set_global_assignment -name QIP_FILE fifo30x4.qip
+set_global_assignment -name QIP_FILE bram256x32.qip
+set_global_assignment -name QIP_FILE bram22x32.qip
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
-set_global_assignment -name QIP_FILE cache.qip
