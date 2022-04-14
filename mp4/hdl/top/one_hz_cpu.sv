@@ -7,16 +7,16 @@ module one_hz_cpu (
     input clk,
     input rst,
     output  rv32i_word   pc,
-    input   rv32i_word   instr,
-    output  logic        imem_read,
-    input   logic        imem_resp,
-    output  rv32i_word   mem_address,
-    input   rv32i_word   mem_rdata,
-    output  rv32i_word   mem_wdata,
-    output  logic        mem_read,
-    output  logic        mem_write,
-    output  logic [3:0]  mem_byte_enable,
-    input   logic        mem_resp
+    input   rv32i_word   inst_rdata,
+    output  logic        inst_read,
+    input   logic        inst_resp,
+    output  rv32i_word   data_address,
+    input   rv32i_word   data_rdata,
+    output  rv32i_word   data_wdata,
+    output  logic        data_read,
+    output  logic        data_write,
+    output  logic [3:0]  data_mbe,
+    input   logic        data_resp
 );
 
     //------------//
@@ -141,7 +141,7 @@ module one_hz_cpu (
     assign mispred = bru_redir;
 
     //-- fetch0 --//
-    assign imem_read = 1'b1;//~stall;
+    assign inst_read = 1'b1;//~stall;
 
     // TODO: decide based on:
     // BHT entry (4 state)
@@ -215,7 +215,7 @@ module one_hz_cpu (
     // dummy 2 cycle pipelined icache
     assign pc = pc_f1;
     // fetch1 instruction becomes a nop if there was a decode redirect
-    assign instr_f1 = dec_redir ? 32'h00000013 : instr;
+    assign instr_f1 = dec_redir ? 32'h00000013 : inst_rdata;
 
 
     //-- fetch1 -> decode --//
@@ -721,20 +721,20 @@ module one_hz_cpu (
     // mem access
 
     rv32i_word mem_res_ex;
-    assign mem_byte_enable = mem_mbe_ex;
-    assign mem_address = mem_addr_ex;
-    assign mem_wdata = mem_valu_ex;
-    assign mem_read = mem_ctrl_ex.memfn[1];
-    assign mem_write = mem_ctrl_ex.memfn[0];
+    assign data_mbe = mem_mbe_ex;
+    assign data_address = mem_addr_ex;
+    assign data_wdata = mem_valu_ex;
+    assign data_read = mem_ctrl_ex.memfn[1];
+    assign data_write = mem_ctrl_ex.memfn[0];
 
     // TODO: modulize
     always_comb begin
         unique case ({mem_ctrl_ex.memsz, mem_ctrl_ex.ldext})
-            {memszt::b, ldextt::s} : mem_res_ex = {{24{mem_rdata[07]}}, mem_rdata[07:0]};
-            {memszt::b, ldextt::z} : mem_res_ex = { 24'b0,              mem_rdata[07:0]};
-            {memszt::h, ldextt::s} : mem_res_ex = {{16{mem_rdata[15]}}, mem_rdata[15:0]};
-            {memszt::h, ldextt::z} : mem_res_ex = { 16'b0,              mem_rdata[15:0]};
-            default                : mem_res_ex =                       mem_rdata;
+            {memszt::b, ldextt::s} : mem_res_ex = {{24{data_rdata[07]}}, data_rdata[07:0]};
+            {memszt::b, ldextt::z} : mem_res_ex = { 24'b0,               data_rdata[07:0]};
+            {memszt::h, ldextt::s} : mem_res_ex = {{16{data_rdata[15]}}, data_rdata[15:0]};
+            {memszt::h, ldextt::z} : mem_res_ex = { 16'b0,               data_rdata[15:0]};
+            default                : mem_res_ex =                        data_rdata;
         endcase
     end
 

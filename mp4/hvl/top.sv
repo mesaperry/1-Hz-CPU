@@ -106,19 +106,14 @@ Please refer to tb_itf.sv for more information.
 */
 
 mp4 dut(
-    .clk             (itf.clk       ),    
-    .rst             (itf.rst       ),
-    .pc              (itf.inst_addr ),
-    .instr           (itf.inst_rdata),
-    .imem_read       (itf.inst_read ),
-    .imem_resp       (itf.inst_resp ),
-    .mem_address     (itf.data_addr ),
-    .mem_rdata       (itf.data_rdata),  
-    .mem_wdata       (itf.data_wdata),
-    .mem_read        (itf.data_read ),
-    .mem_write       (itf.data_write),
-    .mem_byte_enable (itf.data_mbe  ),
-    .mem_resp        (itf.data_resp )
+    .clk            (itf.clk       ),    
+    .rst            (itf.rst       ),
+    .pmem_address   (itf.mem_addr  ),
+    .pmem_rdata     (itf.mem_rdata ),  
+    .pmem_wdata     (itf.mem_wdata ),
+    .pmem_read      (itf.mem_read  ),
+    .pmem_write     (itf.mem_write ),
+    .mem_resp       (itf.mem_resp )
 );
 
 /***************************** End Instantiation *****************************/
