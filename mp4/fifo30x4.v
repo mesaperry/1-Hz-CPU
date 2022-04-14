@@ -86,7 +86,7 @@ module fifo30x4 (
 		scfifo_component.lpm_widthu = 2,
 		scfifo_component.overflow_checking = "OFF",
 		scfifo_component.underflow_checking = "OFF",
-		scfifo_component.use_eab = "ON";
+		scfifo_component.use_eab = "OFF";
 
 
 endmodule
@@ -104,7 +104,7 @@ endmodule
 // Retrieval info: PRIVATE: Empty NUMERIC "1"
 // Retrieval info: PRIVATE: Full NUMERIC "1"
 // Retrieval info: PRIVATE: INTENDED_DEVICE_FAMILY STRING "Arria II GX"
-// Retrieval info: PRIVATE: LE_BasedFIFO NUMERIC "0"
+// Retrieval info: PRIVATE: LE_BasedFIFO NUMERIC "1"
 // Retrieval info: PRIVATE: LegacyRREQ NUMERIC "0"
 // Retrieval info: PRIVATE: MAX_DEPTH_BY_9 NUMERIC "0"
 // Retrieval info: PRIVATE: OVERFLOW_CHECKING NUMERIC "1"
@@ -136,7 +136,7 @@ endmodule
 // Retrieval info: CONSTANT: LPM_WIDTHU NUMERIC "2"
 // Retrieval info: CONSTANT: OVERFLOW_CHECKING STRING "OFF"
 // Retrieval info: CONSTANT: UNDERFLOW_CHECKING STRING "OFF"
-// Retrieval info: CONSTANT: USE_EAB STRING "ON"
+// Retrieval info: CONSTANT: USE_EAB STRING "OFF"
 // Retrieval info: USED_PORT: clock 0 0 0 0 INPUT NODEFVAL "clock"
 // Retrieval info: USED_PORT: data 0 0 30 0 INPUT NODEFVAL "data[29..0]"
 // Retrieval info: USED_PORT: empty 0 0 0 0 OUTPUT NODEFVAL "empty"
