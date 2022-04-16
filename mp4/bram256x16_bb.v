@@ -4,7 +4,7 @@
 // MODULE: altsyncram 
 
 // ============================================================
-// File Name: bram22x32.v
+// File Name: bram256x16.v
 // Megafunction Name(s):
 // 			altsyncram
 //
@@ -31,18 +31,18 @@
 //Intel and sold by Intel or its authorized distributors.  Please
 //refer to the applicable agreement for further details.
 
-module bram22x32 (
+module bram256x16 (
 	address,
 	clock,
 	data,
 	wren,
 	q);
 
-	input	[4:0]  address;
+	input	[3:0]  address;
 	input	  clock;
-	input	[21:0]  data;
+	input	[255:0]  data;
 	input	  wren;
-	output	[21:0]  q;
+	output	[255:0]  q;
 `ifndef ALTERA_RESERVED_QIS
 // synopsys translate_off
 `endif
@@ -76,7 +76,7 @@ endmodule
 // Retrieval info: PRIVATE: JTAG_ID STRING "NONE"
 // Retrieval info: PRIVATE: MAXIMUM_DEPTH NUMERIC "0"
 // Retrieval info: PRIVATE: MIFfilename STRING ""
-// Retrieval info: PRIVATE: NUMWORDS_A NUMERIC "32"
+// Retrieval info: PRIVATE: NUMWORDS_A NUMERIC "16"
 // Retrieval info: PRIVATE: RAM_BLOCK_TYPE NUMERIC "0"
 // Retrieval info: PRIVATE: READ_DURING_WRITE_MODE_PORT_A NUMERIC "2"
 // Retrieval info: PRIVATE: RegAddr NUMERIC "1"
@@ -86,8 +86,8 @@ endmodule
 // Retrieval info: PRIVATE: SingleClock NUMERIC "1"
 // Retrieval info: PRIVATE: UseDQRAM NUMERIC "1"
 // Retrieval info: PRIVATE: WRCONTROL_ACLR_A NUMERIC "0"
-// Retrieval info: PRIVATE: WidthAddr NUMERIC "5"
-// Retrieval info: PRIVATE: WidthData NUMERIC "22"
+// Retrieval info: PRIVATE: WidthAddr NUMERIC "4"
+// Retrieval info: PRIVATE: WidthData NUMERIC "256"
 // Retrieval info: PRIVATE: rden NUMERIC "0"
 // Retrieval info: LIBRARY: altera_mf altera_mf.altera_mf_components.all
 // Retrieval info: CONSTANT: CLOCK_ENABLE_INPUT_A STRING "BYPASS"
@@ -95,29 +95,29 @@ endmodule
 // Retrieval info: CONSTANT: INTENDED_DEVICE_FAMILY STRING "Arria II GX"
 // Retrieval info: CONSTANT: LPM_HINT STRING "ENABLE_RUNTIME_MOD=NO"
 // Retrieval info: CONSTANT: LPM_TYPE STRING "altsyncram"
-// Retrieval info: CONSTANT: NUMWORDS_A NUMERIC "32"
+// Retrieval info: CONSTANT: NUMWORDS_A NUMERIC "16"
 // Retrieval info: CONSTANT: OPERATION_MODE STRING "SINGLE_PORT"
 // Retrieval info: CONSTANT: OUTDATA_ACLR_A STRING "NONE"
 // Retrieval info: CONSTANT: OUTDATA_REG_A STRING "UNREGISTERED"
 // Retrieval info: CONSTANT: POWER_UP_UNINITIALIZED STRING "TRUE"
 // Retrieval info: CONSTANT: READ_DURING_WRITE_MODE_PORT_A STRING "DONT_CARE"
-// Retrieval info: CONSTANT: WIDTHAD_A NUMERIC "5"
-// Retrieval info: CONSTANT: WIDTH_A NUMERIC "22"
+// Retrieval info: CONSTANT: WIDTHAD_A NUMERIC "4"
+// Retrieval info: CONSTANT: WIDTH_A NUMERIC "256"
 // Retrieval info: CONSTANT: WIDTH_BYTEENA_A NUMERIC "1"
-// Retrieval info: USED_PORT: address 0 0 5 0 INPUT NODEFVAL "address[4..0]"
+// Retrieval info: USED_PORT: address 0 0 4 0 INPUT NODEFVAL "address[3..0]"
 // Retrieval info: USED_PORT: clock 0 0 0 0 INPUT VCC "clock"
-// Retrieval info: USED_PORT: data 0 0 22 0 INPUT NODEFVAL "data[21..0]"
-// Retrieval info: USED_PORT: q 0 0 22 0 OUTPUT NODEFVAL "q[21..0]"
+// Retrieval info: USED_PORT: data 0 0 256 0 INPUT NODEFVAL "data[255..0]"
+// Retrieval info: USED_PORT: q 0 0 256 0 OUTPUT NODEFVAL "q[255..0]"
 // Retrieval info: USED_PORT: wren 0 0 0 0 INPUT NODEFVAL "wren"
-// Retrieval info: CONNECT: @address_a 0 0 5 0 address 0 0 5 0
+// Retrieval info: CONNECT: @address_a 0 0 4 0 address 0 0 4 0
 // Retrieval info: CONNECT: @clock0 0 0 0 0 clock 0 0 0 0
-// Retrieval info: CONNECT: @data_a 0 0 22 0 data 0 0 22 0
+// Retrieval info: CONNECT: @data_a 0 0 256 0 data 0 0 256 0
 // Retrieval info: CONNECT: @wren_a 0 0 0 0 wren 0 0 0 0
-// Retrieval info: CONNECT: q 0 0 22 0 @q_a 0 0 22 0
-// Retrieval info: GEN_FILE: TYPE_NORMAL bram22x32.v TRUE
-// Retrieval info: GEN_FILE: TYPE_NORMAL bram22x32.inc FALSE
-// Retrieval info: GEN_FILE: TYPE_NORMAL bram22x32.cmp FALSE
-// Retrieval info: GEN_FILE: TYPE_NORMAL bram22x32.bsf FALSE
-// Retrieval info: GEN_FILE: TYPE_NORMAL bram22x32_inst.v FALSE
-// Retrieval info: GEN_FILE: TYPE_NORMAL bram22x32_bb.v TRUE
+// Retrieval info: CONNECT: q 0 0 256 0 @q_a 0 0 256 0
+// Retrieval info: GEN_FILE: TYPE_NORMAL bram256x16.v TRUE
+// Retrieval info: GEN_FILE: TYPE_NORMAL bram256x16.inc FALSE
+// Retrieval info: GEN_FILE: TYPE_NORMAL bram256x16.cmp FALSE
+// Retrieval info: GEN_FILE: TYPE_NORMAL bram256x16.bsf FALSE
+// Retrieval info: GEN_FILE: TYPE_NORMAL bram256x16_inst.v FALSE
+// Retrieval info: GEN_FILE: TYPE_NORMAL bram256x16_bb.v TRUE
 // Retrieval info: LIB_FILE: altera_mf

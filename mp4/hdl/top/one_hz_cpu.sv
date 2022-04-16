@@ -97,6 +97,7 @@ module one_hz_cpu (
     rv32i_word lsu_base_ex;
     rv32i_word lsu_ofst_ex;
 
+    logic mem_stall;
     rv32i_word lsu_res_ex;
     
     // bru
@@ -141,33 +142,29 @@ module one_hz_cpu (
     assign mispred = bru_redir;
 
     //-- fetch0 --//
-    assign inst_read = 1'b1;//~stall;
+    assign inst_read = ~stall;
     assign pc = pc_f0;
 
-    // TODO: decide based on:
-    // BHT entry (4 state)
-    // BTB valid? ret? jmp?
-    // decoded jal
-    // branch unit resolution
     always_comb begin
         unique casez ({
-            inst_resp,
             bru_redir, 
             dec_redir, 
             btb_resp_f1.valid, 
             btb_resp_f1.is_ret, 
             btb_resp_f1.is_jmp, 
-            &bht_resp_f1
+            &bht_resp_f1,
+            inst_resp
         })
             // FIXME: currently, the cache is sensitive to changing
             // addresses, so we prioritize stalling to wait for 
             // the fetch over changing pc to respond to a prediction
-            7'b0?????? : {pc_f0, taken_f1} = {pc_f1,      1'b0};
-            7'b11????? : {pc_f0, taken_f1} = {bru_target, 1'b0};
-            7'b101???? : {pc_f0, taken_f1} = {dec_target, 1'b0};
-            7'b10011?? : {pc_f0, taken_f1} = {ras_target, 1'b1};
-            7'b100101? : {pc_f0, taken_f1} = {btb_target, 1'b1};
-            7'b1001001 : {pc_f0, taken_f1} = {btb_target, 1'b1};
+            7'b1?????? : {pc_f0, taken_f1} = {bru_target, 1'b0};
+            7'b01????? : {pc_f0, taken_f1} = {dec_target, 1'b0};
+            7'b0011??? : {pc_f0, taken_f1} = {ras_target, 1'b1};
+            7'b00101?? : {pc_f0, taken_f1} = {btb_target, 1'b1};
+            7'b001001? : {pc_f0, taken_f1} = {btb_target, 1'b1};
+            7'b0010000 : {pc_f0, taken_f1} = {pc_f1,      1'b0};
+            7'b000???0 : {pc_f0, taken_f1} = {pc_f1,      1'b0};
             default    : {pc_f0, taken_f1} = {nxl_target, 1'b0};
         endcase
     end
@@ -395,7 +392,8 @@ module one_hz_cpu (
         .rs2('{ctrl_sigs_rd.rs2}),
         .ready('{can_issue}),
         .has_rd_wb({alu_has_rd_wb, lsu_has_rd_wb, bru_has_rd_wb}),
-        .rd_wb('{alu_rd_wb, lsu_rd_wb, bru_rd_wb})
+        .rd_wb('{alu_rd_wb, lsu_rd_wb, bru_rd_wb}),
+        .exu_status({mem_stall, 1'b0, 1'b1, 1'b0}) // TODO: fix when implementing mul
     );
 
     assign ctrl_sigs_is = can_issue ? ctrl_sigs_rd : nop_sigs;
@@ -422,8 +420,8 @@ module one_hz_cpu (
     rv32i_word imm_out;
 
     imm_dec imm_dec0 (
-        .packed_imm(ctrl_sigs_is.packed_imm),
-        .imm_type(ctrl_sigs_is.imm_type),
+        .packed_imm(ctrl_sigs_rd.packed_imm),
+        .imm_type(ctrl_sigs_rd.imm_type),
         .imm(imm_out)
     );
 
@@ -484,7 +482,6 @@ module one_hz_cpu (
 
 
     //-- rrd/issue -> alu --//
-    // TODO: update scoreboard
 
     rg #(
         .size(1)
@@ -574,12 +571,10 @@ module one_hz_cpu (
 
     //-- writeback (alu) --//
 
-    // TODO: updata scoreboard
 
 
 
     //-- rrd/issue -> lsu --//
-    // TODO: update scoreboard
 
     rg #(
         .size(1)
@@ -587,7 +582,7 @@ module one_hz_cpu (
     agu_has_rd_reg (
         .clk,
         .rst(rst | mispred),
-        .ld(1'b1),
+        .ld(~mem_stall),
         .din(lsu_has_rd_is),
         .dout(lsu_has_rd_ex)
     );
@@ -597,7 +592,7 @@ module one_hz_cpu (
     agu_rd_reg (
         .clk,
         .rst(rst | mispred),
-        .ld(1'b1),
+        .ld(~mem_stall),
         .din(ctrl_sigs_is.rd),
         .dout(lsu_rd_ex)
     );
@@ -609,7 +604,7 @@ module one_hz_cpu (
     agu_mem_ctrl_reg (
         .clk,
         .rst(rst | mispred),
-        .ld(1'b1),
+        .ld(~mem_stall),
         .din(lsu_ctrl_is),
         .dout(lsu_ctrl_bits_ex)
     );
@@ -617,21 +612,21 @@ module one_hz_cpu (
     rg agu_mem_val_reg (
         .clk,
         .rst,
-        .ld(1'b1),
+        .ld(~mem_stall),
         .din(lsu_valu_is),
         .dout(lsu_valu_ex)
     );
     rg agu_mem_base_reg (
         .clk,
         .rst,
-        .ld(1'b1),
+        .ld(~mem_stall),
         .din(lsu_base_is),
         .dout(lsu_base_ex)
     );
     rg agu_mem_ofst_reg (
         .clk,
         .rst,
-        .ld(1'b1),
+        .ld(~mem_stall),
         .din(lsu_ofst_is),
         .dout(lsu_ofst_ex)
     );
@@ -674,8 +669,13 @@ module one_hz_cpu (
 
     logic mem_busy;
     assign mem_busy = |mem_ctrl_ex.memfn;
-    logic mem_stall;
     assign mem_stall = mem_busy & ~data_resp;
+
+    assign data_mbe = mem_stall ? mem_mbe_ex : agu_mbe_ex;
+    assign data_address = mem_stall ? mem_addr_ex : agu_addr_ex;
+    assign data_wdata = mem_stall ? mem_valu_ex : agu_valu_ex;
+    assign data_read = mem_stall ? mem_ctrl_ex.memfn[1] : agu_ctrl_ex.memfn[1];
+    assign data_write = mem_stall ? mem_ctrl_ex.memfn[0] : agu_ctrl_ex.memfn[0];
 
     rg #(
         .size(1)
@@ -736,11 +736,6 @@ module one_hz_cpu (
     // mem access
 
     rv32i_word mem_res_ex;
-    assign data_mbe = mem_mbe_ex;
-    assign data_address = mem_addr_ex;
-    assign data_wdata = mem_valu_ex;
-    assign data_read = mem_ctrl_ex.memfn[1];
-    assign data_write = mem_ctrl_ex.memfn[0];
 
 
     // TODO: modulize
@@ -754,8 +749,6 @@ module one_hz_cpu (
         endcase
     end
 
-
-    // TODO: if no resp, unit busy
 
     assign lsu_res_ex = mem_res_ex;
     
@@ -792,15 +785,12 @@ module one_hz_cpu (
 
     //-- writeback (lsu) --//
 
-    // TODO: updata scoreboard
-
 
     
 
 
 
     //-- rrd/issue -> bru --//
-    // TODO: update scoreboard
 
     rg bru_pc_reg (
         .clk,
@@ -958,7 +948,6 @@ module one_hz_cpu (
 
     //-- writeback (alu) --//
 
-    // TODO: updata scoreboard
 
 
 
@@ -1020,14 +1009,17 @@ module scoreboard #(
     parameter s_index = 5,
     parameter num_read_ports = 1,
     parameter num_write_ports = 3,
+    parameter num_execution_units = 4,
     parameter nrp = num_read_ports,
-    parameter nwp = num_write_ports
+    parameter nwp = num_write_ports,
+    parameter neu = num_execution_units,
+    parameter eu_idx_sz = $clog2(neu)
 )
 (
     input   logic                  clk,
     input   logic                  rst,
     input   logic                  mispred,
-    input   exut::exe_unit_type_t  exu_type [nrp-1:0],
+    input   logic [eu_idx_sz-1:0]  exu_type [nrp-1:0],
     input   logic [nrp-1:0]        has_rd,
     input   logic [nrp-1:0]        has_rs1,
     input   logic [nrp-1:0]        has_rs2,
@@ -1037,7 +1029,8 @@ module scoreboard #(
     output  logic                  ready [nrp-1:0],
 
     input   logic [nwp-1:0]        has_rd_wb,
-    input   logic [s_index-1:0]    rd_wb [nwp-1:0]
+    input   logic [s_index-1:0]    rd_wb [nwp-1:0],
+    input   logic [neu-1:0]        exu_status
 
 );
 
@@ -1050,10 +1043,12 @@ module scoreboard #(
     genvar rp;
     generate
         for (rp = 0; rp < nrp; rp++) begin : reads
-            assign ready[rp] = ~((reg_states[rd[rp]] & has_rd)
-                             | (reg_states[rs1[rp]] & has_rs1)
-                             | (reg_states[rs2[rp]] & has_rs2));
-
+            assign ready[rp] = ~(
+                (reg_states[rd[rp]] & has_rd)   |
+                (reg_states[rs1[rp]] & has_rs1) | 
+                (reg_states[rs2[rp]] & has_rs2) | 
+                (exu_status[exu_type[rp]])      
+            );
         end
     endgenerate
 

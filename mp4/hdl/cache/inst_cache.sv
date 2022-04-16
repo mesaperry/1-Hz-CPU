@@ -14,6 +14,11 @@ module inst_cache (
     input   logic           pmem_resp
 );
 
+    // cache lines are 256 bits
+    // pages are 512 bits
+    // there is a 500 ns delay per request
+    // the delay is halved if accessing same page
+
     localparam x_len = 32;
     localparam s_line = 256;
     localparam n_sets = 32;
@@ -22,6 +27,21 @@ module inst_cache (
     localparam s_offset = $clog2(bytes_per_line);
     localparam s_index = $clog2(n_sets);
     localparam s_tag = x_len - (s_offset + s_index);
+
+    // FIXME: very hacky state machine stuff
+    // so i think this gives us a clock cycle delay
+    // after a stall where we don't change stages
+    // this allows the pc_f0 to be corrected
+    logic start;
+    always_ff @(posedge clk) begin
+        if (rst)
+            start <= 1'b1;
+        else if (mem_read)
+            start <= 1'b0;
+        else
+            start <= 1'b1;
+    end
+
 
     // decl //
     // stage 0 //
@@ -53,30 +73,30 @@ module inst_cache (
     // stage 0 -> stage 1
     always_ff @(posedge clk) begin
         if (rst) begin
-            address_1 <= 32'h60;
-            read_1 <= 1'b0;
+            address_1 <= '0;
         end
-        else if (mem_resp | ~read_1) begin
+        // TODO: maybe use or redir as condition as well
+        else if (hit_1 & mem_read | start) begin
             address_1 <= address_0;
-            read_1 <= read_0;
         end
     end
 
     // stage 1
     assign {tag_1, index_1, offset_1} = address_1;
 
-    assign hit_1 = (tag_1 == tag_o) & valid_1;
+    assign hit_1 = valid_1 ? (tag_1 == tag_o) : 1'b0;
 
 
-    assign mem_resp = hit_1 & read_1;
-    assign pmem_read = ~hit_1 & read_1;
+    assign mem_resp = hit_1 & ~start;
+    assign pmem_read = ~hit_1 & ~start;
     assign pmem_address = {tag_1, index_1, {s_offset{1'b0}}};
 
 
     logic [s_line-1:0] rline;
-    assign mem_rdata = rline[offset_1[s_offset-1:2] * 32 +: 32];
+    assign mem_rdata = rline[offset_1[s_offset-1:2] * x_len +: x_len];
 
 
+    // WARNING: these guys do not support simultaneous read and write
     bram256x32 data (
         .address (pmem_read ? index_1 : index_0),
         .clock   (clk),
