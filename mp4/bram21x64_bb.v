@@ -1,10 +1,10 @@
-// megafunction wizard: %RAM: 1-PORT%
+// megafunction wizard: %RAM: 1-PORT%VBB%
 // GENERATION: STANDARD
 // VERSION: WM1.0
 // MODULE: altsyncram 
 
 // ============================================================
-// File Name: cache.v
+// File Name: bram21x64.v
 // Megafunction Name(s):
 // 			altsyncram
 //
@@ -16,7 +16,6 @@
 //
 // 18.1.0 Build 625 09/12/2018 SJ Standard Edition
 // ************************************************************
-
 
 //Copyright (C) 2018  Intel Corporation. All rights reserved.
 //Your use of Intel Corporation's design tools, logic functions 
@@ -32,80 +31,25 @@
 //Intel and sold by Intel or its authorized distributors.  Please
 //refer to the applicable agreement for further details.
 
-
-// synopsys translate_off
-`timescale 1 ps / 1 ps
-// synopsys translate_on
-module cache (
+module bram21x64 (
 	address,
-	byteena,
 	clock,
 	data,
-	rden,
 	wren,
 	q);
 
 	input	[5:0]  address;
-	input	[31:0]  byteena;
 	input	  clock;
-	input	[255:0]  data;
-	input	  rden;
+	input	[20:0]  data;
 	input	  wren;
-	output	[255:0]  q;
+	output	[20:0]  q;
 `ifndef ALTERA_RESERVED_QIS
 // synopsys translate_off
 `endif
-	tri1	[31:0]  byteena;
 	tri1	  clock;
-	tri1	  rden;
 `ifndef ALTERA_RESERVED_QIS
 // synopsys translate_on
 `endif
-
-	wire [255:0] sub_wire0;
-	wire [255:0] q = sub_wire0[255:0];
-
-	altsyncram	altsyncram_component (
-				.address_a (address),
-				.byteena_a (byteena),
-				.clock0 (clock),
-				.data_a (data),
-				.rden_a (rden),
-				.wren_a (wren),
-				.q_a (sub_wire0),
-				.aclr0 (1'b0),
-				.aclr1 (1'b0),
-				.address_b (1'b1),
-				.addressstall_a (1'b0),
-				.addressstall_b (1'b0),
-				.byteena_b (1'b1),
-				.clock1 (1'b1),
-				.clocken0 (1'b1),
-				.clocken1 (1'b1),
-				.clocken2 (1'b1),
-				.clocken3 (1'b1),
-				.data_b (1'b1),
-				.eccstatus (),
-				.q_b (),
-				.rden_b (1'b1),
-				.wren_b (1'b0));
-	defparam
-		altsyncram_component.byte_size = 8,
-		altsyncram_component.clock_enable_input_a = "BYPASS",
-		altsyncram_component.clock_enable_output_a = "BYPASS",
-		altsyncram_component.intended_device_family = "Arria II GX",
-		altsyncram_component.lpm_hint = "ENABLE_RUNTIME_MOD=NO",
-		altsyncram_component.lpm_type = "altsyncram",
-		altsyncram_component.numwords_a = 64,
-		altsyncram_component.operation_mode = "SINGLE_PORT",
-		altsyncram_component.outdata_aclr_a = "NONE",
-		altsyncram_component.outdata_reg_a = "UNREGISTERED",
-		altsyncram_component.power_up_uninitialized = "TRUE",
-		altsyncram_component.read_during_write_mode_port_a = "DONT_CARE",
-		altsyncram_component.widthad_a = 6,
-		altsyncram_component.width_a = 256,
-		altsyncram_component.width_byteena_a = 32;
-
 
 endmodule
 
@@ -117,7 +61,7 @@ endmodule
 // Retrieval info: PRIVATE: AclrByte NUMERIC "0"
 // Retrieval info: PRIVATE: AclrData NUMERIC "0"
 // Retrieval info: PRIVATE: AclrOutput NUMERIC "0"
-// Retrieval info: PRIVATE: BYTE_ENABLE NUMERIC "1"
+// Retrieval info: PRIVATE: BYTE_ENABLE NUMERIC "0"
 // Retrieval info: PRIVATE: BYTE_SIZE NUMERIC "8"
 // Retrieval info: PRIVATE: BlankMemory NUMERIC "1"
 // Retrieval info: PRIVATE: CLOCK_ENABLE_INPUT_A NUMERIC "0"
@@ -143,10 +87,9 @@ endmodule
 // Retrieval info: PRIVATE: UseDQRAM NUMERIC "1"
 // Retrieval info: PRIVATE: WRCONTROL_ACLR_A NUMERIC "0"
 // Retrieval info: PRIVATE: WidthAddr NUMERIC "6"
-// Retrieval info: PRIVATE: WidthData NUMERIC "256"
-// Retrieval info: PRIVATE: rden NUMERIC "1"
+// Retrieval info: PRIVATE: WidthData NUMERIC "21"
+// Retrieval info: PRIVATE: rden NUMERIC "0"
 // Retrieval info: LIBRARY: altera_mf altera_mf.altera_mf_components.all
-// Retrieval info: CONSTANT: BYTE_SIZE NUMERIC "8"
 // Retrieval info: CONSTANT: CLOCK_ENABLE_INPUT_A STRING "BYPASS"
 // Retrieval info: CONSTANT: CLOCK_ENABLE_OUTPUT_A STRING "BYPASS"
 // Retrieval info: CONSTANT: INTENDED_DEVICE_FAMILY STRING "Arria II GX"
@@ -159,26 +102,22 @@ endmodule
 // Retrieval info: CONSTANT: POWER_UP_UNINITIALIZED STRING "TRUE"
 // Retrieval info: CONSTANT: READ_DURING_WRITE_MODE_PORT_A STRING "DONT_CARE"
 // Retrieval info: CONSTANT: WIDTHAD_A NUMERIC "6"
-// Retrieval info: CONSTANT: WIDTH_A NUMERIC "256"
-// Retrieval info: CONSTANT: WIDTH_BYTEENA_A NUMERIC "32"
+// Retrieval info: CONSTANT: WIDTH_A NUMERIC "21"
+// Retrieval info: CONSTANT: WIDTH_BYTEENA_A NUMERIC "1"
 // Retrieval info: USED_PORT: address 0 0 6 0 INPUT NODEFVAL "address[5..0]"
-// Retrieval info: USED_PORT: byteena 0 0 32 0 INPUT VCC "byteena[31..0]"
 // Retrieval info: USED_PORT: clock 0 0 0 0 INPUT VCC "clock"
-// Retrieval info: USED_PORT: data 0 0 256 0 INPUT NODEFVAL "data[255..0]"
-// Retrieval info: USED_PORT: q 0 0 256 0 OUTPUT NODEFVAL "q[255..0]"
-// Retrieval info: USED_PORT: rden 0 0 0 0 INPUT VCC "rden"
+// Retrieval info: USED_PORT: data 0 0 21 0 INPUT NODEFVAL "data[20..0]"
+// Retrieval info: USED_PORT: q 0 0 21 0 OUTPUT NODEFVAL "q[20..0]"
 // Retrieval info: USED_PORT: wren 0 0 0 0 INPUT NODEFVAL "wren"
 // Retrieval info: CONNECT: @address_a 0 0 6 0 address 0 0 6 0
-// Retrieval info: CONNECT: @byteena_a 0 0 32 0 byteena 0 0 32 0
 // Retrieval info: CONNECT: @clock0 0 0 0 0 clock 0 0 0 0
-// Retrieval info: CONNECT: @data_a 0 0 256 0 data 0 0 256 0
-// Retrieval info: CONNECT: @rden_a 0 0 0 0 rden 0 0 0 0
+// Retrieval info: CONNECT: @data_a 0 0 21 0 data 0 0 21 0
 // Retrieval info: CONNECT: @wren_a 0 0 0 0 wren 0 0 0 0
-// Retrieval info: CONNECT: q 0 0 256 0 @q_a 0 0 256 0
-// Retrieval info: GEN_FILE: TYPE_NORMAL cache.v TRUE
-// Retrieval info: GEN_FILE: TYPE_NORMAL cache.inc FALSE
-// Retrieval info: GEN_FILE: TYPE_NORMAL cache.cmp FALSE
-// Retrieval info: GEN_FILE: TYPE_NORMAL cache.bsf FALSE
-// Retrieval info: GEN_FILE: TYPE_NORMAL cache_inst.v FALSE
-// Retrieval info: GEN_FILE: TYPE_NORMAL cache_bb.v TRUE
+// Retrieval info: CONNECT: q 0 0 21 0 @q_a 0 0 21 0
+// Retrieval info: GEN_FILE: TYPE_NORMAL bram21x64.v TRUE
+// Retrieval info: GEN_FILE: TYPE_NORMAL bram21x64.inc FALSE
+// Retrieval info: GEN_FILE: TYPE_NORMAL bram21x64.cmp FALSE
+// Retrieval info: GEN_FILE: TYPE_NORMAL bram21x64.bsf FALSE
+// Retrieval info: GEN_FILE: TYPE_NORMAL bram21x64_inst.v FALSE
+// Retrieval info: GEN_FILE: TYPE_NORMAL bram21x64_bb.v TRUE
 // Retrieval info: LIB_FILE: altera_mf

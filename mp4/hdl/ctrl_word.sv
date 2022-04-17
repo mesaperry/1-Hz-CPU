@@ -64,10 +64,10 @@ endpackage
 
 package exut;
 typedef enum logic [1:0] {
-    alu,
-    mul,
-    jmp,
-    mem
+    alu = 2'b00,
+    mul = 2'b01,
+    jmp = 2'b10,
+    mem = 2'b11
 } exe_unit_type_t;
 endpackage
 
