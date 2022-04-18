@@ -114,7 +114,7 @@ typedef enum logic [5:0] {
     sh,
     sw,
 
-    addi,
+    addi, // TODO: get this to be '0 without needing to specify all
     slti,
     sltiu,
     xori,

@@ -19,6 +19,10 @@ module one_hz_cpu (
     input   logic        data_resp
 );
 
+    
+    localparam start_addr = 32'h00000060;
+    localparam nop_inst = 32'h00000013;
+
     //------------//
     //--- decl ---//
     //------------//
@@ -145,6 +149,17 @@ module one_hz_cpu (
     assign inst_read = ~stall;
     assign pc = pc_f0;
 
+    // PERF: timing optimization. if we just did pc_f0 + 4, we'd have
+    // a critical path from inst_resp to next_line_reg
+    // pretty sure adders are cheap so this should be fine
+    rv32i_word bru_plus4, dec_plus4, ras_plus4, btb_plus4, pf1_plus4, nxl_plus4, pf0_plus4;
+    assign bru_plus4 = bru_target + 4;
+    assign dec_plus4 = dec_target + 4;
+    assign ras_plus4 = ras_target + 4;
+    assign btb_plus4 = btb_target + 4;
+    assign pf1_plus4 = pc_f1 + 4;
+    assign nxl_plus4 = nxl_target + 4;
+
     always_comb begin
         unique casez ({
             bru_redir, 
@@ -158,14 +173,14 @@ module one_hz_cpu (
             // FIXME: currently, the cache is sensitive to changing
             // addresses, so we prioritize stalling to wait for 
             // the fetch over changing pc to respond to a prediction
-            7'b1?????? : {pc_f0, taken_f1} = {bru_target, 1'b0};
-            7'b01????? : {pc_f0, taken_f1} = {dec_target, 1'b0};
-            7'b0011??? : {pc_f0, taken_f1} = {ras_target, 1'b1};
-            7'b00101?? : {pc_f0, taken_f1} = {btb_target, 1'b1};
-            7'b001001? : {pc_f0, taken_f1} = {btb_target, 1'b1};
-            7'b0010000 : {pc_f0, taken_f1} = {pc_f1,      1'b0};
-            7'b000???0 : {pc_f0, taken_f1} = {pc_f1,      1'b0};
-            default    : {pc_f0, taken_f1} = {nxl_target, 1'b0};
+            7'b1?????? : {pc_f0, pf0_plus4, taken_f1} = {bru_target, bru_plus4, 1'b0};
+            7'b01????? : {pc_f0, pf0_plus4, taken_f1} = {dec_target, dec_plus4, 1'b0};
+            7'b0011??? : {pc_f0, pf0_plus4, taken_f1} = {ras_target, ras_plus4, 1'b1};
+            7'b00101?? : {pc_f0, pf0_plus4, taken_f1} = {btb_target, btb_plus4, 1'b1};
+            7'b001001? : {pc_f0, pf0_plus4, taken_f1} = {btb_target, btb_plus4, 1'b1};
+            7'b0010000 : {pc_f0, pf0_plus4, taken_f1} = {pc_f1,      pf1_plus4, 1'b0};
+            7'b000???0 : {pc_f0, pf0_plus4, taken_f1} = {pc_f1,      pf1_plus4, 1'b0};
+            default    : {pc_f0, pf0_plus4, taken_f1} = {nxl_target, nxl_plus4, 1'b0};
         endcase
     end
 
@@ -192,7 +207,7 @@ module one_hz_cpu (
     //-- fetch0 -> fetch1 --//
 
     rg #(
-        .rst_val(32'h00000060)
+        .rst_val(start_addr)
     )
     fetch1_pc_reg (
         .clk,
@@ -203,13 +218,13 @@ module one_hz_cpu (
     );
 
     rg #(
-        .rst_val(32'h00000060)
+        .rst_val(start_addr)
     )
     next_line_reg (
         .clk,
         .rst,
         .ld(~stall),
-        .din(pc_f0 + 4),
+        .din(pf0_plus4),
         .dout(nxl_target)
     );
 
@@ -221,7 +236,7 @@ module one_hz_cpu (
     end
 
     // fetch1 instruction becomes a nop if there was a decode redirect
-    assign instr_f1 = dec_redir | ~inst_resp ? 32'h00000013 : inst_rdata;
+    assign instr_f1 = dec_redir | ~inst_resp ? nop_inst : inst_rdata;
 
 
     //-- fetch1 -> decode --//
@@ -260,7 +275,7 @@ module one_hz_cpu (
     );
 
     rg #(
-        .rst_val(32'h00000013)
+        .rst_val(nop_inst)
     )
     decode_instr_reg (
         .clk,
@@ -349,7 +364,7 @@ module one_hz_cpu (
         .dout(ctrl_sigs_iq)
     );
 
-    pc_queue pc0 (
+    pc_queue pq0 (
         .clk,
         .rst(rst | mispred),
         .push(push_pq0),
@@ -375,21 +390,27 @@ module one_hz_cpu (
     };
     // TODO: determine if we need to check for mispred as well
     queue_item_t ctrl_sigs_rd;
+    // when empty, the queue output is all zeros
+    // this is fine except that the opcode becomes an lw
     assign ctrl_sigs_rd = empty_iq0 ? nop_sigs : ctrl_sigs_iq;
 
     logic can_issue;
 
+    // PERF: do as much as possible to use ctrl_sigs_iq instead of
+    // ctrl_sigs_rd and especially ctrl_sigs_is
+    // TODO: make it so the uopcode 000000 is an alu op and get rid of
+    // ctrl_sigs_rd
     scoreboard sb0 (
         .clk,
         .rst,
         .mispred,
         .exu_type('{ctrl_sigs_rd.exu_type}),
-        .has_rd(ctrl_sigs_rd.has_rd),
-        .has_rs1(ctrl_sigs_rd.has_rs1),
-        .has_rs2(ctrl_sigs_rd.has_rs2),
-        .rd('{ctrl_sigs_rd.rd}),
-        .rs1('{ctrl_sigs_rd.rs1}),
-        .rs2('{ctrl_sigs_rd.rs2}),
+        .has_rd(ctrl_sigs_iq.has_rd),
+        .has_rs1(ctrl_sigs_iq.has_rs1),
+        .has_rs2(ctrl_sigs_iq.has_rs2),
+        .rd('{ctrl_sigs_iq.rd}),
+        .rs1('{ctrl_sigs_iq.rs1}),
+        .rs2('{ctrl_sigs_iq.rs2}),
         .ready('{can_issue}),
         .has_rd_wb({alu_has_rd_wb, lsu_has_rd_wb, bru_has_rd_wb}),
         .rd_wb('{alu_rd_wb, lsu_rd_wb, bru_rd_wb}),
@@ -403,7 +424,7 @@ module one_hz_cpu (
 
     assign pop_iq0 = ~empty_iq0 & can_issue;
     // assuming will not be empty if needs pc
-    assign pop_pq0 = pop_iq0 & needs_pc_is;
+    assign pop_pq0 = ~empty_pq0 & can_issue & needs_pc_is;
 
     rv32i_word rs1_out, rs2_out;
 
@@ -413,26 +434,26 @@ module one_hz_cpu (
         .ld({alu_has_rd_wb, lsu_has_rd_wb, bru_has_rd_wb}),
         .dest('{alu_rd_wb, lsu_rd_wb, bru_rd_wb}),
         .in('{alu_res_wb, lsu_res_wb, bru_res_wb}),
-        .src('{ctrl_sigs_rd.rs1, ctrl_sigs_rd.rs2}),
+        .src('{ctrl_sigs_iq.rs1, ctrl_sigs_iq.rs2}),
         .out('{rs1_out, rs2_out})
     );
 
     rv32i_word imm_out;
 
     imm_dec imm_dec0 (
-        .packed_imm(ctrl_sigs_rd.packed_imm),
-        .imm_type(ctrl_sigs_rd.imm_type),
+        .packed_imm(ctrl_sigs_iq.packed_imm),
+        .imm_type(ctrl_sigs_iq.imm_type),
         .imm(imm_out)
     );
 
     
     // alu setup
     logic is_lui;
-    assign is_lui = ctrl_sigs_is.uopcode == uopc::lui;
+    assign is_lui = ctrl_sigs_iq.uopcode == uopc::lui;
 
     alu_ctrl_sigs_t alu_ctrl;
     alu_decode alu_dec0 (
-        .uopcode(ctrl_sigs_is.uopcode),
+        .uopcode(ctrl_sigs_iq.uopcode),
         .ctrl(alu_ctrl)
     );
 
@@ -462,10 +483,10 @@ module one_hz_cpu (
 
     // bru setup
     logic is_jalr_is;
-    assign is_jalr_is = ctrl_sigs_is.uopcode == uopc::jalr;
+    assign is_jalr_is = ctrl_sigs_iq.uopcode == uopc::jalr;
 
     logic is_auipc;
-    assign is_auipc = ctrl_sigs_is.uopcode == uopc::auipc;
+    assign is_auipc = ctrl_sigs_iq.uopcode == uopc::auipc;
 
     bru_decode bru_dec0 (
         .uopcode(ctrl_sigs_is.uopcode),
@@ -517,14 +538,14 @@ module one_hz_cpu (
     assign alufn_ex = alufnt::alu_func_t'(alufn_bits_ex);
     rg alu_opr1_reg (
         .clk,
-        .rst,
+        .rst(1'b0),
         .ld(1'b1),
         .din(alu_opr1_is),
         .dout(alu_opr1_ex)
     );
     rg alu_opr2_reg (
         .clk,
-        .rst,
+        .rst(1'b0),
         .ld(1'b1),
         .din(alu_opr2_is),
         .dout(alu_opr2_ex)
@@ -611,21 +632,21 @@ module one_hz_cpu (
     assign lsu_ctrl_ex = mem_ctrl_sigs_t'(lsu_ctrl_bits_ex);
     rg agu_mem_val_reg (
         .clk,
-        .rst,
+        .rst(1'b0),
         .ld(~mem_stall),
         .din(lsu_valu_is),
         .dout(lsu_valu_ex)
     );
     rg agu_mem_base_reg (
         .clk,
-        .rst,
+        .rst(1'b0),
         .ld(~mem_stall),
         .din(lsu_base_is),
         .dout(lsu_base_ex)
     );
     rg agu_mem_ofst_reg (
         .clk,
-        .rst,
+        .rst(1'b0),
         .ld(~mem_stall),
         .din(lsu_ofst_is),
         .dout(lsu_ofst_ex)
@@ -794,7 +815,7 @@ module one_hz_cpu (
 
     rg bru_pc_reg (
         .clk,
-        .rst,
+        .rst(1'b0),
         .ld(1'b1), // bru is pipelined so never busy
         .din(pc_is),
         .dout(pc_br)
@@ -835,35 +856,35 @@ module one_hz_cpu (
     assign brfn_ex = brfnt::br_func_t'(brfn_bits_ex);
     rg bru_cmp1_reg (
         .clk,
-        .rst,
+        .rst(1'b0),
         .ld(1'b1),
         .din(bru_cmp1_is),
         .dout(bru_cmp1_ex)
     );
     rg bru_cmp2_reg (
         .clk,
-        .rst,
+        .rst(1'b0),
         .ld(1'b1),
         .din(bru_cmp2_is),
         .dout(bru_cmp2_ex)
     );
     rg bru_base_reg (
         .clk,
-        .rst,
+        .rst(1'b0),
         .ld(1'b1),
         .din(bru_base_is),
         .dout(bru_base_ex)
     );
     rg bru_ofst_reg (
         .clk,
-        .rst,
+        .rst(1'b0),
         .ld(1'b1),
         .din(bru_ofst_is),
         .dout(bru_ofst_ex)
     );
     rg bru_add1_reg (
         .clk,
-        .rst,
+        .rst(1'b0),
         .ld(1'b1),
         .din(bru_add1_is),
         .dout(bru_add1_ex)

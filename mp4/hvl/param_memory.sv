@@ -42,6 +42,8 @@ task reset;
         return;
     _mem.delete();
     itf.path_mb.get(s);
+    // suchir put this here. may not exist for competition
+    itf.mcb.resp <= 1'b0;
     $readmemh(s, _mem);
     $display("Reset Memory");
     pageno = -1;

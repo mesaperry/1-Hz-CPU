@@ -1,16 +1,21 @@
 import rv32i_types::*;
 
-module inst_cache (
+module data_cache (
     input                   clk,
     input                   rst,
 
     input   rv32i_word      mem_address,
     output  rv32i_word      mem_rdata,
+    input   rv32i_word      mem_wdata,
     input   logic           mem_read,
+    input   logic           mem_write,
+    input   logic [3:0]     mem_mbe,
     output  logic           mem_resp,
     output  rv32i_word      pmem_address,
     input   logic [255:0]   pmem_rdata,
+    output  logic [255:0]   pmem_wdata,
     output  logic           pmem_read,
+    output  logic           pmem_write,
     input   logic           pmem_resp
 );
 
@@ -88,7 +93,7 @@ module inst_cache (
 
 
     assign mem_resp = hit_1 & ~start;
-    // PERF: on critical path starting at tag_o
+    // PERF: on critical path starting from tag_o
     assign pmem_read = ~hit_1 & ~start;
     assign pmem_address = {tag_1, index_1, {s_offset{1'b0}}};
 
