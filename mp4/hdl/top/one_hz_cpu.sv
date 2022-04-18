@@ -149,17 +149,6 @@ module one_hz_cpu (
     assign inst_read = ~stall;
     assign pc = pc_f0;
 
-    // PERF: timing optimization. if we just did pc_f0 + 4, we'd have
-    // a critical path from inst_resp to next_line_reg
-    // pretty sure adders are cheap so this should be fine
-    rv32i_word bru_plus4, dec_plus4, ras_plus4, btb_plus4, pf1_plus4, nxl_plus4, pf0_plus4;
-    assign bru_plus4 = bru_target + 4;
-    assign dec_plus4 = dec_target + 4;
-    assign ras_plus4 = ras_target + 4;
-    assign btb_plus4 = btb_target + 4;
-    assign pf1_plus4 = pc_f1 + 4;
-    assign nxl_plus4 = nxl_target + 4;
-
     always_comb begin
         unique casez ({
             bru_redir, 
@@ -173,14 +162,14 @@ module one_hz_cpu (
             // FIXME: currently, the cache is sensitive to changing
             // addresses, so we prioritize stalling to wait for 
             // the fetch over changing pc to respond to a prediction
-            7'b1?????? : {pc_f0, pf0_plus4, taken_f1} = {bru_target, bru_plus4, 1'b0};
-            7'b01????? : {pc_f0, pf0_plus4, taken_f1} = {dec_target, dec_plus4, 1'b0};
-            7'b0011??? : {pc_f0, pf0_plus4, taken_f1} = {ras_target, ras_plus4, 1'b1};
-            7'b00101?? : {pc_f0, pf0_plus4, taken_f1} = {btb_target, btb_plus4, 1'b1};
-            7'b001001? : {pc_f0, pf0_plus4, taken_f1} = {btb_target, btb_plus4, 1'b1};
-            7'b0010000 : {pc_f0, pf0_plus4, taken_f1} = {pc_f1,      pf1_plus4, 1'b0};
-            7'b000???0 : {pc_f0, pf0_plus4, taken_f1} = {pc_f1,      pf1_plus4, 1'b0};
-            default    : {pc_f0, pf0_plus4, taken_f1} = {nxl_target, nxl_plus4, 1'b0};
+            7'b1?????? : {pc_f0, taken_f1} = {bru_target, 1'b0};
+            7'b01????? : {pc_f0, taken_f1} = {dec_target, 1'b0};
+            7'b0011??? : {pc_f0, taken_f1} = {ras_target, 1'b1};
+            7'b00101?? : {pc_f0, taken_f1} = {btb_target, 1'b1};
+            7'b001001? : {pc_f0, taken_f1} = {btb_target, 1'b1};
+            7'b0010000 : {pc_f0, taken_f1} = {pc_f1,      1'b0};
+            7'b000???0 : {pc_f0, taken_f1} = {pc_f1,      1'b0};
+            default    : {pc_f0, taken_f1} = {nxl_target, 1'b0};
         endcase
     end
 
@@ -217,17 +206,7 @@ module one_hz_cpu (
         .dout(pc_f1)
     );
 
-    rg #(
-        .rst_val(start_addr)
-    )
-    next_line_reg (
-        .clk,
-        .rst,
-        .ld(~stall),
-        .din(pf0_plus4),
-        .dout(nxl_target)
-    );
-
+    assign nxl_target = pc_f1 + 4;
 
     //-- fetch1 --//
 
