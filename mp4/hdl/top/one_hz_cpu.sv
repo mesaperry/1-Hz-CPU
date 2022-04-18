@@ -330,7 +330,6 @@ module one_hz_cpu (
     assign push_pq0 = push_iq0 & needs_pc_dc;
     
     queue_item_t ctrl_sigs_iq;
-    rv32i_word   pc_pq;
 
     instr_queue iq0 (
         .clk,
@@ -367,26 +366,24 @@ module one_hz_cpu (
         1'b0, 
         1'b0
     };
-    // TODO: determine if we need to check for mispred as well
+
+
+    // PERF: do as much as possible to use ctrl_sigs_iq instead of
+    // ctrl_sigs_rd and especially ctrl_sigs_is
+    // WARNING: queue output (ctrl_sigs_iq, can be don't cares if empty)
     queue_item_t ctrl_sigs_rd;
-    // when empty, the queue output is all zeros
-    // this is fine except that the opcode becomes an lw
     assign ctrl_sigs_rd = empty_iq0 ? nop_sigs : ctrl_sigs_iq;
 
     logic can_issue;
 
-    // PERF: do as much as possible to use ctrl_sigs_iq instead of
-    // ctrl_sigs_rd and especially ctrl_sigs_is
-    // TODO: make it so the uopcode 000000 is an alu op and get rid of
-    // ctrl_sigs_rd
     scoreboard sb0 (
         .clk,
         .rst,
         .mispred,
         .exu_type('{ctrl_sigs_rd.exu_type}),
-        .has_rd(ctrl_sigs_iq.has_rd),
-        .has_rs1(ctrl_sigs_iq.has_rs1),
-        .has_rs2(ctrl_sigs_iq.has_rs2),
+        .has_rd(ctrl_sigs_rd.has_rd),
+        .has_rs1(ctrl_sigs_rd.has_rs1),
+        .has_rs2(ctrl_sigs_rd.has_rs2),
         .rd('{ctrl_sigs_iq.rd}),
         .rs1('{ctrl_sigs_iq.rs1}),
         .rs2('{ctrl_sigs_iq.rs2}),
@@ -399,7 +396,7 @@ module one_hz_cpu (
     assign ctrl_sigs_is = can_issue ? ctrl_sigs_rd : nop_sigs;
 
     logic needs_pc_is;
-    assign needs_pc_is = ctrl_sigs_rd.exu_type == exut::jmp;
+    assign needs_pc_is = ctrl_sigs_iq.exu_type == exut::jmp;
 
     assign pop_iq0 = ~empty_iq0 & can_issue;
     // assuming will not be empty if needs pc

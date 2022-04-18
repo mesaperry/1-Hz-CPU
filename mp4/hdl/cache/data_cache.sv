@@ -94,7 +94,9 @@ module data_cache (
 
     assign mem_resp = hit_1 & ~start;
     // PERF: on critical path starting from tag_o
-    assign pmem_read = ~hit_1 & ~start;
+    always_ff @(posedge clk) begin
+        pmem_read <= ~hit_1 & mem_read;
+    end
     assign pmem_address = {tag_1, index_1, {s_offset{1'b0}}};
 
 
@@ -130,5 +132,5 @@ module data_cache (
             valids[index_1] <= 1'b1;
     end
 
-endmodule : inst_cache
+endmodule : data_cache
 

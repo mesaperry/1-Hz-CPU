@@ -73,7 +73,7 @@ endpackage
 
 package immt;
 typedef enum logic [1:0] {
-    i, // includes s
+    i = 2'b00, // includes s
     b,
     u,
     j
@@ -91,30 +91,7 @@ endpackage
 
 package uopc;
 typedef enum logic [5:0] {
-    lui,
-    auipc,
-
-    jal,
-    jalr,
-
-    beq,
-    bne,
-    blt,
-    bge,
-    bltu,
-    bgeu,
-
-    lb,
-    lh,
-    lw,
-    lbu,
-    lhu,
-
-    sb,
-    sh,
-    sw,
-
-    addi, // TODO: get this to be '0 without needing to specify all
+    addi = 6'b000000, // TODO: get this to be '0 without needing to specify all
     slti,
     sltiu,
     xori,
@@ -161,7 +138,31 @@ typedef enum logic [5:0] {
     gorci, // orc.b
 
     cbsext,
-    pack  // zext.h
+    pack,  // zext.h
+
+    lui,
+    auipc,
+
+    jal,
+    jalr,
+
+    beq,
+    bne,
+    blt,
+    bge,
+    bltu,
+    bgeu,
+
+    lb,
+    lh,
+    lw,
+    lbu,
+    lhu,
+
+    sb,
+    sh,
+    sw
+
 } micro_opcode_t;
 endpackage
 
