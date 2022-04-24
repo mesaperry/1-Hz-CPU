@@ -223,7 +223,7 @@ module ca_ctrl (
 
     // PERF: adding posedge rst here
     // slightly improved timings
-    always_ff @(posedge clk or posedge ~reset_n)
+    always_ff @(posedge clk)
     begin: next_state_assignment
         if (~reset_n)
             state <= no;

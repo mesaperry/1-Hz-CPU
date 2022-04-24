@@ -111,6 +111,7 @@ module one_hz_cpu (
     
     // bru
     rv32i_word pc_br;
+    logic [1:0] bru_bht_resp_ex;
     logic bru_has_rd_ex;
     logic [4:0] bru_rd_ex;
     brfnt::br_func_t brfn_ex;
@@ -123,6 +124,8 @@ module one_hz_cpu (
     logic [9:0] bru_bh_ex;
 
     logic bru_redir;
+    logic bru_is_br;
+    logic [1:0] bru_bht_update;
     rv32i_word bru_res_ex;
     rv32i_word bru_target;
     logic [9:0] bru_bh_snap;
@@ -157,7 +160,7 @@ module one_hz_cpu (
     assign pc = pc_f0;
 
     logic bht_says_take_f1;
-    assign bht_says_take_f1 = &bht_resp_f1;
+    assign bht_says_take_f1 = bht_resp_f1[1];
 
     always_comb begin
         unique casez ({
@@ -203,11 +206,16 @@ module one_hz_cpu (
         .resp(btb_resp_f1)
     );
 
-    dummyBHT bht (
+    BHT bht (
         .clk,
         .rst,
-        .pc(pc_f0),
-        .pred(bht_resp_f1)
+        .read_pc(pc_f0),
+        .read_bh(bh_f0),
+        .pred(bht_resp_f1),
+        .write(bru_is_br),
+        .write_pc(pc_br),
+        .write_bh(bru_bh_ex),
+        .update(bru_bht_update)
     );
     
 
@@ -344,7 +352,7 @@ module one_hz_cpu (
     // that loop check isn't amazing for fmax
     // assuming bht will never say strongly taken for a non jmp instruction
     assign dec_says_take = dc0.bctrl.is_jal
-                         | &bht_resp_dc
+                         | bht_resp_dc[1]
                          | (dc0.bctrl.is_br & |bht_resp_dc & instr_dc[31]);
     assign dec_redir = dec_says_take & ~taken_dc;
     assign dc0.taken = dec_says_take;
@@ -947,6 +955,16 @@ module one_hz_cpu (
         .din(ctrl_sigs_is.taken),
         .dout(bru_taken_ex)
     );
+    rg #(
+        .size(2)
+    )
+    bru_bht_resp_reg (
+        .clk,
+        .rst(1'b0),
+        .ld(1'b1),
+        .din(bht_resp_is),
+        .dout(bru_bht_resp_ex)
+    );
 
     //-- bru --//
 
@@ -969,14 +987,14 @@ module one_hz_cpu (
 
     always_comb begin
         unique case (brfn_ex)
-            brfnt::beq  : bru_says_take = eq;
-            brfnt::bne  : bru_says_take = !eq;
-            brfnt::blt  : bru_says_take = lt;
-            brfnt::bge  : bru_says_take = !lt;
-            brfnt::bltu : bru_says_take = ltu;
-            brfnt::bgeu : bru_says_take = !ltu;
-            brfnt::jalr : bru_says_take = 1'b1;
-            default     : bru_says_take = 1'b0;
+            brfnt::beq  : {bru_says_take, bru_is_br} = {eq,   1'b1};
+            brfnt::bne  : {bru_says_take, bru_is_br} = {!eq,  1'b1};
+            brfnt::blt  : {bru_says_take, bru_is_br} = {lt,   1'b1};
+            brfnt::bge  : {bru_says_take, bru_is_br} = {!lt,  1'b1};
+            brfnt::bltu : {bru_says_take, bru_is_br} = {ltu,  1'b1};
+            brfnt::bgeu : {bru_says_take, bru_is_br} = {!ltu, 1'b1};
+            brfnt::jalr : {bru_says_take, bru_is_br} = {1'b1, 1'b0};
+            default     : {bru_says_take, bru_is_br} = {1'b0, 1'b0};
         endcase
     end
 
@@ -984,6 +1002,19 @@ module one_hz_cpu (
     assign bru_target = bru_says_take ? bru_jmp_target : bru_no_jmp_target;
     assign bru_bh_snap = {bru_bh_ex[8:0], bru_says_take};
 
+    always_comb begin
+        unique case ({bru_bht_resp_ex, bru_says_take})
+            3'b000 : bru_bht_update = 2'b00;
+            3'b001 : bru_bht_update = 2'b01;
+            3'b010 : bru_bht_update = 2'b00;
+            3'b011 : bru_bht_update = 2'b10;
+            3'b100 : bru_bht_update = 2'b01;
+            3'b101 : bru_bht_update = 2'b11;
+            3'b110 : bru_bht_update = 2'b10;
+            3'b111 : bru_bht_update = 2'b11;
+            //default : bru_bht_update = 2'b01;
+        endcase
+    end
 
 
     //-- bru -> writeback --//
@@ -1185,31 +1216,30 @@ module dummyBTB (
 endmodule : dummyBTB
 
 
-module dummyBHT (
+module BHT (
     input clk,
     input rst,
 
-    input   logic [31:0]   pc,
-    output  logic [1:0]    pred
+    input   logic [31:0]   read_pc,
+    input   logic [9:0]    read_bh,
+    output  logic [1:0]    pred,
+
+    input   logic          write,
+    input   logic [31:0]   write_pc,
+    input   logic [9:0]    write_bh,
+    input   logic [1:0]    update
 );
 
-    logic [31:0] pc_out;
-    rg pc_reg (
-        .clk,
-        .rst,
-        .ld(1'b1),
-        .din(pc),
-        .dout(pc_out)
+    bram2x1024_2p bht_store (
+        .clock     (clk),
+        .data      (update),
+        .rdaddress (read_pc[11:2] ^ read_bh),
+        .wraddress (write_pc[11:2] ^ write_bh),
+        .wren      (write),
+        .q         (pred)
     );
-    // wrong prediction test
-    always_comb begin
-        if (pc_out == 32'h140)
-            pred = 2'b01;
-        else
-            pred = 2'b01;
-    end
 
-endmodule : dummyBHT
+endmodule : BHT
 
 
 module rg #(

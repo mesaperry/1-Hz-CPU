@@ -84,6 +84,11 @@ set_global_assignment -name QII_AUTO_PACKED_REGISTERS NORMAL
 set_global_assignment -name ROUTER_CLOCKING_TOPOLOGY_ANALYSIS ON
 set_global_assignment -name PHYSICAL_SYNTHESIS_ASYNCHRONOUS_SIGNAL_PIPELINING ON
 set_global_assignment -name FITTER_EFFORT "STANDARD FIT"
+set_global_assignment -name PLACEMENT_EFFORT_MULTIPLIER 4
+set_global_assignment -name ROUTER_EFFORT_MULTIPLIER 4
+set_global_assignment -name MUX_RESTRUCTURE OFF
+set_global_assignment -name SMART_RECOMPILE ON
+set_global_assignment -name MIF_FILE data/bht.mif
 set_global_assignment -name QIP_FILE qip/fifo50x8.qip
 set_global_assignment -name QIP_FILE qip/fifo30x4.qip
 set_global_assignment -name QIP_FILE qip/bram256x64.qip
@@ -106,12 +111,9 @@ set_global_assignment -name SYSTEMVERILOG_FILE hdl/rrd/mem_decode.sv
 set_global_assignment -name SYSTEMVERILOG_FILE hdl/rrd/exe_decode.sv
 set_global_assignment -name SYSTEMVERILOG_FILE hdl/exe/alu.sv
 set_global_assignment -name SYSTEMVERILOG_FILE hdl/decode/decode.sv
-set_global_assignment -name SYSTEMVERILOG_FILE hdl/branch_target_buffer/branch_target_buffer.sv
-set_global_assignment -name PLACEMENT_EFFORT_MULTIPLIER 4
-set_global_assignment -name ROUTER_EFFORT_MULTIPLIER 4
-set_global_assignment -name MUX_RESTRUCTURE OFF
-set_global_assignment -name SMART_RECOMPILE ON
 set_global_assignment -name QIP_FILE qip/muls33x33_4c.qip
 set_global_assignment -name QIP_FILE qip/divs33x33_15c.qip
 set_global_assignment -name QIP_FILE qip/fifo42x4.qip
+set_global_assignment -name QIP_FILE qip/bram2x1024.qip
+set_global_assignment -name QIP_FILE qip/bram2x1024_2p.qip
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
