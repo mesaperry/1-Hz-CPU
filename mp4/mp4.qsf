@@ -88,6 +88,7 @@ set_global_assignment -name PLACEMENT_EFFORT_MULTIPLIER 4
 set_global_assignment -name ROUTER_EFFORT_MULTIPLIER 4
 set_global_assignment -name MUX_RESTRUCTURE OFF
 set_global_assignment -name SMART_RECOMPILE ON
+set_global_assignment -name SYSTEMVERILOG_FILE hdl/cache/data_cache.sv
 set_global_assignment -name MIF_FILE data/bht.mif
 set_global_assignment -name QIP_FILE qip/fifo50x8.qip
 set_global_assignment -name QIP_FILE qip/fifo30x4.qip
