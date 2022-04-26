@@ -33,7 +33,7 @@ module data_cache (
     localparam s_index = $clog2(n_sets);
     localparam s_tag = x_len - (s_offset + s_index);
 
-    /* IMPLEMENTATION */
+    /* DECLARATION */
 
     // 1
     struct {
