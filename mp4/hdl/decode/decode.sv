@@ -9,12 +9,12 @@ module decode_unit (
 
     decode_mux dec_mux_inst (.*);
 
-    branch_decode_mux bdec_mux_inst (.*);
+    //branch_decode_mux bdec_mux_inst (.*);
 
     //if (!ctrl.legal) // do something
 
     // TODO: if under shadow and come across non shadowable instruction, cancel SFO
-    assign dc.shadowed = dc.bctrl.shadowable & dc.under_shadow;
+    assign dc.shadowed = 1'b0;//dc.bctrl.shadowable & dc.under_shadow;
 
     logic [4:0] packed_imm_mid;
     // critical path #1

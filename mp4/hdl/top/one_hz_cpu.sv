@@ -29,10 +29,12 @@ module one_hz_cpu (
 
     //-- fetch0 --//
     rv32i_word pc_f0;
+    logic [9:0] bh_f0;
 
 
     //-- fetch1 --//
     rv32i_word pc_f1;
+    logic [9:0] bh_f1;
 
     logic taken_f1;
 
@@ -43,14 +45,15 @@ module one_hz_cpu (
     rv32i_word ras_target; // technically available in f0
 
     rv32i_word instr_f1;
+    logic is_br_f1;
 
 
     //-- decode --//
     rv32i_word pc_dc;
+    logic [1:0] bht_resp_dc;
+    logic [9:0] bh_dc;
 
     logic taken_dc;
-
-    logic [1:0] bht_resp_dc;
 
     rv32i_word instr_dc;
 
@@ -62,6 +65,8 @@ module one_hz_cpu (
 
     //-- rrd/issue --//
     rv32i_word pc_is;
+    logic [1:0] bht_resp_is;
+    logic [9:0] bh_is;
 
     queue_item_t ctrl_sigs_is;
 
@@ -106,6 +111,7 @@ module one_hz_cpu (
     
     // bru
     rv32i_word pc_br;
+    logic [1:0] bru_bht_resp_ex;
     logic bru_has_rd_ex;
     logic [4:0] bru_rd_ex;
     brfnt::br_func_t brfn_ex;
@@ -115,10 +121,14 @@ module one_hz_cpu (
     rv32i_word bru_ofst_ex;
     rv32i_word bru_add1_ex;
     logic bru_taken_ex;
+    logic [9:0] bru_bh_ex;
 
     logic bru_redir;
+    logic bru_is_br;
+    logic [1:0] bru_bht_update;
     rv32i_word bru_res_ex;
     rv32i_word bru_target;
+    logic [9:0] bru_bh_snap;
 
 
     //-- writeback --//
@@ -149,6 +159,9 @@ module one_hz_cpu (
     assign inst_read = ~stall;
     assign pc = pc_f0;
 
+    logic bht_says_take_f1;
+    assign bht_says_take_f1 = bht_resp_f1[1];
+
     always_comb begin
         unique casez ({
             bru_redir, 
@@ -156,7 +169,7 @@ module one_hz_cpu (
             btb_resp_f1.valid, 
             btb_resp_f1.is_ret, 
             btb_resp_f1.is_jmp, 
-            &bht_resp_f1,
+            bht_says_take_f1,
             inst_resp
         })
             // FIXME: currently, the cache is sensitive to changing
@@ -173,6 +186,14 @@ module one_hz_cpu (
         endcase
     end
 
+    assign bh_f0 = bru_redir 
+                 ? bru_bh_snap
+                 : dec_redir
+                 ? {bh_f1[9:1], 1'b1}
+                 : is_br_f1 
+                 ? {bh_f1[8:0], bht_says_take_f1}
+                 : bh_f1;
+
     dummyBTB btb (
         .clk,
         .rst,
@@ -185,11 +206,16 @@ module one_hz_cpu (
         .resp(btb_resp_f1)
     );
 
-    dummyBHT bht (
+    BHT bht (
         .clk,
         .rst,
-        .pc(pc_f0),
-        .pred(bht_resp_f1)
+        .read_pc(pc_f0),
+        .read_bh(bh_f0),
+        .pred(bht_resp_f1),
+        .write(bru_is_br),
+        .write_pc(pc_br),
+        .write_bh(bru_bh_ex),
+        .update(bru_bht_update)
     );
     
 
@@ -205,6 +231,16 @@ module one_hz_cpu (
         .din(pc_f0),
         .dout(pc_f1)
     );
+    rg #(
+        .size(10)
+    )
+    fetch1_bh_reg (
+        .clk,
+        .rst,
+        .ld(~stall),
+        .din(bh_f0),
+        .dout(bh_f1)
+    );
 
     assign nxl_target = pc_f1 + 4;
 
@@ -214,12 +250,18 @@ module one_hz_cpu (
         ras_target <= '0; // TODO: output from RAS
     end
 
+    // we need this to update branch history.
+    // we don't have to read from instr_f1, because if there's a dec_redir,
+    // that already takes priority when assigning bh_f0
+    assign is_br_f1 = inst_resp ? inst_rdata[6:2] == 5'b11000 : 1'b0;
+
     // fetch1 instruction becomes a nop if there was a decode redirect
     assign instr_f1 = dec_redir | ~inst_resp ? nop_inst : inst_rdata;
 
 
     //-- fetch1 -> decode --//
 
+    DecodeControl dc0();
     rg #(
         .rst_val('X)
     )
@@ -230,7 +272,16 @@ module one_hz_cpu (
         .din(pc_f1),
         .dout(pc_dc)
     );
-
+    rg #(
+        .size(10)
+    )
+    decode_bh_reg (
+        .clk,
+        .rst,
+        .ld(~stall),
+        .din(bh_f1),
+        .dout(bh_dc)
+    );
     rg #(
         .size(1)
     )
@@ -241,7 +292,6 @@ module one_hz_cpu (
         .din(taken_f1),
         .dout(taken_dc)
     );
-
     rg #(
         .size(2)
     )
@@ -252,7 +302,6 @@ module one_hz_cpu (
         .din(bht_resp_f1),
         .dout(bht_resp_dc)
     );
-
     rg #(
         .rst_val(nop_inst)
     )
@@ -263,11 +312,20 @@ module one_hz_cpu (
         .din(instr_f1),
         .dout(instr_dc)
     );
+    rg #(
+        .size(1)
+    )
+    decode_is_br_reg (
+        .clk,
+        .rst(rst | mispred),
+        .ld(~stall),
+        .din(is_br_f1),
+        .dout(dc0.bctrl.is_br)
+    );
 
     //-- decode --//
 
     // TODO: detect ret and call
-    DecodeControl dc0();
 
     assign dc0.instr = instr_dc;
     // TODO: implement SFO
@@ -282,6 +340,8 @@ module one_hz_cpu (
         .dc(dc0)
     );
 
+    assign dc0.bctrl.is_jal = dc0.opcode[6:2] == 5'b11011;
+
     assign dec_target = dc0.bctrl.is_jal ? dc0.jtarget : dc0.btarget;
     logic dec_says_take;
     // decode says take if:
@@ -292,10 +352,16 @@ module one_hz_cpu (
     // that loop check isn't amazing for fmax
     // assuming bht will never say strongly taken for a non jmp instruction
     assign dec_says_take = dc0.bctrl.is_jal
-                         | &bht_resp_dc
+                         | bht_resp_dc[1]
                          | (dc0.bctrl.is_br & |bht_resp_dc & instr_dc[31]);
     assign dec_redir = dec_says_take & ~taken_dc;
     assign dc0.taken = dec_says_take;
+
+    // do sfo if we're only skipping one instruction
+    logic is_sf;
+    assign is_sf = {dc0.instr[31], dc0.instr[7], dc0.instr[30:25], dc0.instr[11:8]} == 12'h004;
+    logic is_sf_br;
+    assign is_sf_br = dc0.bctrl.is_br & |bht_resp_dc & is_sf;
 
 
     assign ctrl_sigs_dc = '{
@@ -349,8 +415,12 @@ module one_hz_cpu (
         .pop(pop_pq0),
         .empty(empty_pq0),
         .full(full_pq0),
-        .din(pc_dc),
-        .dout(pc_is)
+        .pc_in(pc_dc),
+        .bh_in(bh_dc),
+        .pred_in(bht_resp_dc),
+        .pc_out(pc_is),
+        .bh_out(bh_is),
+        .pred_out(bht_resp_is)
     );
 
 
@@ -797,6 +867,16 @@ module one_hz_cpu (
         .dout(pc_br)
     );
     rg #(
+        .size(10)
+    )
+    bru_bh_reg (
+        .clk,
+        .rst(1'b0),
+        .ld(1'b1), // bru is pipelined so never busy
+        .din(bh_is),
+        .dout(bru_bh_ex)
+    );
+    rg #(
         .size(1)
     )
     exec_bru_has_rd_reg (
@@ -875,6 +955,16 @@ module one_hz_cpu (
         .din(ctrl_sigs_is.taken),
         .dout(bru_taken_ex)
     );
+    rg #(
+        .size(2)
+    )
+    bru_bht_resp_reg (
+        .clk,
+        .rst(1'b0),
+        .ld(1'b1),
+        .din(bht_resp_is),
+        .dout(bru_bht_resp_ex)
+    );
 
     //-- bru --//
 
@@ -897,20 +987,34 @@ module one_hz_cpu (
 
     always_comb begin
         unique case (brfn_ex)
-            brfnt::beq  : bru_says_take = eq;
-            brfnt::bne  : bru_says_take = !eq;
-            brfnt::blt  : bru_says_take = lt;
-            brfnt::bge  : bru_says_take = !lt;
-            brfnt::bltu : bru_says_take = ltu;
-            brfnt::bgeu : bru_says_take = !ltu;
-            brfnt::jalr : bru_says_take = 1'b1;
-            default     : bru_says_take = 1'b0;
+            brfnt::beq  : {bru_says_take, bru_is_br} = {eq,   1'b1};
+            brfnt::bne  : {bru_says_take, bru_is_br} = {!eq,  1'b1};
+            brfnt::blt  : {bru_says_take, bru_is_br} = {lt,   1'b1};
+            brfnt::bge  : {bru_says_take, bru_is_br} = {!lt,  1'b1};
+            brfnt::bltu : {bru_says_take, bru_is_br} = {ltu,  1'b1};
+            brfnt::bgeu : {bru_says_take, bru_is_br} = {!ltu, 1'b1};
+            brfnt::jalr : {bru_says_take, bru_is_br} = {1'b1, 1'b0};
+            default     : {bru_says_take, bru_is_br} = {1'b0, 1'b0};
         endcase
     end
 
     assign bru_redir = bru_says_take ^ bru_taken_ex;
     assign bru_target = bru_says_take ? bru_jmp_target : bru_no_jmp_target;
+    assign bru_bh_snap = {bru_bh_ex[8:0], bru_says_take};
 
+    always_comb begin
+        unique case ({bru_bht_resp_ex, bru_says_take})
+            3'b000 : bru_bht_update = 2'b00;
+            3'b001 : bru_bht_update = 2'b01;
+            3'b010 : bru_bht_update = 2'b00;
+            3'b011 : bru_bht_update = 2'b10;
+            3'b100 : bru_bht_update = 2'b01;
+            3'b101 : bru_bht_update = 2'b11;
+            3'b110 : bru_bht_update = 2'b10;
+            3'b111 : bru_bht_update = 2'b11;
+            //default : bru_bht_update = 2'b01;
+        endcase
+    end
 
 
     //-- bru -> writeback --//
@@ -957,23 +1061,26 @@ module pc_queue (
     input logic pop,
     output logic empty,
     output logic full,
-    input rv32i_word din,
-    output rv32i_word dout
+    input rv32i_word pc_in,
+    input logic [9:0] bh_in,
+    input logic [1:0] pred_in,
+    output rv32i_word pc_out,
+    output logic [9:0] bh_out,
+    output logic [1:0] pred_out
 );
 
-    logic [31:02] pc3102;
-    fifo30x4 fifo (
+    fifo42x4 fifo (
         .clock(clk),
-        .data(din[31:02]),
+        .data({pc_in[31:02], bh_in, pred_in}),
         .rdreq(pop),
         .sclr(rst),
         .wrreq(push),
         .empty(empty),
         .full(full),
-        .q(pc3102)
+        .q({pc_out[31:02], bh_out, pred_out})
     );
 
-    assign dout = {pc3102, 2'b00};
+    assign pc_out[1:0] = 2'b00;
 
 endmodule : pc_queue
 
@@ -1109,31 +1216,30 @@ module dummyBTB (
 endmodule : dummyBTB
 
 
-module dummyBHT (
+module BHT (
     input clk,
     input rst,
 
-    input   logic [31:0]   pc,
-    output  logic [1:0]    pred
+    input   logic [31:0]   read_pc,
+    input   logic [9:0]    read_bh,
+    output  logic [1:0]    pred,
+
+    input   logic          write,
+    input   logic [31:0]   write_pc,
+    input   logic [9:0]    write_bh,
+    input   logic [1:0]    update
 );
 
-    logic [31:0] pc_out;
-    rg pc_reg (
-        .clk,
-        .rst,
-        .ld(1'b1),
-        .din(pc),
-        .dout(pc_out)
+    bram2x1024_2p bht_store (
+        .clock     (clk),
+        .data      (update),
+        .rdaddress (read_pc[11:2] ^ read_bh),
+        .wraddress (write_pc[11:2] ^ write_bh),
+        .wren      (write),
+        .q         (pred)
     );
-    // wrong prediction test
-    always_comb begin
-        if (pc_out == 32'h140)
-            pred = 2'b01;
-        else
-            pred = 2'b01;
-    end
 
-endmodule : dummyBHT
+endmodule : BHT
 
 
 module rg #(

@@ -5,6 +5,9 @@ mp4/output_files/
 mp4/.qsys_edit/
 mp4/greybox_tmp/
 mp4/mp4_nativelink_simulation.rpt
+greybox_tmp/
+iplauncher_debug.log
+*.ipregen.rpt
 
 *.bak
 
