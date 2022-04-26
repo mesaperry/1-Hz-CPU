@@ -33,104 +33,136 @@ module data_cache (
     localparam s_index = $clog2(n_sets);
     localparam s_tag = x_len - (s_offset + s_index);
 
-    // FIXME: very hacky state machine stuff
-    // so i think this gives us a clock cycle delay
-    // after a stall where we don't change stages
-    // this allows the pc_f0 to be corrected
-    logic start;
-    always_ff @(posedge clk) begin
-        if (rst)
-            start <= 1'b1;
-        else if (mem_read)
-            start <= 1'b0;
-        else
-            start <= 1'b1;
-    end
-
-
-    // decl //
-    // stage 0 //
-    rv32i_word address_0;
-    logic [s_tag-1:0] tag_0;
-    logic [s_index-1:0] index_0;
-    logic [s_offset-1:0] offset_0;
-    logic read_0;
-
-    // stage 1 //
-    rv32i_word address_1;
-    logic [s_tag-1:0] tag_1;
-    logic [s_index-1:0] index_1;
-    logic [s_offset-1:0] offset_1;
-    logic read_1;
-
-    logic valid_1;
-    logic hit_1;
-    logic [s_tag-1:0] tag_o;
-
-
-    // impl
-    // stage 0
-    assign address_0 = mem_address;
-    assign {tag_0, index_0, offset_0} = address_0;
-    assign read_0 = mem_read;
-
-
-    // stage 0 -> stage 1
-    always_ff @(posedge clk) begin
-        if (rst) begin
-            address_1 <= '0;
-        end
-        // TODO: maybe use or redir as condition as well
-        else if (hit_1 & mem_read | start) begin
-            address_1 <= address_0;
-        end
-    end
-
-    // stage 1
-    assign {tag_1, index_1, offset_1} = address_1;
-
-    assign hit_1 = valid_1 ? (tag_1 == tag_o) : 1'b0;
-
-
-    assign mem_resp = hit_1 & ~start;
-    // PERF: on critical path starting from tag_o
-    always_ff @(posedge clk) begin
-        pmem_read <= ~hit_1 & mem_read;
-    end
-    assign pmem_address = {tag_1, index_1, {s_offset{1'b0}}};
-
-
-    logic [s_line-1:0] rline;
-    assign mem_rdata = rline[offset_1[s_offset-1:2] * x_len +: x_len];
-
+    /* bram and regs declaration */
 
     // WARNING: these guys do not support simultaneous read and write
     bram256x32 data (
-        .address (pmem_read ? index_1 : index_0),
+        .address (data_addr),
         .clock   (clk),
-        .data    (pmem_rdata),
-        .wren    (pmem_resp),
-        .q       (rline)
+        .data    (data_wren_5 ? data_in_5 : data_in_7),
+        .wren    (data_wren_5 || data_wren_7),
+        .q       (data_out)
     );
 
     bram22x32 tags (
-        .address (pmem_read ? index_1 : index_0),
+        .address (tags_addr),
         .clock   (clk),
-        .data    (tag_1),
-        .wren    (pmem_resp),
-        .q       (tag_o)
+        .data    (tags_in),
+        .wren    (tags_wren),
+        .q       (tags_out)
     );
+   
+    logic [s_line-1:0] data_out;
+    logic [s_tag-1:0] tags_out;
 
     logic [n_sets-1:0] valids;
+    logic [n_sets-1:0] dirtys;
 
-    assign valid_1 = valids[index_1];
-
-    always_ff @(posedge clk) begin
+    always_ff @(posedge clk) begin : VALIDS_ASSIGNMENT
         if (rst) 
             valids <= '0;
-        else if (pmem_resp)
-            valids[index_1] <= 1'b1;
+        else if (invalidate)
+            valids[input1.addr.index] <= 1'b0;
+        else if (valid_set)
+            valids[input1.addr.index] <= 1'b1;
     end
 
+    always_ff @(posedge clk) begin : DIRTYS_ASSIGNMENT
+        if (rst) 
+            dirtys <= '0;
+        else if (invalidate)
+            dirtys[input1.addr.index] <= 1'b0;
+        else if (dirty_set)
+            dirtys[input1.addr.index] <= 1'b1;
+    end
+
+    /* 1. wait until cache is not busy */
+    assign mem_resp = input1_success;
+    assign input_load = input1_success || (!input1.read && !input1.write);
+    
+    /* 2. load input data into pipeline buffer, access brams */
+    struct {
+        struct packed {
+            logic   [s_tag-1:0]     tag;
+            logic   [s_index-1:0]   index;
+            logic   [s_offset-1:0]  offset;
+        } addr;
+        rv32i_word  wdata;
+        logic       read;
+        logic       write;
+        logic [3:0] mbe;
+    } input0, input1;
+    assign input0 = {mem_address, mem_wdata, mem_read, mem_write, mem_mbe};
+
+    always_ff @(posedge clk) begin : INPUT_LOAD
+        input1 <= input_load ? input0 : input1;
+    end
+
+    logic [s_index-1:0] data_addr, tags_addr;
+    assign data_addr = input_load ? input0.addr.index : input1.addr.index;
+    assign tags_addr = input_load ? input0.addr.index : input1.addr.index;
+
+    /* 3. check that tag matches and index is valid (hit) */
+    logic valid, dirty, is_operating, hit, miss;
+
+    assign valid = valids[input1.addr.index];
+    assign dirty = dirtys[input1.addr.index];
+    assign is_operating = input1.write || input1.read;
+    assign hit = is_operating && valid && (input1.addr.tag == tags_out);
+    assign miss = is_operating && !hit;
+
+    /* 4. if missed index is valid and dirty -> invalidate and evict cacheline to mem */
+    logic invalidate;
+
+    assign pmem_write = miss && valid && dirty;
+    assign pmem_wdata = data_out;
+    assign pmem_address = {input1.addr.tag, input1.addr.index, {s_offset{1'b0}}};
+    assign invalidate = pmem_write && pmem_resp; // invalidation takes 1 cycle
+
+    /* 5. if missed index is invalid -> load cacheline from mem into data bram */
+    logic [255:0] data_in_5;
+    logic data_wren_5, cacheline_loaded;
+
+    assign pmem_read = miss && !valid;
+    // pmem_address already set
+    assign data_in_5 = pmem_rdata;
+    assign cacheline_loaded = pmem_read && pmem_resp;
+    assign data_wren_5 = cacheline_loaded;
+
+    /* 6. update tag, and set valid */
+    logic [s_tag-1:0] tags_in;
+    logic tags_wren, set_valid;
+
+    assign tags_in = input1.addr.tag;
+    assign tags_wren = cacheline_loaded;
+    assign set_valid = cacheline_loaded;
+
+    /* 7. mem_write -> write to brams, set dirty */
+    logic do_write, data_in_7, data_wren_7, set_dirty;
+
+    assign do_write = hit && mem_write;
+    assign data_wren_7 = do_write;
+    assign set_dirty = do_write;
+    generate
+        genvar i;
+        for (i = 0; i < 4; i++) begin
+            data_in_7[i*8 +: 8] = input1.mbe[i] ?
+                input1.wdata[i*8 +: 8] : data_out[i*8 +: 8];
+        end
+    endgenerate
+
+    /* 8. check operation success */
+    assign mem_rdata = data_out[addr1.offset[s_offset-1:2] * x_len +: x_len];
+
+    logic [3:0] bytes_correct;
+    logic wdata_success, input1_success;
+    generate
+        genvar i;
+        for (i = 0; i < 4; i++) begin
+            bytes_correct[i] = mem_rdata[i*8 +: 8] == input1.wdata[i*8 +: 8];
+        end
+    endgenerate
+    assign wdata_success = (input1.mbe & bytes_correct) == input1.mbe;
+    assign input1_success = hit && (input1.mem_read || (input1.mem_write && wdata_success)); // means system has input1 read or write applied
 endmodule : data_cache
 
