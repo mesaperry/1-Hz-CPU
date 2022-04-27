@@ -33,7 +33,7 @@ typedef enum logic [2:0] {
     bge  = 3'b011,
     bltu = 3'b100,
     bgeu = 3'b101,
-    jalr = 3'b110,
+    jal  = 3'b110,
     none = 3'b111
 } br_func_t;
 endpackage
@@ -69,6 +69,16 @@ typedef enum logic [1:0] {
     jmp = 2'b10,
     mem = 2'b11
 } exe_unit_type_t;
+endpackage
+
+package fwdsel;
+typedef enum logic [2:0] {
+    alu = 3'b000,
+    mul = 3'b001,
+    bru = 3'b010,
+    lsu = 3'b011,
+    rgf = 3'b111
+} fwd_sel_t;
 endpackage
 
 package immt;

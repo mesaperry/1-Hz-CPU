@@ -47,8 +47,8 @@ module bru_decode (
             uopc::auipc  : brfn = brfnt::none;
 
             // should be taken care of in decode
-            uopc::jal    : brfn = brfnt::none;
-            uopc::jalr   : brfn = brfnt::jalr;
+            uopc::jal    : brfn = brfnt::jal;
+            uopc::jalr   : brfn = brfnt::jal;
 
             uopc::beq    : brfn = brfnt::beq;
             uopc::bne    : brfn = brfnt::bne;

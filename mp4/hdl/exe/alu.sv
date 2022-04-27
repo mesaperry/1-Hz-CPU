@@ -54,14 +54,14 @@ module alu (
     rv32i_word shout;
 
     assign shin = fn == alufnt::sr || fn == alufnt::sra ? shin_r : shin_l;
-    assign shout_r = {is_sub & shin[31], shin} >> shamt;
+    assign shout_r = $signed({is_sub & shin[31], shin}) >>> shamt;
     always_comb begin
         for (int n = 0; n < 32; n++) begin
             shout_l[n] <= shout_r[31-n];
         end
     end
     assign shout = (fn == alufnt::sr || fn == alufnt::sra ? shout_r : '0) | 
-                   (fn == alufnt::sl ? shout_l : '0);
+                   (fn == alufnt::sl                      ? shout_l : '0);
 
     rv32i_word logic_out;
     rv32i_word shift_logic;

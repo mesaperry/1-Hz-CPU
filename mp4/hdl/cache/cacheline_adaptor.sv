@@ -55,6 +55,7 @@ module cacheline_adaptor
 
 
     // PERF: the fitter might put us really fucking far from the resp_i pin,
+    // TODO: PERF: register all inputs
     // at which point it's better for timing to do a counter like the 
     // given adapter
     ca_ctrl ctrl (

@@ -28,103 +28,100 @@ module inst_cache (
     localparam s_index = $clog2(n_sets);
     localparam s_tag = x_len - (s_offset + s_index);
 
-    // FIXME: very hacky state machine stuff
-    // so i think this gives us a clock cycle delay
-    // after a stall where we don't change stages
-    // this allows the pc_f0 to be corrected
-    logic start;
-    always_ff @(posedge clk) begin
-        if (rst)
-            start <= 1'b1;
-        else if (mem_read)
-            start <= 1'b0;
-        else
-            start <= 1'b1;
-    end
+    /* DECLARATION */
 
+    // 1
+    struct {
+        struct packed {
+            logic   [s_tag-1:0]     tag;
+            logic   [s_index-1:0]   index;
+            logic   [s_offset-1:0]  offset;
+        } addr;
+        logic       read;
+    } input0, input1;
+    logic is_operating;
+    logic pipeline_move;
 
-    // decl //
-    // stage 0 //
-    rv32i_word address_0;
-    logic [s_tag-1:0] tag_0;
-    logic [s_index-1:0] index_0;
-    logic [s_offset-1:0] offset_0;
-    logic read_0;
+    // 2
+    logic [s_index-1:0] data_addr, tags_addr;
 
-    // stage 1 //
-    rv32i_word address_1;
-    logic [s_tag-1:0] tag_1;
-    logic [s_index-1:0] index_1;
-    logic [s_offset-1:0] offset_1;
-    logic read_1;
+    // 3
+    logic valid, hit, miss;
 
-    logic valid_1;
-    logic hit_1;
-    logic [s_tag-1:0] tag_o;
+    // 4
+    logic evict;
+    logic [255:0] data_in;
+    logic [s_tag-1:0] tags_in;
+    logic data_wren, tags_wren, valid_set;
 
+    // bram and regs
+    logic [s_line-1:0] data_out;
+    logic [s_tag-1:0] tags_out;
 
-    // impl
-    // stage 0
-    assign address_0 = mem_address;
-    assign {tag_0, index_0, offset_0} = address_0;
-    assign read_0 = mem_read;
-
-
-    // stage 0 -> stage 1
-    always_ff @(posedge clk) begin
-        if (rst) begin
-            address_1 <= '0;
-        end
-        // TODO: maybe use or redir as condition as well
-        else if (hit_1 & mem_read | start) begin
-            address_1 <= address_0;
-        end
-    end
-
-    // stage 1
-    assign {tag_1, index_1, offset_1} = address_1;
-
-    assign hit_1 = valid_1 ? (tag_1 == tag_o) : 1'b0;
-
-
-    assign mem_resp = hit_1 & ~start;
-    // PERF: on critical path starting at tag_o
-    always_ff @(posedge clk) begin
-        pmem_read <= ~hit_1 & mem_read;
-    end
-    assign pmem_address = {tag_1, index_1, {s_offset{1'b0}}};
-
-
-    logic [s_line-1:0] rline;
-    assign mem_rdata = rline[offset_1[s_offset-1:2] * x_len +: x_len];
-
+    logic [n_sets-1:0] valids;
+    logic [n_sets-1:0] dirtys;
 
     // WARNING: these guys do not support simultaneous read and write
     bram256x32 data (
-        .address (pmem_read ? index_1 : index_0),
+        .address (data_addr),
         .clock   (clk),
-        .data    (pmem_rdata),
-        .wren    (pmem_resp),
-        .q       (rline)
+        .data    (data_in),
+        .wren    (data_wren),
+        .q       (data_out)
     );
 
     bram22x32 tags (
-        .address (pmem_read ? index_1 : index_0),
+        .address (tags_addr),
         .clock   (clk),
-        .data    (tag_1),
-        .wren    (pmem_resp),
-        .q       (tag_o)
+        .data    (tags_in),
+        .wren    (tags_wren),
+        .q       (tags_out)
     );
 
-    logic [n_sets-1:0] valids;
 
-    assign valid_1 = valids[index_1];
+    /* IMPLEMENTATION */
 
-    always_ff @(posedge clk) begin
+    /* 1. wait until cache is not busy to move pipeline */
+    assign is_operating = input1.read;
+    assign mem_resp = hit;
+    assign pipeline_move = hit || !is_operating;
+    
+    /* 2. load input data into pipeline buffer, access brams */
+    assign input0 = '{mem_address, mem_read};
+
+    always_ff @(posedge clk) begin : INPUT_LOAD
+        if (rst) input1 <= '{'0, '0};
+        else input1 <= pipeline_move ? input0 : input1;
+    end
+
+    assign data_addr = pipeline_move ? input0.addr.index : input1.addr.index;
+    assign tags_addr = pipeline_move ? input0.addr.index : input1.addr.index;
+
+    /* 3. check if tag matches and index is valid (hit) */
+    assign valid = valids[input1.addr.index];
+    assign hit = is_operating && valid && (input1.addr.tag == tags_out);
+    assign miss = is_operating && !hit;
+
+    /* 4. if current cacheline is wrong -> evict and load in correct one */
+    assign evict = miss && valid;
+    assign pmem_read = evict || (!valid && is_operating);
+    assign pmem_address = {input1.addr.tag, input1.addr.index, {s_offset{1'b0}}};
+    assign data_in = pmem_rdata;
+    assign data_wren = pmem_resp;
+    assign tags_in = input1.addr.tag;
+    assign tags_wren = pmem_resp;
+    assign valid_set = pmem_resp;
+    
+    /* 5. output correct word */
+    assign mem_rdata = data_out[input1.addr.offset[s_offset-1:2] * x_len +: x_len];
+
+    always_ff @(posedge clk) begin : VALIDS_ASSIGNMENT
         if (rst) 
             valids <= '0;
-        else if (pmem_resp)
-            valids[index_1] <= 1'b1;
+        else if (evict)
+            valids[input1.addr.index] <= 1'b0;
+        else if (valid_set)
+            valids[input1.addr.index] <= 1'b1;
     end
 
 endmodule : inst_cache

@@ -65,14 +65,14 @@ module arbiter (
             srvi : begin
                        inst_cline_resp = pmem_resp;
                        pmem_address = inst_cline_addr;
-                       pmem_read = inst_cline_read;
+                       pmem_read = 1'b1;
                        pmem_write = 1'b0;
                    end
             srvd : data_cline_resp = pmem_resp;
             siqd : begin
                        inst_cline_resp = pmem_resp;
                        pmem_address = inst_cline_addr;
-                       pmem_read = inst_cline_read;
+                       pmem_read = 1'b1;
                        pmem_write = 1'b0;
                    end
             sdqi : data_cline_resp = pmem_resp;

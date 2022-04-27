@@ -48,6 +48,23 @@ module mbe_gen (
 
 endmodule : mbe_gen
 
+module mem_wdata_align (
+    input rv32i_word addr,
+    input rv32i_word data_ualgn,
+    output rv32i_word data_algn
+);
+
+    always_comb begin
+        unique case (addr[1:0])
+            2'b01   : data_algn = {data_ualgn[23:0], 8'b0};
+            2'b10   : data_algn = {data_ualgn[15:0], 16'b0};
+            2'b11   : data_algn = {data_ualgn[7:0], 24'b0};
+            default : data_algn = data_ualgn;
+        endcase
+    end
+
+endmodule : mem_wdata_align
+
 
 module mem_imm_dec (
     input   logic [19:0]       packed_imm,

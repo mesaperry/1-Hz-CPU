@@ -30,6 +30,9 @@ module one_hz_cpu (
     //-- fetch0 --//
     rv32i_word pc_f0;
     logic [9:0] bh_f0;
+    logic hold_redir;
+    rv32i_word hold_target;
+    logic [9:0] hold_bh_snap;
 
 
     //-- fetch1 --//
@@ -45,6 +48,7 @@ module one_hz_cpu (
     rv32i_word ras_target; // technically available in f0
 
     rv32i_word instr_f1;
+    logic instr_valid_f1;
     logic is_br_f1;
 
 
@@ -56,11 +60,14 @@ module one_hz_cpu (
     logic taken_dc;
 
     rv32i_word instr_dc;
+    logic instr_valid_dc;
 
     logic dec_redir;
     rv32i_word dec_target;
 
     queue_item_t ctrl_sigs_dc;
+
+    DecodeControl dc0();
 
 
     //-- rrd/issue --//
@@ -145,8 +152,6 @@ module one_hz_cpu (
     rv32i_word bru_res_wb;
 
 
-
-
     //------------//
     //--- impl ---//
     //------------//
@@ -164,35 +169,68 @@ module one_hz_cpu (
 
     always_comb begin
         unique casez ({
+            inst_resp,
+            hold_redir,
             bru_redir, 
             dec_redir, 
             btb_resp_f1.valid, 
             btb_resp_f1.is_ret, 
             btb_resp_f1.is_jmp, 
-            bht_says_take_f1,
-            inst_resp
+            bht_says_take_f1
         })
             // FIXME: currently, the cache is sensitive to changing
             // addresses, so we prioritize stalling to wait for 
             // the fetch over changing pc to respond to a prediction
-            7'b1?????? : {pc_f0, taken_f1} = {bru_target, 1'b0};
-            7'b01????? : {pc_f0, taken_f1} = {dec_target, 1'b0};
-            7'b0011??? : {pc_f0, taken_f1} = {ras_target, 1'b1};
-            7'b00101?? : {pc_f0, taken_f1} = {btb_target, 1'b1};
-            7'b001001? : {pc_f0, taken_f1} = {btb_target, 1'b1};
-            7'b0010000 : {pc_f0, taken_f1} = {pc_f1,      1'b0};
-            7'b000???0 : {pc_f0, taken_f1} = {pc_f1,      1'b0};
-            default    : {pc_f0, taken_f1} = {nxl_target, 1'b0};
+            8'b0??????? : {pc_f0, taken_f1} = {pc_f1,      1'b0};
+            8'b11?????? : {pc_f0, taken_f1} = {hold_target,1'b0};
+            8'b101????? : {pc_f0, taken_f1} = {bru_target, 1'b0};
+            8'b1001???? : {pc_f0, taken_f1} = {dec_target, 1'b0};
+            8'b100011?? : {pc_f0, taken_f1} = {ras_target, 1'b1};
+            8'b1000101? : {pc_f0, taken_f1} = {btb_target, 1'b1};
+            8'b10001001 : {pc_f0, taken_f1} = {btb_target, 1'b1};
+            default     : {pc_f0, taken_f1} = {nxl_target, 1'b0};
         endcase
     end
 
-    assign bh_f0 = bru_redir 
-                 ? bru_bh_snap
-                 : dec_redir
-                 ? {bh_f1[9:1], 1'b1}
-                 : is_br_f1 
-                 ? {bh_f1[8:0], bht_says_take_f1}
-                 : bh_f1;
+
+    always_ff @(posedge clk) begin
+        if (rst) begin
+            hold_redir <= 1'b0;
+            hold_target <= start_addr;
+            hold_bh_snap <= 10'b0;
+        end
+        else if (mispred & ~inst_resp) begin
+            hold_redir <= 1'b1;
+            hold_target <= bru_target;
+            hold_bh_snap <= bru_bh_snap;
+        end
+        else if (hold_redir & inst_resp) begin
+            hold_redir <= 1'b0;
+            hold_target <= bru_target;
+            hold_bh_snap <= bru_bh_snap;
+        end
+    end
+
+
+
+    always_comb begin
+        unique casez ({
+            inst_resp,
+            hold_redir,
+            bru_redir,
+            dec_redir & dc0.bctrl.is_br,
+            is_br_f1
+        })
+            // FIXME: currently, the cache is sensitive to changing
+            // addresses, so we prioritize stalling to wait for 
+            // the fetch over changing pc to respond to a prediction
+            5'b11??? : bh_f0 = hold_bh_snap;
+            5'b101?? : bh_f0 = bru_bh_snap;
+            5'b1001? : bh_f0 = {bh_f1, 1'b1};
+            5'b10001 : bh_f0 = {bh_f1[8:0], bht_says_take_f1};
+            default  : bh_f0 = bh_f1;
+        endcase
+    end
 
     dummyBTB btb (
         .clk,
@@ -217,6 +255,7 @@ module one_hz_cpu (
         .write_bh(bru_bh_ex),
         .update(bru_bht_update)
     );
+    //assign bht_resp_f1 = 2'b01;
     
 
     //-- fetch0 -> fetch1 --//
@@ -256,12 +295,13 @@ module one_hz_cpu (
     assign is_br_f1 = inst_resp ? inst_rdata[6:2] == 5'b11000 : 1'b0;
 
     // fetch1 instruction becomes a nop if there was a decode redirect
-    assign instr_f1 = dec_redir | ~inst_resp ? nop_inst : inst_rdata;
+    assign instr_f1 = inst_rdata;
+
+    assign instr_valid_f1 = ~(dec_redir | ~inst_resp | hold_redir);
 
 
     //-- fetch1 -> decode --//
 
-    DecodeControl dc0();
     rg #(
         .rst_val('X)
     )
@@ -315,6 +355,16 @@ module one_hz_cpu (
     rg #(
         .size(1)
     )
+    decode_instr_valid_reg (
+        .clk,
+        .rst(rst | mispred),
+        .ld(~stall),
+        .din(instr_valid_f1),
+        .dout(instr_valid_dc)
+    );
+    rg #(
+        .size(1)
+    )
     decode_is_br_reg (
         .clk,
         .rst(rst | mispred),
@@ -351,15 +401,18 @@ module one_hz_cpu (
     // and the immediate sign is negative (loops)
     // that loop check isn't amazing for fmax
     // assuming bht will never say strongly taken for a non jmp instruction
-    assign dec_says_take = dc0.bctrl.is_jal
-                         | bht_resp_dc[1]
-                         | (dc0.bctrl.is_br & |bht_resp_dc & instr_dc[31]);
+    assign dec_says_take = ((dc0.bctrl.is_jal)
+                         | (dc0.bctrl.is_br & bht_resp_dc[1])
+                         | (dc0.bctrl.is_br & |bht_resp_dc & instr_dc[31]))
+                         & instr_valid_dc;
     assign dec_redir = dec_says_take & ~taken_dc;
-    assign dc0.taken = dec_says_take;
+    // anded with inst_resp, because if we are committed to 
+    // waiting for a resp, then we can't do a dec_redir
+    assign dc0.taken = (dec_says_take & inst_resp) | taken_dc;
 
     // do sfo if we're only skipping one instruction
     logic is_sf;
-    assign is_sf = {dc0.instr[31], dc0.instr[7], dc0.instr[30:25], dc0.instr[11:8]} == 12'h004;
+    assign is_sf = ({dc0.instr[31], dc0.instr[7], dc0.instr[30:25], dc0.instr[11:8]} == 12'h004) & instr_valid_dc;
     logic is_sf_br;
     assign is_sf_br = dc0.bctrl.is_br & |bht_resp_dc & is_sf;
 
@@ -379,9 +432,6 @@ module one_hz_cpu (
         dc0.shadowed
     };
 
-    logic is_nop_dc;
-    assign is_nop_dc = dc0.ctrl.exu_type == exut::alu && dc0.rd == 5'b0;
-
     logic needs_pc_dc;
     assign needs_pc_dc = dc0.ctrl.exu_type == exut::jmp;
 
@@ -392,7 +442,7 @@ module one_hz_cpu (
 
     assign stall = full_iq0 | full_pq0;
 
-    assign push_iq0 = ~stall & ~is_nop_dc;
+    assign push_iq0 = ~stall & instr_valid_dc;
     assign push_pq0 = push_iq0 & needs_pc_dc;
     
     queue_item_t ctrl_sigs_iq;
@@ -423,6 +473,28 @@ module one_hz_cpu (
         .pred_out(bht_resp_is)
     );
 
+    // synthesis translate_off
+    logic [79:0] debug_sigs_dc;
+    logic [79:0] debug_sigs_is;
+    assign debug_sigs_dc = {
+        dc0.instr,
+        ~dc0.ctrl.legal,
+        dc0.rs1,
+        dc0.rs2,
+        dc0.ctrl.has_rd ? dc0.rd : 5'b0,
+        pc_dc
+    };
+    logic [7:0] level;
+    rvfi_dc_is rq0 (
+        .clk,
+        .rst(rst | mispred),
+        .push(push_iq0),
+        .pop(pop_iq0),
+        .level,
+        .rvfi_dc(debug_sigs_dc),
+        .rvfi_is(debug_sigs_is)
+    );
+    // synthesis translate_on
 
     //-- rrd/issue --//
     queue_item_t nop_sigs;
@@ -443,6 +515,12 @@ module one_hz_cpu (
     // WARNING: queue output (ctrl_sigs_iq, can be don't cares if empty)
     queue_item_t ctrl_sigs_rd;
     assign ctrl_sigs_rd = empty_iq0 ? nop_sigs : ctrl_sigs_iq;
+    fwdsel::fwd_sel_t rs1_sel, rs2_sel;
+    logic [4:0] lsu_rd_fwd, bru_rd_fwd, mul_rd_fwd, alu_rd_fwd;
+    assign lsu_rd_fwd = 5'b0;
+    assign bru_rd_fwd = 5'b0;
+    assign mul_rd_fwd = 5'b0;
+    assign alu_rd_fwd = 5'b0;
 
     logic can_issue;
 
@@ -458,8 +536,11 @@ module one_hz_cpu (
         .rs1('{ctrl_sigs_iq.rs1}),
         .rs2('{ctrl_sigs_iq.rs2}),
         .ready('{can_issue}),
+        .rs1_sel('{rs1_sel}),
+        .rs2_sel('{rs2_sel}),
         .has_rd_wb({alu_has_rd_wb, lsu_has_rd_wb, bru_has_rd_wb}),
         .rd_wb('{alu_rd_wb, lsu_rd_wb, bru_rd_wb}),
+        .exu_fwd('{lsu_rd_fwd, bru_rd_fwd, mul_rd_fwd, alu_rd_fwd}),
         .exu_status({mem_stall, 1'b0, 1'b1, 1'b0}) // TODO: fix when implementing mul
     );
 
@@ -509,6 +590,7 @@ module one_hz_cpu (
         unique case (alu_ctrl.opr2)
             opr2t::rs2  : alu_opr2_is = rs2_out;
             opr2t::imm  : alu_opr2_is = imm_out;
+            default     : alu_opr2_is = imm_out;
         endcase
     end
 
@@ -648,7 +730,7 @@ module one_hz_cpu (
     )
     agu_has_rd_reg (
         .clk,
-        .rst(rst | mispred),
+        .rst(rst | (mispred & ~mem_stall)),
         .ld(~mem_stall),
         .din(lsu_has_rd_is),
         .dout(lsu_has_rd_ex)
@@ -658,7 +740,7 @@ module one_hz_cpu (
     )
     agu_rd_reg (
         .clk,
-        .rst(rst | mispred),
+        .rst(rst | (mispred & ~mem_stall)),
         .ld(~mem_stall),
         .din(ctrl_sigs_is.rd),
         .dout(lsu_rd_ex)
@@ -670,7 +752,7 @@ module one_hz_cpu (
     )
     agu_mem_ctrl_reg (
         .clk,
-        .rst(rst | mispred),
+        .rst(rst | (mispred & ~mem_stall)),
         .ld(~mem_stall),
         .din(lsu_ctrl_is),
         .dout(lsu_ctrl_bits_ex)
@@ -714,7 +796,6 @@ module one_hz_cpu (
     assign agu_has_rd_ex = lsu_has_rd_ex;
     assign agu_rd_ex = lsu_rd_ex;
     assign agu_ctrl_ex = lsu_ctrl_ex;
-    assign agu_valu_ex = lsu_valu_ex;
     assign agu_base_ex = lsu_base_ex;
     assign agu_ofst_ex = lsu_ofst_ex;
 
@@ -724,6 +805,12 @@ module one_hz_cpu (
         .ctrl(agu_ctrl_ex),
         .addr(agu_addr_ex),
         .mbe(agu_mbe_ex)
+    );
+
+    mem_wdata_align mem_wdata_align0 (
+        .addr(agu_addr_ex),
+        .data_ualgn(lsu_valu_ex),
+        .data_algn(agu_valu_ex)
     );
 
     // agu -> mem
@@ -739,7 +826,7 @@ module one_hz_cpu (
     assign mem_stall = mem_busy & ~data_resp;
 
     assign data_mbe = mem_stall ? mem_mbe_ex : agu_mbe_ex;
-    assign data_address = mem_stall ? mem_addr_ex : agu_addr_ex;
+    assign data_address = {mem_stall ? mem_addr_ex[31:2] : agu_addr_ex[31:2], 2'b0};
     assign data_wdata = mem_stall ? mem_valu_ex : agu_valu_ex;
     assign data_read = mem_stall ? mem_ctrl_ex.memfn[1] : agu_ctrl_ex.memfn[1];
     assign data_write = mem_stall ? mem_ctrl_ex.memfn[0] : agu_ctrl_ex.memfn[0];
@@ -807,11 +894,19 @@ module one_hz_cpu (
 
     // TODO: modulize
     always_comb begin
-        unique case ({mem_ctrl_ex.memsz, mem_ctrl_ex.ldext})
-            {memszt::b, ldextt::s} : mem_res_ex = {{24{data_rdata[07]}}, data_rdata[07:0]};
-            {memszt::b, ldextt::z} : mem_res_ex = { 24'b0,               data_rdata[07:0]};
-            {memszt::h, ldextt::s} : mem_res_ex = {{16{data_rdata[15]}}, data_rdata[15:0]};
-            {memszt::h, ldextt::z} : mem_res_ex = { 16'b0,               data_rdata[15:0]};
+        unique casez ({mem_ctrl_ex.memsz, mem_ctrl_ex.ldext, mem_addr_ex[1:0]})
+            {memszt::b, ldextt::s, 2'b00} : mem_res_ex = {{24{data_rdata[07]}}, data_rdata[07:0]};
+            {memszt::b, ldextt::s, 2'b01} : mem_res_ex = {{24{data_rdata[15]}}, data_rdata[15:8]};
+            {memszt::b, ldextt::s, 2'b10} : mem_res_ex = {{24{data_rdata[23]}}, data_rdata[23:16]};
+            {memszt::b, ldextt::s, 2'b11} : mem_res_ex = {{24{data_rdata[31]}}, data_rdata[31:24]};
+            {memszt::b, ldextt::z, 2'b00} : mem_res_ex = { 24'b0,               data_rdata[07:0]};
+            {memszt::b, ldextt::z, 2'b01} : mem_res_ex = { 24'b0,               data_rdata[15:8]};
+            {memszt::b, ldextt::z, 2'b10} : mem_res_ex = { 24'b0,               data_rdata[23:16]};
+            {memszt::b, ldextt::z, 2'b11} : mem_res_ex = { 24'b0,               data_rdata[31:24]};
+            {memszt::h, ldextt::s, 2'b0?} : mem_res_ex = {{16{data_rdata[15]}}, data_rdata[15:0]};
+            {memszt::h, ldextt::s, 2'b1?} : mem_res_ex = {{16{data_rdata[31]}}, data_rdata[31:16]};
+            {memszt::h, ldextt::z, 2'b0?} : mem_res_ex = { 16'b0,               data_rdata[15:0]};
+            {memszt::h, ldextt::z, 2'b1?} : mem_res_ex = { 16'b0,               data_rdata[31:16]};
             default                : mem_res_ex =                        data_rdata;
         endcase
     end
@@ -827,8 +922,8 @@ module one_hz_cpu (
     )
     wb_lsu_has_rd_reg (
         .clk,
-        .rst,
-        .ld(~mem_stall),
+        .rst(rst | ~data_resp),
+        .ld(1'b1),
         .din(mem_has_rd_ex),
         .dout(lsu_has_rd_wb)
     );
@@ -950,7 +1045,7 @@ module one_hz_cpu (
     )
     bru_taken_reg (
         .clk,
-        .rst,
+        .rst(rst | mispred),
         .ld(1'b1),
         .din(ctrl_sigs_is.taken),
         .dout(bru_taken_ex)
@@ -993,14 +1088,18 @@ module one_hz_cpu (
             brfnt::bge  : {bru_says_take, bru_is_br} = {!lt,  1'b1};
             brfnt::bltu : {bru_says_take, bru_is_br} = {ltu,  1'b1};
             brfnt::bgeu : {bru_says_take, bru_is_br} = {!ltu, 1'b1};
-            brfnt::jalr : {bru_says_take, bru_is_br} = {1'b1, 1'b0};
+            brfnt::jal : {bru_says_take, bru_is_br} = {1'b1, 1'b0};
             default     : {bru_says_take, bru_is_br} = {1'b0, 1'b0};
         endcase
     end
 
     assign bru_redir = bru_says_take ^ bru_taken_ex;
-    assign bru_target = bru_says_take ? bru_jmp_target : bru_no_jmp_target;
-    assign bru_bh_snap = {bru_bh_ex[8:0], bru_says_take};
+    assign bru_target = bru_says_take 
+                      ? bru_jmp_target 
+                      : bru_no_jmp_target;
+    assign bru_bh_snap = bru_is_br 
+                       ? {bru_bh_ex[8:0], bru_says_take}
+                       : bru_bh_ex;
 
     always_comb begin
         unique case ({bru_bht_resp_ex, bru_says_take})
@@ -1012,7 +1111,7 @@ module one_hz_cpu (
             3'b101 : bru_bht_update = 2'b11;
             3'b110 : bru_bht_update = 2'b10;
             3'b111 : bru_bht_update = 2'b11;
-            //default : bru_bht_update = 2'b01;
+            default : bru_bht_update = 2'b01;
         endcase
     end
 
@@ -1108,6 +1207,30 @@ module instr_queue (
 
 endmodule : instr_queue
 
+module rvfi_dc_is (
+    input logic clk,
+    input logic rst,
+    input logic push,
+    input logic pop,
+    output logic [7:0] level,
+    input logic [79:0] rvfi_dc,
+    output logic [79:0] rvfi_is
+);
+
+    logic [19:0] unused;
+
+    fifo100x8_n fifo (
+        .clock(clk),
+        .data({20'b0, rvfi_dc}),
+        .rdreq(pop),
+        .sclr(rst),
+        .wrreq(push),
+        .q({unused, rvfi_is}),
+        .usedw(level[2:0])
+    );
+    assign level[7:3] = '0;
+
+endmodule : rvfi_dc_is
 
 module scoreboard #(
     parameter s_index = 5,
@@ -1131,9 +1254,12 @@ module scoreboard #(
     input   logic [s_index-1:0]    rs1 [nrp-1:0],
     input   logic [s_index-1:0]    rs2 [nrp-1:0],
     output  logic                  ready [nrp-1:0],
+    output  fwdsel::fwd_sel_t      rs1_sel [nrp-1:0],                
+    output  fwdsel::fwd_sel_t      rs2_sel [nrp-1:0],                
 
     input   logic [nwp-1:0]        has_rd_wb,
     input   logic [s_index-1:0]    rd_wb [nwp-1:0],
+    input   logic [s_index-1:0]    exu_fwd [neu-1:0],
     input   logic [neu-1:0]        exu_status
 
 );
@@ -1142,17 +1268,23 @@ module scoreboard #(
     localparam s_write_sel = $clog2(nwp);
     localparam swl = s_write_sel;
 
-    logic reg_states [num_regs];
+    logic [1:0] reg_states [num_regs];
+    logic [eu_idx_sz-1:0] reg_locs [num_regs];
 
     genvar rp;
     generate
         for (rp = 0; rp < nrp; rp++) begin : reads
             assign ready[rp] = ~(
-                (reg_states[rd[rp]] & has_rd)   |
-                (reg_states[rs1[rp]] & has_rs1) | 
-                (reg_states[rs2[rp]] & has_rs2) | 
+                // guess it doesn't hurt to "forward" rd?
+                ((reg_states[rd[rp]] & ~(exu_fwd[reg_locs[rd[rp]]] == rd[rp])) & has_rd)   |
+                ((reg_states[rs1[rp]] & ~(exu_fwd[reg_locs[rs1[rp]]] == rs1[rp])) & has_rs1) | 
+                ((reg_states[rs2[rp]] & ~(exu_fwd[reg_locs[rs2[rp]]] == rs2[rp])) & has_rs2) | 
                 (exu_status[exu_type[rp]])      
             );
+        end
+        for (rp = 0; rp < nrp; rp++) begin : sel_gen
+            assign rs1_sel[rp] = reg_states[rs1[rp]] ? fwdsel::fwd_sel_t'({1'b0, reg_locs[rs1[rp]]}) : fwdsel::rgf;
+            assign rs2_sel[rp] = reg_states[rs2[rp]] ? fwdsel::fwd_sel_t'({1'b0, reg_locs[rs2[rp]]}) : fwdsel::rgf;
         end
     endgenerate
 
@@ -1165,6 +1297,7 @@ module scoreboard #(
             for (int i = 0; i < nrp; i++) begin
                 if (ready[i] & ~mispred & rd[i] != '0) begin
                     reg_states[rd[i]] <= has_rd[i];
+                    reg_locs[rd[i]] <= exu_type[i];
                 end
             end
             for (int i = 0; i < nwp; i++) begin

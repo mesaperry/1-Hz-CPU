@@ -31,7 +31,7 @@ end
 int timeout = 100000000;
 
 always @(posedge tb_itf.clk) begin
-    if (rvfi.halt)
+    if (|rvfi.halt)
         $finish;
     if (timeout == 0) begin
         $display("TOP: Timed out");
@@ -75,22 +75,22 @@ generate
             .rvfi_insn(rvfi.inst),
             .rvfi_trap(rvfi.trap),
             .rvfi_halt(rvfi.halt),
-            .rvfi_intr(1'b0),
-            .rvfi_mode(2'b00),
+            .rvfi_intr(4'h0),
+            .rvfi_mode(8'h00),
             .rvfi_rs1_addr(rvfi.rs1_addr),
             .rvfi_rs2_addr(rvfi.rs2_addr),
-            .rvfi_rs1_rdata(rvfi.rs1_addr ? rvfi.rs1_rdata : 0),
-            .rvfi_rs2_rdata(rvfi.rs2_addr ? rvfi.rs2_rdata : 0),
-            .rvfi_rd_addr(rvfi.load_regfile ? rvfi.rd_addr : 0),
-            .rvfi_rd_wdata(rvfi.load_regfile ? rvfi.rd_wdata : 0),
+            .rvfi_rs1_rdata(rvfi.rs1_rdata),
+            .rvfi_rs2_rdata(rvfi.rs2_rdata),
+            .rvfi_rd_addr(rvfi.rd_addr),
+            .rvfi_rd_wdata(rvfi.rd_wdata),
             .rvfi_pc_rdata(rvfi.pc_rdata),
             .rvfi_pc_wdata(rvfi.pc_wdata),
-            .rvfi_mem_addr({rvfi.mem_addr[31:2], 2'b0}),
+            .rvfi_mem_addr(rvfi.mem_addr),
             .rvfi_mem_rmask(rvfi.mem_rmask),
             .rvfi_mem_wmask(rvfi.mem_wmask),
             .rvfi_mem_rdata(rvfi.mem_rdata),
             .rvfi_mem_wdata(rvfi.mem_wdata),
-            .rvfi_mem_extamo(1'b0),
+            .rvfi_mem_extamo(4'h0),
             .errcode(rvfi.errcode)
         );
     end

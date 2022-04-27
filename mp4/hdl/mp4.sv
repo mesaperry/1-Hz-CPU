@@ -72,21 +72,6 @@ inst_cache icache (
     .pmem_resp    (inst_cline_resp    )
 );
 
-inst_cache dcache (
-    .clk          (clk                ),
-    .rst          (rst                ),
-    .mem_address  (data_addr          ),
-    .mem_rdata    (data_rdata         ),
-    .mem_read     (data_read          ),
-    .mem_resp     (data_resp          ),
-    .pmem_address (data_cline_address ),
-    .pmem_rdata   (data_cline_rdata   ),
-    .pmem_read    (data_cline_read    ),
-    .pmem_resp    (data_cline_resp    )
-);
-assign data_cline_write = 1'b0;
-
-/*
 data_cache dcache (
     .clk          (clk                ),
     .rst          (rst                ),
@@ -104,7 +89,6 @@ data_cache dcache (
     .pmem_write   (data_cline_write   ),
     .pmem_resp    (data_cline_resp    )
 );
-*/
 
 arbiter arb (
     .clk              (clk                ),
