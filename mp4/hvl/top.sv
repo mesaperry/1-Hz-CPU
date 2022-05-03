@@ -78,8 +78,6 @@ assign rvfi_is0.rs2_addr = dut.cpu.ctrl_sigs_rd.has_rs2 ? rs2_is0 : 5'b0;
 
 assign rvfi_is0.valid = dut.cpu.pop_iq0;
 assign rvfi_is0.order = order;
-assign rvfi_is0.rs1_rdata = rvfi_is0.rs1_addr != 5'b0 ? dut.cpu.rs1_out : '0;
-assign rvfi_is0.rs2_rdata = rvfi_is0.rs2_addr != 5'b0 ? dut.cpu.rs2_out : '0;
 
 always @(posedge itf.clk) begin
     if (rvfi_is0.valid & ~dut.cpu.mispred)
@@ -95,6 +93,8 @@ rvfi_is_ex is_alu_reg (
     .rvfi_ex(rvfi_ex_alu0)
 );
 
+assign rvfi_ex_alu0.rs1_rdata = rvfi_ex_alu0.rs1_addr != 5'b0 ? dut.cpu.rs1_out : '0;
+assign rvfi_ex_alu0.rs2_rdata = rvfi_ex_alu0.rs2_addr != 5'b0 ? dut.cpu.rs2_out : '0;
 assign rvfi_ex_alu0.halt = 1'b0;
 assign rvfi_ex_alu0.pc_wdata = rvfi_ex_alu0.pc_rdata + 4;
 assign rvfi_ex_alu0.mem_addr = '0;
@@ -124,6 +124,21 @@ rvfi_is_ex is_lsu_reg (
     .rvfi_ex(rvfi_ex_agu0)
 );
 
+logic [31:0] lsu_rs1_rdata_in, lsu_rs2_rdata_in;
+logic [31:0] agu_rs1_hold, agu_rs2_hold;
+
+assign lsu_rs1_rdata_in = rvfi_ex_agu0.rs1_addr != 5'b0 ? dut.cpu.rs1_out : '0;
+assign lsu_rs2_rdata_in = rvfi_ex_agu0.rs2_addr != 5'b0 ? dut.cpu.rs2_out : '0;
+
+always_ff @(posedge itf.clk) begin
+    if (~dut.cpu.rmem_stall) begin
+        agu_rs1_hold <= lsu_rs1_rdata_in;
+        agu_rs2_hold <= lsu_rs2_rdata_in;
+    end
+end
+
+assign rvfi_ex_agu0.rs1_rdata = dut.cpu.rmem_stall ? agu_rs1_hold : lsu_rs1_rdata_in;
+assign rvfi_ex_agu0.rs2_rdata = dut.cpu.rmem_stall ? agu_rs2_hold : lsu_rs2_rdata_in;
 assign rvfi_ex_agu0.halt = 1'b0;
 assign rvfi_ex_agu0.pc_wdata = rvfi_ex_agu0.pc_rdata + 4;
 assign rvfi_ex_agu0.mem_addr = {dut.cpu.agu_addr_ex[31:2], 2'b0};
@@ -165,6 +180,8 @@ rvfi_is_ex is_bru_reg (
 assign rvfi_ex_bru0.halt = dut.cpu.bru_says_take 
                          & (dut.cpu.bru_jmp_target == dut.cpu.pc_br);
 
+assign rvfi_ex_bru0.rs1_rdata = rvfi_ex_bru0.rs1_addr != 5'b0 ? dut.cpu.rs1_out : '0;
+assign rvfi_ex_bru0.rs2_rdata = rvfi_ex_bru0.rs2_addr != 5'b0 ? dut.cpu.rs2_out : '0;
 assign rvfi_ex_bru0.pc_wdata = dut.cpu.bru_target;
 assign rvfi_ex_bru0.mem_addr = '0;
 assign rvfi_ex_bru0.mem_rmask = 4'h0;
@@ -491,8 +508,6 @@ module rvfi_is_ex (
             rvfi_ex.trap <= rvfi_is.trap;
             rvfi_ex.rs1_addr <= rvfi_is.rs1_addr;
             rvfi_ex.rs2_addr <= rvfi_is.rs2_addr;
-            rvfi_ex.rs1_rdata <= rvfi_is.rs1_rdata;
-            rvfi_ex.rs2_rdata <= rvfi_is.rs2_rdata;
             rvfi_ex.rd_addr <= rvfi_is.rd_addr;
             rvfi_ex.pc_rdata <= rvfi_is.pc_rdata;
         end

@@ -85,7 +85,7 @@ add wave -noupdate -group decode /mp4_tb/dut/cpu/dec_redir
 add wave -noupdate -group decode /mp4_tb/dut/cpu/is_sf
 add wave -noupdate -group decode /mp4_tb/dut/cpu/is_sf_br
 add wave -noupdate -group decode -childformat {{/mp4_tb/dut/cpu/ctrl_sigs_dc.rd -radix unsigned} {/mp4_tb/dut/cpu/ctrl_sigs_dc.rs1 -radix unsigned} {/mp4_tb/dut/cpu/ctrl_sigs_dc.rs2 -radix unsigned} {/mp4_tb/dut/cpu/ctrl_sigs_dc.packed_imm -radix hexadecimal}} -expand -subitemconfig {/mp4_tb/dut/cpu/ctrl_sigs_dc.rd {-height 16 -radix unsigned} /mp4_tb/dut/cpu/ctrl_sigs_dc.rs1 {-height 16 -radix unsigned} /mp4_tb/dut/cpu/ctrl_sigs_dc.rs2 {-height 16 -radix unsigned} /mp4_tb/dut/cpu/ctrl_sigs_dc.packed_imm {-height 16 -radix hexadecimal}} /mp4_tb/dut/cpu/ctrl_sigs_dc
-add wave -noupdate -group queue -radix unsigned /mp4_tb/dut/cpu/level
+add wave -noupdate -group queue -radix unsigned -childformat {{{/mp4_tb/dut/cpu/level[7]} -radix unsigned} {{/mp4_tb/dut/cpu/level[6]} -radix unsigned} {{/mp4_tb/dut/cpu/level[5]} -radix unsigned} {{/mp4_tb/dut/cpu/level[4]} -radix unsigned} {{/mp4_tb/dut/cpu/level[3]} -radix unsigned} {{/mp4_tb/dut/cpu/level[2]} -radix unsigned} {{/mp4_tb/dut/cpu/level[1]} -radix unsigned} {{/mp4_tb/dut/cpu/level[0]} -radix unsigned}} -subitemconfig {{/mp4_tb/dut/cpu/level[7]} {-height 16 -radix unsigned} {/mp4_tb/dut/cpu/level[6]} {-height 16 -radix unsigned} {/mp4_tb/dut/cpu/level[5]} {-height 16 -radix unsigned} {/mp4_tb/dut/cpu/level[4]} {-height 16 -radix unsigned} {/mp4_tb/dut/cpu/level[3]} {-height 16 -radix unsigned} {/mp4_tb/dut/cpu/level[2]} {-height 16 -radix unsigned} {/mp4_tb/dut/cpu/level[1]} {-height 16 -radix unsigned} {/mp4_tb/dut/cpu/level[0]} {-height 16 -radix unsigned}} /mp4_tb/dut/cpu/level
 add wave -noupdate -group queue /mp4_tb/dut/cpu/needs_pc_dc
 add wave -noupdate -group queue /mp4_tb/dut/cpu/push_iq0
 add wave -noupdate -group queue /mp4_tb/dut/cpu/pop_iq0
@@ -103,17 +103,14 @@ add wave -noupdate -group rrd/issue /mp4_tb/dut/cpu/ctrl_sigs_iq
 add wave -noupdate -group rrd/issue -childformat {{/mp4_tb/dut/cpu/ctrl_sigs_rd.rd -radix unsigned} {/mp4_tb/dut/cpu/ctrl_sigs_rd.rs1 -radix unsigned} {/mp4_tb/dut/cpu/ctrl_sigs_rd.rs2 -radix unsigned} {/mp4_tb/dut/cpu/ctrl_sigs_rd.packed_imm -radix hexadecimal}} -subitemconfig {/mp4_tb/dut/cpu/ctrl_sigs_rd.rd {-height 16 -radix unsigned} /mp4_tb/dut/cpu/ctrl_sigs_rd.rs1 {-height 16 -radix unsigned} /mp4_tb/dut/cpu/ctrl_sigs_rd.rs2 {-height 16 -radix unsigned} /mp4_tb/dut/cpu/ctrl_sigs_rd.packed_imm {-height 16 -radix hexadecimal}} /mp4_tb/dut/cpu/ctrl_sigs_rd
 add wave -noupdate -group rrd/issue -childformat {{/mp4_tb/dut/cpu/ctrl_sigs_is.rd -radix unsigned -childformat {{{[4]} -radix decimal} {{[3]} -radix decimal} {{[2]} -radix decimal} {{[1]} -radix decimal} {{[0]} -radix decimal}}} {/mp4_tb/dut/cpu/ctrl_sigs_is.rs1 -radix unsigned} {/mp4_tb/dut/cpu/ctrl_sigs_is.rs2 -radix unsigned} {/mp4_tb/dut/cpu/ctrl_sigs_is.packed_imm -radix hexadecimal}} -subitemconfig {/mp4_tb/dut/cpu/ctrl_sigs_is.rd {-height 16 -radix unsigned -childformat {{{[4]} -radix decimal} {{[3]} -radix decimal} {{[2]} -radix decimal} {{[1]} -radix decimal} {{[0]} -radix decimal}}} {/mp4_tb/dut/cpu/ctrl_sigs_is.rd[4]} {-radix decimal} {/mp4_tb/dut/cpu/ctrl_sigs_is.rd[3]} {-radix decimal} {/mp4_tb/dut/cpu/ctrl_sigs_is.rd[2]} {-radix decimal} {/mp4_tb/dut/cpu/ctrl_sigs_is.rd[1]} {-radix decimal} {/mp4_tb/dut/cpu/ctrl_sigs_is.rd[0]} {-radix decimal} /mp4_tb/dut/cpu/ctrl_sigs_is.rs1 {-height 16 -radix unsigned} /mp4_tb/dut/cpu/ctrl_sigs_is.rs2 {-height 16 -radix unsigned} /mp4_tb/dut/cpu/ctrl_sigs_is.packed_imm {-height 16 -radix hexadecimal}} /mp4_tb/dut/cpu/ctrl_sigs_is
 add wave -noupdate -group rrd/issue /mp4_tb/dut/cpu/alufn_is
-add wave -noupdate -group rrd/issue -radix hexadecimal /mp4_tb/dut/cpu/alu_opr1_is
-add wave -noupdate -group rrd/issue -radix hexadecimal /mp4_tb/dut/cpu/alu_opr2_is
 add wave -noupdate -group rrd/issue /mp4_tb/dut/cpu/lsu_ctrl_is
-add wave -noupdate -group rrd/issue -radix hexadecimal /mp4_tb/dut/cpu/lsu_valu_is
-add wave -noupdate -group rrd/issue -radix hexadecimal /mp4_tb/dut/cpu/lsu_base_is
-add wave -noupdate -group rrd/issue -radix hexadecimal /mp4_tb/dut/cpu/lsu_ofst_is
 add wave -noupdate -group rrd/issue /mp4_tb/dut/cpu/brfn_is
-add wave -noupdate -group rrd/issue -radix hexadecimal /mp4_tb/dut/cpu/bru_cmp1_is
-add wave -noupdate -group rrd/issue -radix hexadecimal /mp4_tb/dut/cpu/bru_cmp2_is
-add wave -noupdate -group rrd/issue -radix hexadecimal /mp4_tb/dut/cpu/bru_ofst_is
-add wave -noupdate -group rrd/issue -radix hexadecimal /mp4_tb/dut/cpu/bru_add1_is
+add wave -noupdate -group rrd/issue /mp4_tb/dut/cpu/rs1_sel_is
+add wave -noupdate -group rrd/issue /mp4_tb/dut/cpu/rs2_sel_is
+add wave -noupdate -group rrd/issue -radix hexadecimal /mp4_tb/dut/cpu/lsu_rd_fwd
+add wave -noupdate -group rrd/issue -radix hexadecimal /mp4_tb/dut/cpu/bru_rd_fwd
+add wave -noupdate -group rrd/issue -radix hexadecimal /mp4_tb/dut/cpu/mul_rd_fwd
+add wave -noupdate -group rrd/issue -radix hexadecimal /mp4_tb/dut/cpu/alu_rd_fwd
 add wave -noupdate -group rrd/issue -expand -group scoreboard /mp4_tb/dut/cpu/sb0/exu_type
 add wave -noupdate -group rrd/issue -expand -group scoreboard /mp4_tb/dut/cpu/sb0/has_rd
 add wave -noupdate -group rrd/issue -expand -group scoreboard /mp4_tb/dut/cpu/sb0/has_rs1
@@ -324,8 +321,8 @@ add wave -noupdate -group performance -radix unsigned /mp4_tb/pc_queue_full
 add wave -noupdate -group performance -radix unsigned /mp4_tb/inst_cache_req
 add wave -noupdate -group performance -radix unsigned /mp4_tb/inst_cache_miss
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {927304392 ps} 0} {{Cursor 2} {86297817 ps} 0}
-quietly wave cursor active 1
+WaveRestoreCursors {{Cursor 1} {2830925354 ps} 0} {{Cursor 2} {8192 ps} 0}
+quietly wave cursor active 2
 configure wave -namecolwidth 362
 configure wave -valuecolwidth 100
 configure wave -justifyvalue left
@@ -340,4 +337,4 @@ configure wave -griddelta 40
 configure wave -timeline 0
 configure wave -timelineunits ns
 update
-WaveRestoreZoom {927301711 ps} {927442016 ps}
+WaveRestoreZoom {0 ps} {140305 ps}

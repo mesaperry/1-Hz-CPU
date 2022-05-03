@@ -78,20 +78,10 @@ module one_hz_cpu (
     queue_item_t ctrl_sigs_is;
 
     alufnt::alu_func_t alufn_is;
-    rv32i_word alu_opr1_is;
-    rv32i_word alu_opr2_is;
 
     mem_ctrl_sigs_t lsu_ctrl_is;
-    rv32i_word lsu_valu_is;
-    rv32i_word lsu_base_is;
-    rv32i_word lsu_ofst_is;
 
     brfnt::br_func_t brfn_is;
-    rv32i_word bru_cmp1_is;
-    rv32i_word bru_cmp2_is;
-    rv32i_word bru_base_is;
-    rv32i_word bru_ofst_is;
-    rv32i_word bru_add1_is;
 
 
     //-- execute --//
@@ -515,12 +505,10 @@ module one_hz_cpu (
     // WARNING: queue output (ctrl_sigs_iq, can be don't cares if empty)
     queue_item_t ctrl_sigs_rd;
     assign ctrl_sigs_rd = empty_iq0 ? nop_sigs : ctrl_sigs_iq;
-    fwdsel::fwd_sel_t rs1_sel, rs2_sel;
+    fwdsel::fwd_sel_t rs1_sel_is, rs2_sel_is;
     logic [4:0] lsu_rd_fwd, bru_rd_fwd, mul_rd_fwd, alu_rd_fwd;
     assign lsu_rd_fwd = 5'b0;
-    assign bru_rd_fwd = 5'b0;
     assign mul_rd_fwd = 5'b0;
-    assign alu_rd_fwd = 5'b0;
 
     logic can_issue;
 
@@ -536,8 +524,8 @@ module one_hz_cpu (
         .rs1('{ctrl_sigs_iq.rs1}),
         .rs2('{ctrl_sigs_iq.rs2}),
         .ready('{can_issue}),
-        .rs1_sel('{rs1_sel}),
-        .rs2_sel('{rs2_sel}),
+        .rs1_sel('{rs1_sel_is}),
+        .rs2_sel('{rs2_sel_is}),
         .has_rd_wb({alu_has_rd_wb, lsu_has_rd_wb, bru_has_rd_wb}),
         .rd_wb('{alu_rd_wb, lsu_rd_wb, bru_rd_wb}),
         .exu_fwd('{lsu_rd_fwd, bru_rd_fwd, mul_rd_fwd, alu_rd_fwd}),
@@ -553,8 +541,8 @@ module one_hz_cpu (
     // assuming will not be empty if needs pc
     assign pop_pq0 = ~empty_pq0 & can_issue & needs_pc_is;
 
-    rv32i_word rs1_out, rs2_out;
 
+    rv32i_word rgf_rs1_is, rgf_rs2_is;
     regfile rf (
         .clk,
         .rst,
@@ -562,21 +550,23 @@ module one_hz_cpu (
         .dest('{alu_rd_wb, lsu_rd_wb, bru_rd_wb}),
         .in('{alu_res_wb, lsu_res_wb, bru_res_wb}),
         .src('{ctrl_sigs_iq.rs1, ctrl_sigs_iq.rs2}),
-        .out('{rs1_out, rs2_out})
+        .out('{rgf_rs1_is, rgf_rs2_is})
     );
 
-    rv32i_word imm_out;
+    rv32i_word imm_out_is;
 
     imm_dec imm_dec0 (
         .packed_imm(ctrl_sigs_iq.packed_imm),
         .imm_type(ctrl_sigs_iq.imm_type),
-        .imm(imm_out)
+        .imm(imm_out_is)
     );
 
+    // TODO: transfer reg outs and fwd_sels to exe, 
+    // and do the operand selection logic in exe
     
     // alu setup
-    logic is_lui;
-    assign is_lui = ctrl_sigs_iq.uopcode == uopc::lui;
+    logic is_lui_is;
+    assign is_lui_is = ctrl_sigs_iq.uopcode == uopc::lui;
 
     alu_ctrl_sigs_t alu_ctrl;
     alu_decode alu_dec0 (
@@ -585,26 +575,18 @@ module one_hz_cpu (
     );
 
     assign alufn_is = alu_ctrl.alufn;
-    assign alu_opr1_is = is_lui ? '0 : rs1_out;
-    always_comb begin
-        unique case (alu_ctrl.opr2)
-            opr2t::rs2  : alu_opr2_is = rs2_out;
-            opr2t::imm  : alu_opr2_is = imm_out;
-            default     : alu_opr2_is = imm_out;
-        endcase
-    end
 
     logic alu_has_rd_is;
     assign alu_has_rd_is = ctrl_sigs_is.exu_type == exut::alu && ctrl_sigs_is.has_rd;
+
+    opr2t::operand2_t alu_opr2_sel_is;
+    assign alu_opr2_sel_is = alu_ctrl.opr2;
 
     // mem setup
     mem_decode mem_dec0 (
         .uopcode(ctrl_sigs_is.uopcode),
         .ctrl(lsu_ctrl_is)
     );
-    assign lsu_valu_is = rs2_out;
-    assign lsu_base_is = rs1_out;
-    assign lsu_ofst_is = imm_out;
 
     logic lsu_has_rd_is;
     assign lsu_has_rd_is = ctrl_sigs_is.exu_type == exut::mem && ctrl_sigs_is.has_rd;
@@ -613,22 +595,90 @@ module one_hz_cpu (
     logic is_jalr_is;
     assign is_jalr_is = ctrl_sigs_iq.uopcode == uopc::jalr;
 
-    logic is_auipc;
-    assign is_auipc = ctrl_sigs_iq.uopcode == uopc::auipc;
+    logic is_auipc_is;
+    assign is_auipc_is = ctrl_sigs_iq.uopcode == uopc::auipc;
 
     bru_decode bru_dec0 (
         .uopcode(ctrl_sigs_is.uopcode),
         .brfn(brfn_is)
     );
-    assign bru_cmp1_is = rs1_out;
-    assign bru_cmp2_is = rs2_out;
-    assign bru_base_is = is_jalr_is ? rs1_out : pc_is;
-    assign bru_ofst_is = imm_out;
-    assign bru_add1_is = is_auipc ? imm_out : 4;
 
     logic bru_has_rd_is;
     assign bru_has_rd_is = ctrl_sigs_is.exu_type == exut::jmp && ctrl_sigs_is.has_rd;
 
+    //-- rrd/issue -> execute (shared) --//
+    rv32i_word rgf_rs1_ex, rgf_rs2_ex;
+    rv32i_word imm_out_ex;
+    fwdsel::fwd_sel_t rs1_sel_ex, rs2_sel_ex;
+
+    rg exec_rs1_reg (
+        .clk,
+        .rst(1'b0),
+        .ld(1'b1),
+        .din(rgf_rs1_is),
+        .dout(rgf_rs1_ex)
+    );
+    rg exec_rs2_reg (
+        .clk,
+        .rst(1'b0),
+        .ld(1'b1),
+        .din(rgf_rs2_is),
+        .dout(rgf_rs2_ex)
+    );
+    rg exec_imm_reg (
+        .clk,
+        .rst(1'b0),
+        .ld(1'b1),
+        .din(imm_out_is),
+        .dout(imm_out_ex)
+    );
+    logic [$bits(fwdsel::fwd_sel_t)-1:0] rs1_sel_bits_ex;
+    rg #(
+        .size($bits(fwdsel::fwd_sel_t))
+    )
+    exec_rs1_sel_reg (
+        .clk,
+        .rst(1'b0),
+        .ld(1'b1),
+        .din(rs1_sel_is),
+        .dout(rs1_sel_bits_ex)
+    );
+    assign rs1_sel_ex = fwdsel::fwd_sel_t'(rs1_sel_bits_ex);
+    logic [$bits(fwdsel::fwd_sel_t)-1:0] rs2_sel_bits_ex;
+    rg #(
+        .size($bits(fwdsel::fwd_sel_t))
+    )
+    exec_rs2_sel_reg (
+        .clk,
+        .rst(1'b0),
+        .ld(1'b1),
+        .din(rs2_sel_is),
+        .dout(rs2_sel_bits_ex)
+    );
+    assign rs2_sel_ex = fwdsel::fwd_sel_t'(rs2_sel_bits_ex);
+
+
+    //-- execute (shared) --//
+    rv32i_word rs1_out, rs2_out;
+
+    always_comb begin
+        unique case (rs1_sel_ex)
+            fwdsel::alu : rs1_out = alu_res_wb;
+            fwdsel::mul : rs1_out = 'X;
+            fwdsel::bru : rs1_out = bru_res_wb;
+            fwdsel::lsu : rs1_out = 'X;
+            default     : rs1_out = rgf_rs1_ex;
+        endcase
+    end
+    always_comb begin
+        unique case (rs2_sel_ex)
+            fwdsel::alu : rs2_out = alu_res_wb;
+            fwdsel::mul : rs2_out = 'X;
+            fwdsel::bru : rs2_out = bru_res_wb;
+            fwdsel::lsu : rs2_out = 'X;
+            default     : rs2_out = rgf_rs2_ex;
+        endcase
+    end
 
     //-- rrd/issue -> alu --//
 
@@ -664,22 +714,40 @@ module one_hz_cpu (
         .dout(alufn_bits_ex)
     );
     assign alufn_ex = alufnt::alu_func_t'(alufn_bits_ex);
-    rg alu_opr1_reg (
+    logic is_lui_ex;
+    rg #(
+        .size(1)
+    )
+    alu_is_lui_reg (
         .clk,
         .rst(1'b0),
         .ld(1'b1),
-        .din(alu_opr1_is),
-        .dout(alu_opr1_ex)
+        .din(is_lui_is),
+        .dout(is_lui_ex)
     );
-    rg alu_opr2_reg (
+    opr2t::operand2_t alu_opr2_sel_ex;
+    logic [$bits(opr2t::operand2_t)-1:0] alu_opr2_sel_bits_ex;
+    rg #(
+        .size($bits(opr2t::operand2_t))
+    )
+    alu_opr2_sel_reg (
         .clk,
         .rst(1'b0),
         .ld(1'b1),
-        .din(alu_opr2_is),
-        .dout(alu_opr2_ex)
+        .din(alu_opr2_sel_is),
+        .dout(alu_opr2_sel_bits_ex)
     );
+    assign alu_opr2_sel_ex = opr2t::operand2_t'(alu_opr2_sel_bits_ex);
 
     //-- alu --//
+    assign alu_opr1_ex = is_lui_ex ? '0 : rs1_out;
+    always_comb begin
+        unique case (alu_opr2_sel_ex)
+            opr2t::rs2  : alu_opr2_ex = rs2_out;
+            opr2t::imm  : alu_opr2_ex = imm_out_ex;
+            default     : alu_opr2_ex = imm_out_ex;
+        endcase
+    end
 
     alu alu0 (
         .fn(alufn_ex),
@@ -687,6 +755,8 @@ module one_hz_cpu (
         .in2(alu_opr2_ex),
         .out(alu_res_ex)
     );
+
+    assign alu_rd_fwd = alu_rd_ex;
 
     //-- alu -> writeback --//
 
@@ -758,31 +828,48 @@ module one_hz_cpu (
         .dout(lsu_ctrl_bits_ex)
     );
     assign lsu_ctrl_ex = mem_ctrl_sigs_t'(lsu_ctrl_bits_ex);
-    rg agu_mem_val_reg (
-        .clk,
-        .rst(1'b0),
-        .ld(~mem_stall),
-        .din(lsu_valu_is),
-        .dout(lsu_valu_ex)
-    );
-    rg agu_mem_base_reg (
-        .clk,
-        .rst(1'b0),
-        .ld(~mem_stall),
-        .din(lsu_base_is),
-        .dout(lsu_base_ex)
-    );
-    rg agu_mem_ofst_reg (
-        .clk,
-        .rst(1'b0),
-        .ld(~mem_stall),
-        .din(lsu_ofst_is),
-        .dout(lsu_ofst_ex)
-    );
 
     //-- lsu --//
 
     // agu
+
+    rv32i_word lsu_valu_hold;
+    rv32i_word lsu_base_hold;
+    rv32i_word lsu_ofst_hold;
+
+    logic rmem_stall;
+    always_ff @(posedge clk) begin
+        rmem_stall <= mem_stall;
+    end
+
+    rg agu_mem_valu_hold_reg (
+        .clk,
+        .rst(1'b0),
+        .ld(~rmem_stall),
+        .din(rs2_out),
+        .dout(lsu_valu_hold)
+    );
+    rg agu_mem_base_hold_reg (
+        .clk,
+        .rst(1'b0),
+        .ld(~rmem_stall),
+        .din(rs1_out),
+        .dout(lsu_base_hold)
+    );
+    rg agu_mem_ofst_hold_reg (
+        .clk,
+        .rst(1'b0),
+        .ld(~rmem_stall),
+        .din(imm_out_ex),
+        .dout(lsu_ofst_hold)
+    );
+
+    // TODO: probably need to hold on 
+    assign lsu_valu_ex = rmem_stall ? lsu_valu_hold : rs2_out;
+    assign lsu_base_ex = rmem_stall ? lsu_base_hold : rs1_out;
+    assign lsu_ofst_ex = rmem_stall ? lsu_ofst_hold : imm_out_ex;
+
+
     logic agu_has_rd_ex;
     logic [4:0] agu_rd_ex;
     mem_ctrl_sigs_t agu_ctrl_ex;
@@ -893,6 +980,7 @@ module one_hz_cpu (
 
 
     // TODO: modulize
+    /*
     always_comb begin
         unique casez ({mem_ctrl_ex.memsz, mem_ctrl_ex.ldext, mem_addr_ex[1:0]})
             {memszt::b, ldextt::s, 2'b00} : mem_res_ex = {{24{data_rdata[07]}}, data_rdata[07:0]};
@@ -907,6 +995,17 @@ module one_hz_cpu (
             {memszt::h, ldextt::s, 2'b1?} : mem_res_ex = {{16{data_rdata[31]}}, data_rdata[31:16]};
             {memszt::h, ldextt::z, 2'b0?} : mem_res_ex = { 16'b0,               data_rdata[15:0]};
             {memszt::h, ldextt::z, 2'b1?} : mem_res_ex = { 16'b0,               data_rdata[31:16]};
+            default                       : mem_res_ex =                        data_rdata;
+        endcase
+    end
+    */
+
+    always_comb begin
+        unique casez ({mem_ctrl_ex.memsz, mem_ctrl_ex.ldext})
+            {memszt::b, ldextt::s} : mem_res_ex = 32'(signed'(data_rdata[mem_addr_ex[1:0]*8 +: 8]));
+            {memszt::b, ldextt::z} : mem_res_ex = 32'(data_rdata[mem_addr_ex[1:0]*8 +: 8]);
+            {memszt::h, ldextt::s} : mem_res_ex = 32'(signed'(data_rdata[mem_addr_ex[1:0]*16 +: 16]));
+            {memszt::h, ldextt::z} : mem_res_ex = 32'(data_rdata[mem_addr_ex[1:0]*16 +: 16]);
             default                : mem_res_ex =                        data_rdata;
         endcase
     end
@@ -1005,41 +1104,6 @@ module one_hz_cpu (
         .dout(brfn_bits_ex)
     );
     assign brfn_ex = brfnt::br_func_t'(brfn_bits_ex);
-    rg bru_cmp1_reg (
-        .clk,
-        .rst(1'b0),
-        .ld(1'b1),
-        .din(bru_cmp1_is),
-        .dout(bru_cmp1_ex)
-    );
-    rg bru_cmp2_reg (
-        .clk,
-        .rst(1'b0),
-        .ld(1'b1),
-        .din(bru_cmp2_is),
-        .dout(bru_cmp2_ex)
-    );
-    rg bru_base_reg (
-        .clk,
-        .rst(1'b0),
-        .ld(1'b1),
-        .din(bru_base_is),
-        .dout(bru_base_ex)
-    );
-    rg bru_ofst_reg (
-        .clk,
-        .rst(1'b0),
-        .ld(1'b1),
-        .din(bru_ofst_is),
-        .dout(bru_ofst_ex)
-    );
-    rg bru_add1_reg (
-        .clk,
-        .rst(1'b0),
-        .ld(1'b1),
-        .din(bru_add1_is),
-        .dout(bru_add1_ex)
-    );
     rg #(
         .size(1)
     )
@@ -1060,8 +1124,35 @@ module one_hz_cpu (
         .din(bht_resp_is),
         .dout(bru_bht_resp_ex)
     );
+    logic is_jalr_ex;
+    rg #(
+        .size(1)
+    )
+    bru_is_jalr_reg (
+        .clk,
+        .rst(1'b0),
+        .ld(1'b1),
+        .din(is_jalr_is),
+        .dout(is_jalr_ex)
+    );
+    logic is_auipc_ex;
+    rg #(
+        .size(1)
+    )
+    bru_is_auipc_reg (
+        .clk,
+        .rst(1'b0),
+        .ld(1'b1),
+        .din(is_auipc_is),
+        .dout(is_auipc_ex)
+    );
 
     //-- bru --//
+    assign bru_cmp1_ex = rs1_out;
+    assign bru_cmp2_ex = rs2_out;
+    assign bru_base_ex = is_jalr_ex ? rs1_out : pc_br;
+    assign bru_ofst_ex = imm_out_ex;
+    assign bru_add1_ex = is_auipc_ex ? imm_out_ex : 4;
 
     // TODO: modulize
     logic eq;
@@ -1088,7 +1179,7 @@ module one_hz_cpu (
             brfnt::bge  : {bru_says_take, bru_is_br} = {!lt,  1'b1};
             brfnt::bltu : {bru_says_take, bru_is_br} = {ltu,  1'b1};
             brfnt::bgeu : {bru_says_take, bru_is_br} = {!ltu, 1'b1};
-            brfnt::jal : {bru_says_take, bru_is_br} = {1'b1, 1'b0};
+            brfnt::jal  : {bru_says_take, bru_is_br} = {1'b1, 1'b0};
             default     : {bru_says_take, bru_is_br} = {1'b0, 1'b0};
         endcase
     end
@@ -1114,6 +1205,8 @@ module one_hz_cpu (
             default : bru_bht_update = 2'b01;
         endcase
     end
+
+    assign bru_rd_fwd = bru_rd_ex;
 
 
     //-- bru -> writeback --//
@@ -1268,7 +1361,7 @@ module scoreboard #(
     localparam s_write_sel = $clog2(nwp);
     localparam swl = s_write_sel;
 
-    logic [1:0] reg_states [num_regs];
+    logic reg_states [num_regs];
     logic [eu_idx_sz-1:0] reg_locs [num_regs];
 
     genvar rp;
@@ -1276,7 +1369,7 @@ module scoreboard #(
         for (rp = 0; rp < nrp; rp++) begin : reads
             assign ready[rp] = ~(
                 // guess it doesn't hurt to "forward" rd?
-                ((reg_states[rd[rp]] & ~(exu_fwd[reg_locs[rd[rp]]] == rd[rp])) & has_rd)   |
+                ((reg_states[rd[rp]]) & has_rd)   |
                 ((reg_states[rs1[rp]] & ~(exu_fwd[reg_locs[rs1[rp]]] == rs1[rp])) & has_rs1) | 
                 ((reg_states[rs2[rp]] & ~(exu_fwd[reg_locs[rs2[rp]]] == rs2[rp])) & has_rs2) | 
                 (exu_status[exu_type[rp]])      
