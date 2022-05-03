@@ -21,7 +21,7 @@ module inst_cache (
 
     localparam x_len = 32;
     localparam s_line = 256;
-    localparam n_sets = 32;
+    localparam n_sets = 64;
 
     localparam bytes_per_line = s_line / 8;
     localparam s_offset = $clog2(bytes_per_line);
@@ -62,7 +62,7 @@ module inst_cache (
     logic [n_sets-1:0] dirtys;
 
     // WARNING: these guys do not support simultaneous read and write
-    bram256x32 data (
+    bram256x64 data (
         .address (data_addr),
         .clock   (clk),
         .data    (data_in),
@@ -70,7 +70,7 @@ module inst_cache (
         .q       (data_out)
     );
 
-    bram22x32 tags (
+    bram21x64 tags (
         .address (tags_addr),
         .clock   (clk),
         .data    (tags_in),
