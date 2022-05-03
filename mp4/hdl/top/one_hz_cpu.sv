@@ -1021,8 +1021,8 @@ module one_hz_cpu (
     )
     wb_lsu_has_rd_reg (
         .clk,
-        .rst(rst | ~data_resp),
-        .ld(1'b1),
+        .rst(rst),
+        .ld(~mem_stall),
         .din(mem_has_rd_ex),
         .dout(lsu_has_rd_wb)
     );

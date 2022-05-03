@@ -58,20 +58,38 @@ module cacheline_adaptor
     // TODO: PERF: register all inputs
     // at which point it's better for timing to do a counter like the 
     // given adapter
+
+    logic [255:0] line_r;
+    logic read_r;
+    logic write_r;
+
+
+    always_ff @(posedge clk) begin
+        if (resp_o) begin
+            read_r <= 1'b0;
+            write_r <= 1'b0;
+        end
+        else begin
+            line_r <= line_i;
+            read_r <= read_i;
+            write_r <= write_i;
+        end
+    end
+    always_ff @(posedge clk) begin
+        address_o <= address_i;
+    end
+
+
     ca_ctrl ctrl (
         .clk,
         .reset_n,
-        .read_i,
-        .write_i,
+        .read_i(read_r),
+        .write_i(write_r),
         .resp_o,
         .read_o,
         .write_o,
         .resp_i
     );
-
-    always_ff @(posedge clk) begin
-        address_o <= address_i;
-    end
 
     shiftin64x4 shi (
         .clk,
@@ -83,9 +101,9 @@ module cacheline_adaptor
     // TODO: ensure this is correct
     shiftout64x4 sho (
         .clk,
-        .ld(write_i & ~write_o),
+        .ld(write_r & ~write_o),
         .rd(resp_i & write_o),
-        .din(line_i),
+        .din(line_r),
         .dout(burst_o)
     );
     
